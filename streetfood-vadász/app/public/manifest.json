@@ -1,0 +1,26 @@
+{
+  "name": "Street Food Vadász",
+  "short_name": "SF Vadász",
+  "description": "Food truck és street food fesztivál kereső alkalmazás",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1565C0",
+  "theme_color": "#1565C0",
+  "lang": "hu",
+  "icons": [
+    { "src": "/icons/sf-icon-v1-72.png",  "sizes": "72x72",   "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/sf-icon-v1-96.png",  "sizes": "96x96",   "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/sf-icon-v1-128.png", "sizes": "128x128", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/sf-icon-v1-144.png", "sizes": "144x144", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/sf-icon-v1-152.png", "sizes": "152x152", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/sf-icon-v1-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/sf-icon-v1-384.png", "sizes": "384x384", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/sf-icon-v1-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["food", "lifestyle", "navigation"],
+  "shortcuts": [
+    { "name": "Térkép", "short_name": "Térkép", "url": "/?page=map", "icons": [{ "src": "/icons/sf-icon-v1-96.png", "sizes": "96x96" }] },
+    { "name": "Fesztiválok", "short_name": "Fesztiválok", "url": "/?page=events", "icons": [{ "src": "/icons/sf-icon-v1-96.png", "sizes": "96x96" }] }
+  ]
+}

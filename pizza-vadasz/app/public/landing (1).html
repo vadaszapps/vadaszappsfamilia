@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pizza Vadász – Találd meg a legjobb pizzériát!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--red:#8B0000;--red2:#6B0000;--gold:#FFD700;--gold2:#E6C200;--cream:#FFF8F0;--cream2:#FFF0DC;--dark:#1A0A00;--gray:#7A6A60;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark);overflow-x:hidden;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 5%;height:70px;background:rgba(139,0,0,0.97);border-bottom:1px solid rgba(255,215,0,0.3);}
+.nav-logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--gold);letter-spacing:1px;}
+.nav-logo span{color:rgba(255,255,255,0.6);font-size:.75rem;display:block;letter-spacing:3px;font-family:'DM Sans',sans-serif;font-weight:300;}
+.nav-cta{background:var(--gold);color:var(--red);font-weight:700;font-size:.9rem;border:none;padding:10px 22px;border-radius:50px;cursor:pointer;text-decoration:none;transition:transform .15s,background .15s;}
+.nav-cta:hover{background:var(--gold2);transform:translateY(-1px);}
+.hero{min-height:100vh;background:var(--red);display:grid;place-items:center;padding:120px 5% 80px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 80%,rgba(255,215,0,0.07) 0%,transparent 70%);pointer-events:none;}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;max-width:1100px;width:100%;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);color:var(--gold);font-size:.75rem;font-weight:500;letter-spacing:2px;padding:6px 14px;border-radius:50px;margin-bottom:24px;text-transform:uppercase;}
+.hero-badge::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%;animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:.5}}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,5vw,4.2rem);font-weight:900;line-height:1.1;color:#fff;margin-bottom:20px;}
+.hero h1 em{color:var(--gold);font-style:italic;}
+.hero-sub{color:rgba(255,255,255,0.65);font-size:1.05rem;line-height:1.7;margin-bottom:36px;max-width:440px;}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;}
+.btn-primary{background:var(--gold);color:var(--red);font-weight:700;font-size:1rem;padding:14px 32px;border-radius:50px;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:transform .15s,box-shadow .15s;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,215,0,0.3);}
+.btn-outline{background:transparent;color:rgba(255,255,255,0.8);font-weight:500;font-size:1rem;padding:13px 28px;border-radius:50px;border:1px solid rgba(255,255,255,0.25);cursor:pointer;text-decoration:none;transition:border-color .15s,color .15s;}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+.hero-phone{display:flex;justify-content:center;align-items:center;}
+.phone-frame{width:260px;height:520px;background:#1A0A00;border-radius:36px;border:6px solid rgba(255,215,0,0.3);position:relative;box-shadow:0 40px 80px rgba(0,0,0,0.5);overflow:hidden;animation:float 4s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.phone-notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:80px;height:22px;background:#1A0A00;border-radius:0 0 12px 12px;z-index:10;}
+.phone-screen{position:absolute;inset:0;background:var(--red);display:flex;flex-direction:column;}
+.phone-header{background:var(--red);border-bottom:1px solid rgba(255,215,0,0.4);padding:40px 14px 10px;display:flex;align-items:center;justify-content:space-between;}
+.phone-header-title{color:var(--gold);font-family:'Playfair Display',serif;font-size:.85rem;font-weight:700;}
+.phone-hungry{background:var(--gold);color:var(--red);font-size:.6rem;font-weight:700;padding:4px 8px;border-radius:20px;}
+.phone-map{flex:1;background:#FFF5E6;position:relative;overflow:hidden;}
+.phone-map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(139,0,0,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(139,0,0,.06) 1px,transparent 1px);background-size:20px 20px;}
+.phone-road-h{position:absolute;top:45%;left:0;right:0;height:4px;background:#fff;}
+.phone-road-v{position:absolute;left:30%;top:0;bottom:0;width:4px;background:#fff;}
+.phone-road-v2{position:absolute;left:65%;top:0;bottom:0;width:3px;background:#fff;}
+.phone-road-h2{position:absolute;top:70%;left:0;right:0;height:3px;background:#fff;}
+.map-pin{position:absolute;font-size:14px;}
+.phone-indulas{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;font-size:.65rem;font-weight:800;padding:8px 20px;border-radius:20px;white-space:nowrap;box-shadow:0 4px 12px rgba(34,197,94,.4);}
+.phone-navbar{height:44px;background:var(--red);border-top:1px solid rgba(255,215,0,0.3);display:flex;justify-content:space-around;align-items:center;padding:0 8px;}
+.phone-nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.phone-nav-icon{font-size:13px;}
+.phone-nav-label{font-size:8px;color:rgba(255,255,255,0.5);}
+.stats{background:var(--cream2);border-top:1px solid rgba(139,0,0,0.1);border-bottom:1px solid rgba(139,0,0,0.1);padding:50px 5%;}
+.stats-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);}
+.stat-item{text-align:center;padding:20px;border-right:1px solid rgba(139,0,0,0.12);}
+.stat-item:last-child{border-right:none;}
+.stat-num{font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:900;color:var(--red);line-height:1;}
+.stat-label{color:var(--gray);font-size:.8rem;margin-top:6px;}
+.features{padding:100px 5%;background:var(--cream);}
+.section-label{color:var(--red);font-size:.75rem;letter-spacing:3px;font-weight:500;text-transform:uppercase;margin-bottom:14px;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,3.5vw,2.8rem);font-weight:900;color:var(--dark);line-height:1.2;margin-bottom:60px;}
+.section-title em{color:var(--red);font-style:italic;}
+.features-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+.feature-card{background:#fff;border:1px solid rgba(139,0,0,0.1);border-radius:16px;padding:32px 28px;transition:transform .2s,box-shadow .2s,border-color .2s;}
+.feature-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(139,0,0,0.1);border-color:rgba(139,0,0,0.25);}
+.feature-icon{width:52px;height:52px;border-radius:14px;background:rgba(139,0,0,0.07);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:20px;}
+.feature-card h3{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--dark);margin-bottom:10px;}
+.feature-card p{color:var(--gray);font-size:.88rem;line-height:1.65;}
+.how{padding:100px 5%;background:var(--red);}
+.how .section-label{color:rgba(255,215,0,0.7);}
+.how .section-title{color:#fff;}
+.how .section-title em{color:var(--gold);}
+.steps{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.step{text-align:center;padding:20px 16px;}
+.step-num{width:56px;height:56px;border-radius:50%;border:2px solid rgba(255,215,0,0.4);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--gold);margin:0 auto 18px;}
+.step h4{color:#fff;font-size:.95rem;font-weight:700;margin-bottom:8px;}
+.step p{color:rgba(255,255,255,0.55);font-size:.82rem;line-height:1.6;}
+.categories{padding:100px 5%;background:var(--cream);}
+.cat-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:16px;}
+.cat-card{background:#fff;border:1px solid rgba(139,0,0,0.1);border-radius:14px;padding:22px 12px;text-align:center;cursor:pointer;transition:all .2s;}
+.cat-card:hover{background:var(--red);border-color:var(--red);transform:translateY(-3px);}
+.cat-card:hover .cat-name{color:var(--gold);}
+.cat-card:hover .cat-desc{color:rgba(255,255,255,0.6);}
+.cat-emoji{font-size:2rem;margin-bottom:10px;}
+.cat-name{font-weight:700;font-size:.85rem;color:var(--dark);margin-bottom:4px;}
+.cat-desc{font-size:.72rem;color:var(--gray);}
+.community{padding:100px 5%;background:var(--cream2);}
+.community-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.community h2{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:900;color:var(--dark);line-height:1.2;margin-bottom:20px;}
+.community h2 em{color:var(--red);font-style:italic;}
+.community p{color:var(--gray);font-size:.95rem;line-height:1.7;margin-bottom:20px;}
+.submit-card{background:#fff;border-radius:20px;border:1px solid rgba(139,0,0,0.12);padding:32px;box-shadow:0 8px 32px rgba(139,0,0,0.07);}
+.submit-card h3{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--red);margin-bottom:20px;}
+.form-row{display:flex;flex-direction:column;gap:12px;}
+.form-input{background:var(--cream);border:1px solid rgba(139,0,0,0.15);border-radius:10px;padding:11px 14px;font-size:.88rem;color:var(--dark);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s;}
+.form-input:focus{border-color:var(--red);}
+.form-input::placeholder{color:#bbb;}
+.form-submit{background:var(--red);color:var(--gold);font-weight:700;font-size:.9rem;padding:12px;border:none;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s;}
+.form-submit:hover{background:var(--red2);}
+.form-note{font-size:.72rem;color:var(--gray);text-align:center;margin-top:4px;}
+.cta-section{padding:120px 5%;background:var(--red);text-align:center;position:relative;overflow:hidden;}
+.cta-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 0%,rgba(255,215,0,0.08) 0%,transparent 70%);}
+.cta-section h2{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,4vw,3.5rem);font-weight:900;color:#fff;line-height:1.15;margin-bottom:20px;position:relative;}
+.cta-section h2 em{color:var(--gold);font-style:italic;}
+.cta-section p{color:rgba(255,255,255,0.6);font-size:1rem;margin-bottom:40px;position:relative;}
+.cta-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;}
+.store-btn{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.25);color:#fff;padding:12px 28px;border-radius:12px;font-size:.9rem;font-weight:500;text-decoration:none;display:flex;align-items:center;gap:10px;transition:background .15s,border-color .15s;}
+.store-btn:hover{background:rgba(255,255,255,0.18);border-color:var(--gold);}
+.store-btn-icon{font-size:1.4rem;}
+.store-btn-text small{display:block;font-size:.65rem;opacity:.7;}
+footer{background:var(--dark);padding:60px 5% 30px;}
+.footer-inner{max-width:1100px;margin:0 auto;}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr;gap:60px;margin-bottom:50px;}
+.footer-brand .logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--gold);margin-bottom:12px;}
+.footer-brand p{color:rgba(255,255,255,0.4);font-size:.83rem;line-height:1.6;max-width:280px;}
+.footer-col h4{color:rgba(255,255,255,0.6);font-size:.72rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;}
+.footer-col a{display:block;color:rgba(255,255,255,0.4);font-size:.85rem;text-decoration:none;margin-bottom:10px;transition:color .15s;}
+.footer-col a:hover{color:var(--gold);}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.08);padding-top:24px;display:flex;justify-content:space-between;align-items:center;}
+.footer-bottom p{color:rgba(255,255,255,0.25);font-size:.78rem;}
+.footer-vadasz{color:rgba(255,215,0,0.4);font-size:.78rem;}
+.footer-vadasz a{color:rgba(255,215,0,0.5);text-decoration:none;}
+.footer-vadasz a:hover{color:var(--gold);}
+.fade-up{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s;}
+.fade-up.visible{opacity:1;transform:none;}
+@media(max-width:900px){
+  .hero-grid{grid-template-columns:1fr;text-align:center;}
+  .hero-phone{display:none;}
+  .hero-sub,.hero-badge{margin-left:auto;margin-right:auto;}
+  .hero-btns{justify-content:center;}
+  .stats-inner{grid-template-columns:repeat(2,1fr);}
+  .stat-item{border-right:none;border-bottom:1px solid rgba(139,0,0,0.12);}
+  .features-grid{grid-template-columns:1fr 1fr;}
+  .steps{grid-template-columns:repeat(2,1fr);}
+  .cat-grid{grid-template-columns:repeat(3,1fr);}
+  .community-inner{grid-template-columns:1fr;gap:40px;}
+  .footer-top{grid-template-columns:1fr 1fr;gap:40px;}
+  .footer-brand{grid-column:1/-1;}
+}
+@media(max-width:600px){
+  .features-grid,.steps,.footer-top{grid-template-columns:1fr;}
+  .cat-grid{grid-template-columns:repeat(2,1fr);}
+  .footer-bottom{flex-direction:column;gap:10px;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">🍕 PIZZA VADÁSZ<span>PIZZÉRIA KERESŐ</span></div>
+  <a href="https://pizza-vadasz.web.app" class="nav-cta">Nyisd meg az appot →</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-badge">Ingyenes alkalmazás</div>
+      <h1>Vadássz rá a <em>legjobb pizzériára</em> a közeledben!</h1>
+      <p class="hero-sub">GPS alapú pizzéria kereső, ami határon túl is megtalálja a rejtett gyöngyszemeket. Kemencés, olasz, vegán – a te ízlésed szerint.</p>
+      <div class="hero-btns">
+        <a href="https://pizza-vadasz.web.app" class="btn-primary">🍕 Indíts keresést!</a>
+        <a href="#features" class="btn-outline">Hogyan működik?</a>
+      </div>
+    </div>
+    <div class="hero-phone">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-header">
+            <div class="phone-header-title">🍕 Pizzériák a közelben</div>
+            <div class="phone-hungry">● Éhes!</div>
+          </div>
+          <div class="phone-map">
+            <div class="phone-map-grid"></div>
+            <div class="phone-road-h"></div>
+            <div class="phone-road-v"></div>
+            <div class="phone-road-v2"></div>
+            <div class="phone-road-h2"></div>
+            <div class="map-pin" style="top:38%;left:22%">🍕</div>
+            <div class="map-pin" style="top:28%;left:55%">🔥</div>
+            <div class="map-pin" style="top:55%;left:60%">🍕</div>
+            <div class="map-pin" style="top:65%;left:25%">🌱</div>
+            <div class="map-pin" style="top:43%;left:46%;font-size:18px">📍</div>
+            <div class="phone-indulas">🧭 INDULÁS!</div>
+          </div>
+          <div class="phone-navbar">
+            <div class="phone-nav-item"><div class="phone-nav-icon">🏠</div><div class="phone-nav-label">Kezdő</div></div>
+            <div class="phone-nav-item"><div class="phone-nav-icon">🗺️</div><div class="phone-nav-label" style="color:var(--gold)">Térkép</div></div>
+            <div class="phone-nav-item"><div class="phone-nav-icon">📋</div><div class="phone-nav-label">Lista</div></div>
+            <div class="phone-nav-item"><div class="phone-nav-icon">🌐</div><div class="phone-nav-label">Partnerek</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="stats-inner">
+    <div class="stat-item fade-up"><div class="stat-num">25km</div><div class="stat-label">Keresési sugár körülötted</div></div>
+    <div class="stat-item fade-up"><div class="stat-num">6+</div><div class="stat-label">Pizzéria kategória</div></div>
+    <div class="stat-item fade-up"><div class="stat-num">3</div><div class="stat-label">Natív navigáció (Apple, Google, Waze)</div></div>
+    <div class="stat-item fade-up"><div class="stat-num">0 Ft</div><div class="stat-label">Teljesen ingyenes</div></div>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label">Miért ez az app?</div>
+    <div class="section-title">Minden amit egy <em>igazi pizza vadász</em> megkíván</div>
+    <div class="features-grid">
+      <div class="feature-card fade-up"><div class="feature-icon">📍</div><h3>GPS alapú keresés</h3><p>Az app a valódi tartózkodási helyed alapján mutat pizzériákat. Honton vagy? Hont körülit keres. Rómában? Rómait.</p></div>
+      <div class="feature-card fade-up"><div class="feature-icon">🗺️</div><h3>Térkép + lista nézet</h3><p>Térképen látod az összes közeli pizzériát, listában távolság szerint rendezve – a legközelebbi mindig elöl.</p></div>
+      <div class="feature-card fade-up"><div class="feature-icon">🔥</div><h3>Kategória szűrők</h3><p>Kemencés, olasz, american, vegán, vékony tészta, calzone, házhozszállítás – szűrj rá arra amit valóban keresel.</p></div>
+      <div class="feature-card fade-up"><div class="feature-icon">🧭</div><h3>Natív navigáció</h3><p>Apple Maps, Google Maps vagy Waze – te döntöd el melyikkel indulsz. Egy kattintás és már megy a navigáció.</p></div>
+      <div class="feature-card fade-up"><div class="feature-icon">🌍</div><h3>Határon túl is keres</h3><p>Ipolyságon vagy Párkányban élsz? Az app nem ismer határokat – a 25km-es körzetedben szlovák és osztrák helyeket is megmutat.</p></div>
+      <div class="feature-card fade-up"><div class="feature-icon">⚡</div><h3>Éhes vagyok gomb</h3><p>Egy kattintás a legközelebbi nyitott pizzériára irányít, figyelembe véve az aktív szűrődet. Gyors, mint a házhozszállítás.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="how">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label">Lépések</div>
+    <div class="section-title">Négy lépés a <em>tökéletes pizzáig</em></div>
+    <div class="steps">
+      <div class="step fade-up"><div class="step-num">1</div><h4>Nyisd meg az appot</h4><p>Böngészőből, telepítés nélkül – vagy add hozzá a kezdőképernyőhöz PWA-ként.</p></div>
+      <div class="step fade-up"><div class="step-num">2</div><h4>Engedélyezd a GPS-t</h4><p>Az app lekéri a helyzeted és automatikusan betölti a környékbeli pizzériákat.</p></div>
+      <div class="step fade-up"><div class="step-num">3</div><h4>Szűrj kategóriára</h4><p>Kemencés? Vegán? Most nyitva? Egy kattintással szűrhetsz rá a kívánságodra.</p></div>
+      <div class="step fade-up"><div class="step-num">4</div><h4>Indulj el!</h4><p>Válaszd ki a kedvenc navigációs appodat és már úton is vagy a legjobb pizza felé.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="categories">
+  <div style="max-width:1100px;margin:0 auto"><div class="section-label">Szűrők</div><div class="section-title">Minden ízlésre van <em>kategória</em></div></div>
+  <div class="cat-grid">
+    <div class="cat-card fade-up"><div class="cat-emoji">🇮🇹</div><div class="cat-name">Olasz</div><div class="cat-desc">Autentikus pizzéria</div></div>
+    <div class="cat-card fade-up"><div class="cat-emoji">🔥</div><div class="cat-name">Kemencés</div><div class="cat-desc">Fával tüzelt kemence</div></div>
+    <div class="cat-card fade-up"><div class="cat-emoji">🥊</div><div class="cat-name">American</div><div class="cat-desc">New York stílus</div></div>
+    <div class="cat-card fade-up"><div class="cat-emoji">🌱</div><div class="cat-name">Vegán</div><div class="cat-desc">Növényi alapú</div></div>
+    <div class="cat-card fade-up"><div class="cat-emoji">🛵</div><div class="cat-name">Kiszállítás</div><div class="cat-desc">Házhozszállítással</div></div>
+    <div class="cat-card fade-up"><div class="cat-emoji">🟢</div><div class="cat-name">Most nyitva</div><div class="cat-desc">Csak nyitott helyek</div></div>
+  </div>
+</section>
+
+<section class="community">
+  <div class="community-inner">
+    <div class="fade-up">
+      <div class="section-label">Közösség</div>
+      <h2>Te is ismersz egy <em>eldugott gyöngyszemet?</em></h2>
+      <p>Ha tudsz egy pizzériáról amit mások még nem ismernek – legyen az egy kemencés sörözőben, egy kis faluban vagy a határon túl – add hozzá te is!</p>
+      <p>A közösség bővíti az adatbázist, hogy mindenki megtalálja a saját kedvencét.</p>
+      <p style="font-size:.85rem;color:var(--red);font-weight:600">Hamarosan: beküldési lehetőség közvetlenül az appból! 🚀</p>
+    </div>
+    <div class="submit-card fade-up">
+      <h3>📍 Ajánlj egy pizzériát</h3>
+      <div class="form-row">
+        <input class="form-input" type="text" placeholder="Pizzéria neve" id="f-nev">
+        <input class="form-input" type="text" placeholder="Város, utca, házszám">
+        <select class="form-input">
+          <option value="">Kategória...</option>
+          <option>🇮🇹 Olasz pizzéria</option>
+          <option>🔥 Kemencés pizza</option>
+          <option>🥊 American pizza</option>
+          <option>🌱 Vegán lehetőség</option>
+          <option>🍕 Általános pizzéria</option>
+        </select>
+        <input class="form-input" type="text" placeholder="Megjegyzés (pl. csak hétvégén nyitva)">
+        <button class="form-submit" id="f-btn" onclick="bekuldesKlikk()">Beküldés →</button>
+        <div class="form-note">Az adminisztrátor jóváhagyása után kerül fel az appba.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <h2>Készen állsz a <em>pizza vadászatra?</em></h2>
+  <p>Telepítés nélkül, azonnal indul. Ingyen. Mindenhol.</p>
+  <div class="cta-btns">
+    <a href="https://pizza-vadasz.web.app" class="store-btn"><span class="store-btn-icon">🌐</span><div class="store-btn-text"><small>Nyisd meg</small>pizza-vadasz.web.app</div></a>
+    <a href="https://pizza-vadasz.web.app" class="store-btn"><span class="store-btn-icon">📱</span><div class="store-btn-text"><small>Telepítsd PWA-ként</small>iOS & Android</div></a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo">🍕 Pizza Vadász</div>
+        <p>GPS alapú pizzéria kereső app Magyarország és a határon túli területekre. A Vadász Apps ökoszisztéma tagja.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Az app</h4>
+        <a href="https://pizza-vadasz.web.app">Térkép nézet</a>
+        <a href="https://pizza-vadasz.web.app">Pizzéria lista</a>
+        <a href="https://pizza-vadasz.web.app">Kategóriák</a>
+      </div>
+      <div class="footer-col">
+        <h4>Vadász Apps</h4>
+        <a href="https://vadasz-apps.web.app">Összes app</a>
+        <a href="https://patika-vadasz.web.app">Patika Vadász</a>
+        <a href="https://szivar-vadasz.web.app">Szivar Vadász</a>
+        <a href="https://ko-fi.com/pizzavadasz">Támogasd az appot ☕</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Pizza Vadász. Minden jog fenntartva. Készítette: Králik Zola</p>
+      <div class="footer-vadasz">Egy <a href="https://vadasz-apps.web.app">Vadász Apps</a> alkalmazás 🛡️</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+function bekuldesKlikk(){
+  var nev=document.getElementById('f-nev').value.trim();
+  if(!nev){document.getElementById('f-nev').focus();document.getElementById('f-nev').style.borderColor='#8B0000';return;}
+  document.querySelectorAll('.form-input').forEach(function(i){i.value='';i.style.borderColor='';});
+  var btn=document.getElementById('f-btn');
+  btn.textContent='✅ Köszönjük a beküldést!';btn.style.background='#22c55e';
+  setTimeout(function(){btn.textContent='Beküldés →';btn.style.background='';},3000);
+}
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.12});
+document.querySelectorAll('.fade-up').forEach(function(el){obs.observe(el);});
+</script>
+</body>
+</html>

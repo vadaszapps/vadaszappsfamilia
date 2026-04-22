@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bor Vadász – Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Lato', sans-serif; background: #1a0808; color: #fff; min-height: 100vh; }
+    :root {
+        --wine:   #4A0E0E;
+        --dark:   #2A0808;
+        --darker: #1a0808;
+        --brown:  #3D0E0E;
+        --mid:    #5C1A1A;
+        --rose:   #E8748A;
+        --rose2:  #D4637A;
+        --gold:   #EDD97A;
+        --gold2:  #d4c050;
+        --green:  #22c55e;
+        --red:    #dc2626;
+    }
+
+    /* ── LOGIN ── */
+    #login-screen {
+        position: fixed; inset: 0; background: var(--darker);
+        display: flex; align-items: center; justify-content: center; z-index: 999;
+    }
+    #login-box {
+        background: var(--dark); border: 2px solid var(--gold);
+        border-radius: 18px; padding: 36px 32px; width: 340px; text-align: center;
+        box-shadow: 0 0 60px rgba(237,217,122,0.12);
+    }
+    #login-box .login-glass { font-size: 3.2rem; display: block; margin-bottom: 10px; filter: drop-shadow(0 0 14px rgba(237,217,122,0.5)); animation: floatGlass 3s ease-in-out infinite; }
+    @keyframes floatGlass { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+    #login-box h1 { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 4px; letter-spacing: 2px; }
+    #login-box p { color: #888; font-size: 0.82rem; margin-bottom: 24px; letter-spacing: 1px; }
+    #pw-input { width: 100%; padding: 13px; background: var(--brown); border: 1px solid var(--gold); color: white; border-radius: 10px; font-size: 1rem; margin-bottom: 12px; font-family: 'Lato', sans-serif; }
+    #pw-input::placeholder { color: #885; }
+    #login-btn { width: 100%; padding: 14px; background: var(--gold); color: var(--dark); border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: 'Lato', sans-serif; letter-spacing: 1px; transition: background 0.2s; }
+    #login-btn:hover { background: var(--gold2); }
+    #login-error { color: #f87171; font-size: 0.85rem; margin-top: 10px; display: none; }
+
+    /* ── ADMIN UI ── */
+    #admin-ui { display: none; }
+
+    header {
+        background: var(--dark); border-bottom: 2px solid var(--gold);
+        padding: 12px 18px; display: flex; align-items: center; justify-content: space-between;
+        position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 6px;
+    }
+    header h1 { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 1.1rem; letter-spacing: 2px; }
+    #stats { color: #886; font-size: 0.75rem; }
+
+    #toolbar {
+        padding: 10px 16px; background: #220a0a;
+        border-bottom: 1px solid #3a1010;
+        display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    }
+    #search-bar {
+        flex: 1; min-width: 160px; padding: 9px 13px;
+        background: var(--brown); border: 1px solid var(--rose2);
+        color: white; border-radius: 8px; font-size: 0.85rem; font-family: 'Lato', sans-serif;
+    }
+    #search-bar::placeholder { color: #885; }
+    .tool-btn {
+        padding: 9px 14px; border-radius: 8px; border: none;
+        font-size: 0.8rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+        background: var(--brown); color: #aaa; border: 1px solid #5a2a2a;
+        font-family: 'Lato', sans-serif; transition: all 0.2s;
+    }
+    .tool-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    #filter-tabs {
+        padding: 8px 16px; display: flex; gap: 6px;
+        background: #1e0808; border-bottom: 1px solid #2a1010; overflow-x: auto;
+    }
+    #filter-tabs::-webkit-scrollbar { display: none; }
+    .tab-btn {
+        padding: 6px 13px; border-radius: 20px; border: 1px solid #5a2a2a;
+        background: var(--dark); color: #aaa; font-size: 0.78rem; cursor: pointer;
+        white-space: nowrap; font-family: 'Lato', sans-serif; transition: all 0.2s;
+    }
+    .tab-btn.active { background: var(--gold); color: var(--dark); border-color: var(--gold); font-weight: 700; }
+
+    #bulk-bar, #bulk-bar-bottom {
+        display: none; padding: 10px 16px; background: #300808;
+        align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    #bulk-bar { border-bottom: 1px solid var(--red); }
+    #bulk-bar-bottom { border-top: 1px solid var(--red); }
+    #bulk-bar.visible, #bulk-bar-bottom.visible { display: flex; }
+    #bulk-label, #bulk-label-bottom { color: #f87171; font-size: 0.85rem; flex: 1; }
+    #bulk-delete-btn, #bulk-delete-btn-bottom {
+        padding: 10px 18px; background: var(--red); color: #fff;
+        border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; font-family: 'Lato', sans-serif;
+    }
+
+    #loading { text-align: center; padding: 50px 20px; color: #885; }
+    .spinner { width: 34px; height: 34px; border: 3px solid var(--brown); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 14px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #table-wrap { overflow-x: auto; padding: 12px 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th { text-align: left; padding: 9px 10px; color: var(--gold); border-bottom: 1px solid #5a2a2a; font-size: 0.75rem; white-space: nowrap; font-family: 'Playfair Display', serif; letter-spacing: 1px; }
+    td { padding: 9px 10px; border-bottom: 1px solid #2a1010; vertical-align: middle; }
+    tr:hover td { background: #220a0a; }
+    .td-nev { color: #fff; font-weight: 700; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .td-cim { color: #aaa; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .td-source { font-size: 0.7rem; color: #665; }
+
+    .meg-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; }
+    .meg-yes  { background: #14532d; color: #4ade80; }
+    .meg-no   { background: #3f1212; color: #f87171; }
+
+    .stilus-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.68rem; background: var(--mid); color: var(--gold); border: 1px solid #5a3a00; margin: 1px; }
+
+    .price-badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; }
+    .price-budget  { background: #1a3300; color: #6fe040; border: 1px solid #2d5500; }
+    .price-mid     { background: #2A1200; color: var(--gold); border: 1px solid #664400; }
+    .price-premium { background: #4A0E0E; color: #e8b400; border: 1px solid #884400; }
+
+    .edit-btn { background: var(--gold); color: var(--dark); border: none; border-radius: 6px; padding: 5px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; font-family: 'Lato', sans-serif; }
+    .del-btn  { background: #3f1212; color: #f87171; border: 1px solid var(--red); border-radius: 6px; padding: 5px 8px; font-size: 0.78rem; cursor: pointer; margin-left: 4px; font-family: 'Lato', sans-serif; }
+
+    #pagination { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 14px; color: #885; font-size: 0.82rem; }
+    .page-btn { padding: 7px 14px; border-radius: 8px; background: var(--dark); border: 1px solid #5a2a2a; color: #aaa; cursor: pointer; font-size: 0.82rem; font-family: 'Lato', sans-serif; transition: all 0.2s; }
+    .page-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .page-btn:disabled { opacity: 0.3; cursor: default; }
+
+    /* ── MODAL ── */
+    #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 500; align-items: center; justify-content: center; padding: 16px; }
+    #modal-overlay.active { display: flex; }
+    #modal { background: var(--dark); border: 2px solid var(--gold); border-radius: 16px; padding: 24px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+    #modal h2 { color: var(--gold); margin-bottom: 18px; font-size: 1rem; font-family: 'Playfair Display', serif; letter-spacing: 1px; }
+    .fg { margin-bottom: 12px; }
+    .fg label { display: block; color: #aaa; font-size: 0.78rem; margin-bottom: 4px; letter-spacing: 1px; text-transform: uppercase; }
+    .fg input, .fg textarea, .fg select {
+        width: 100%; padding: 9px 11px;
+        background: var(--brown); border: 1px solid var(--rose2);
+        color: white; border-radius: 8px; font-size: 0.88rem; font-family: 'Lato', sans-serif;
+    }
+    .fg textarea { resize: vertical; min-height: 65px; }
+    .fg select option { background: var(--brown); }
+    .modal-btns { display: flex; gap: 8px; margin-top: 18px; }
+    .modal-btns button { flex: 1; padding: 12px; border-radius: 8px; border: none; font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: 'Lato', sans-serif; }
+    #save-btn { background: var(--gold); color: var(--dark); }
+    #cancel-btn { background: var(--brown); color: #aaa; }
+    #delete-confirm-btn { background: var(--red); color: #fff; }
+
+    .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .cb-item { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+    .cb-item input { width: 16px; height: 16px; accent-color: var(--gold); cursor: pointer; }
+    .cb-item span { font-size: 0.82rem; color: #ccc; }
+
+    /* ── GEOCODING MODAL ── */
+    #geocode-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 600; align-items: center; justify-content: center; padding: 16px; }
+    #geocode-modal.active { display: flex; }
+    #geocode-box { background: var(--dark); border: 2px solid var(--rose); border-radius: 16px; padding: 22px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    #geocode-box h2 { color: var(--rose); margin-bottom: 6px; font-size: 1rem; font-family: 'Playfair Display', serif; }
+
+    /* ── PROGRESS ── */
+    #progress-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.94); z-index: 9998; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+    #progress-overlay.active { display: flex; }
+    #progress-text { color: var(--gold); font-size: 1rem; font-family: 'Lato', sans-serif; }
+    #progress-bar-wrap { width: 280px; height: 8px; background: var(--brown); border-radius: 4px; overflow: hidden; }
+    #progress-bar { height: 100%; background: var(--gold); width: 0%; transition: width 0.2s; border-radius: 4px; }
+
+    /* ── TOAST ── */
+    /* ── NÉZET VÁLTÓ ── */
+    #view-toggle { display: flex; gap: 8px; align-items: center; }
+    .view-btn { padding: 7px 16px; border-radius: 8px; border: 1px solid #5a2a2a; background: var(--brown); color: #aaa; cursor: pointer; font-size: 0.82rem; font-family: 'Lato', sans-serif; font-weight: 700; transition: all 0.2s; }
+    .view-btn.active { background: var(--gold); color: var(--dark); border-color: var(--gold); }
+
+    /* ── ESEMÉNY TÁBLA ── */
+    #events-section { display: none; padding: 12px 16px; }
+    #events-section.visible { display: block; }
+    .event-row { background: var(--brown); border: 1px solid #3a1010; border-radius: 10px; padding: 13px 15px; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 12px; }
+    .event-row:hover { border-color: #5a2a2a; }
+    .event-info { flex: 1; min-width: 0; }
+    .event-nev { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 0.95rem; margin-bottom: 3px; }
+    .event-meta { font-size: 0.75rem; color: #aaa; margin: 2px 0; }
+    .event-leiras { font-size: 0.75rem; color: #777; margin-top: 4px; }
+    .ev-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.68rem; font-weight: 700; margin-right: 5px; }
+    .ev-ok  { background: #14532d; color: #4ade80; }
+    .ev-new { background: #3f1212; color: #f87171; }
+    .ev-approve-btn { background: #14532d; color: #4ade80; border: 1px solid #4ade80; border-radius: 6px; padding: 5px 10px; font-size: 0.78rem; cursor: pointer; font-family: 'Lato', sans-serif; margin-bottom: 4px; display: block; width: 100%; }
+    .ev-delete-btn  { background: #3f1212; color: #f87171; border: 1px solid #dc2626; border-radius: 6px; padding: 5px 10px; font-size: 0.78rem; cursor: pointer; font-family: 'Lato', sans-serif; display: block; width: 100%; }
+    .ev-actions { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; min-width: 90px; }
+    #events-loading { text-align: center; padding: 40px; color: #885; }
+    #events-empty   { text-align: center; padding: 40px; color: #665; font-size: 0.88rem; }
+
+    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--dark); border: 1px solid var(--gold); color: var(--gold); padding: 11px 22px; border-radius: 10px; font-size: 0.88rem; z-index: 9999; display: none; white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.6); font-family: 'Lato', sans-serif; }
+
+    /* ── MEGERŐSÍTÉS gomb ── */
+    .approve-btn { background: #14532d; color: #4ade80; border: 1px solid #4ade80; border-radius: 6px; padding: 5px 8px; font-size: 0.75rem; cursor: pointer; margin-left: 4px; font-family: 'Lato', sans-serif; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+    <div id="login-box">
+        <span class="login-glass">🍷</span>
+        <h1>BOR VADÁSZ</h1>
+        <p>Admin belépés</p>
+        <input type="password" id="pw-input" placeholder="Jelszó...">
+        <button id="login-btn">Belépés</button>
+        <div id="login-error">❌ Hibás jelszó!</div>
+    </div>
+</div>
+
+<!-- ADMIN UI -->
+<div id="admin-ui">
+    <header>
+        <h1>🍷 Bor Vadász Admin</h1>
+        <div id="view-toggle">
+            <button class="view-btn active" id="btn-view-bolts" onclick="switchView('bolts')">🏪 Boltok</button>
+            <button class="view-btn" id="btn-view-events" onclick="switchView('events')">📅 Események</button>
+        </div>
+        <div id="stats">Betöltés...</div>
+    </header>
+    <div id="toolbar">
+        <input type="text" id="search-bar" placeholder="🔍 Keresés név / cím...">
+        <button class="tool-btn" id="reload-btn">🔄 Frissítés</button>
+        <button class="tool-btn" id="new-btn" style="background:#14532d;color:#4ade80;border-color:#4ade80;">➕ Új bolt</button>
+        <button class="tool-btn" id="geocode-btn" style="background:#1a1a4a;color:#818cf8;border-color:#818cf8;">📍 Geocoding</button>
+    </div>
+    <div id="filter-tabs">
+        <button class="tab-btn active" data-tab="all">📋 Mind</button>
+        <button class="tab-btn" data-tab="nem_megeros">⏳ Nem megerősített</button>
+        <button class="tab-btn" data-tab="megeros">✨ Megerősített</button>
+        <button class="tab-btn" data-tab="user">👤 Felhasználói</button>
+        <button class="tab-btn" data-tab="no_koord">📍 Koordináta hiányzik</button>
+        <button class="tab-btn" data-tab="voros">🔴 Vörösbor</button>
+        <button class="tab-btn" data-tab="feher">🥂 Fehérbor</button>
+        <button class="tab-btn" data-tab="pezsgő">✨ Pezsgő</button>
+        <button class="tab-btn" data-tab="boraszat">🏡 Borászat</button>
+    </div>
+    <div id="bulk-bar">
+        <span id="bulk-label">0 rekord kijelölve</span>
+        <button id="bulk-delete-btn">🗑️ Kijelöltek törlése</button>
+    </div>
+    <div id="loading"><div class="spinner"></div><p>Adatbázis betöltése...</p></div>
+    <div id="table-wrap" style="display:none">
+        <table>
+            <thead><tr>
+                <th><input type="checkbox" id="select-all-cb"></th>
+                <th>#</th>
+                <th>Bolt neve</th>
+                <th>Cím</th>
+                <th>Stílusok</th>
+                <th>Ár</th>
+                <th>Típus</th>
+                <th>Megerősítve</th>
+                <th>Forrás</th>
+                <th id="datum-th" style="display:none">Dátum</th>
+                <th>Műveletek</th>
+            </tr></thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+    <div id="pagination">
+        <button class="page-btn" id="prev-btn">← Előző</button>
+        <span id="page-info">1 / 1</span>
+        <button class="page-btn" id="next-btn">Következő →</button>
+    </div>
+    <div id="bulk-bar-bottom">
+        <span id="bulk-label-bottom">0 rekord kijelölve</span>
+        <button id="bulk-delete-btn-bottom">🗑️ Kijelöltek törlése</button>
+    </div>
+    <!-- ESEMÉNYEK SZEKCIÓ -->
+    <div id="events-section">
+        <div id="events-loading"><div class="spinner"></div><p>Események betöltése...</p></div>
+        <div id="events-list"></div>
+        <div id="events-empty" style="display:none">Nincs beküldött esemény.</div>
+    </div>
+</div>
+
+<!-- SZERKESZTŐ MODAL -->
+<div id="modal-overlay">
+    <div id="modal">
+        <h2 id="modal-title">✏️ Bolt szerkesztése</h2>
+        <div class="fg"><label>Bolt neve</label><input type="text" id="edit-nev"></div>
+        <div class="fg"><label>Cím</label><input type="text" id="edit-cim"></div>
+        <div class="fg"><label>Leírás</label><textarea id="edit-leiras"></textarea></div>
+        <div style="display:flex;gap:8px;">
+            <div class="fg" style="flex:1"><label>Szélesség (lat)</label><input type="number" step="any" id="edit-lat" placeholder="pl. 47.4979"></div>
+            <div class="fg" style="flex:1"><label>Hosszúság (lng)</label><input type="number" step="any" id="edit-lng" placeholder="pl. 19.0402"></div>
+        </div>
+        <div class="fg">
+            <label>Stílusok</label>
+            <div class="checkbox-group" id="stilus-checkboxes">
+                <label class="cb-item"><input type="checkbox" value="voros"><span>🔴 Vörösbor</span></label>
+                <label class="cb-item"><input type="checkbox" value="feher"><span>🥂 Fehérbor</span></label>
+                <label class="cb-item"><input type="checkbox" value="roze"><span>🌸 Rozébor</span></label>
+                <label class="cb-item"><input type="checkbox" value="pezsgő"><span>✨ Pezsgő</span></label>
+                <label class="cb-item"><input type="checkbox" value="boraszat"><span>🏡 Borászat</span></label>
+                <label class="cb-item"><input type="checkbox" value="kostolo"><span>📅 Kóstoló</span></label>
+            </div>
+        </div>
+        <div class="fg"><label>Ár kategória</label>
+            <select id="edit-arkategoria">
+                <option value="">– Nincs megadva –</option>
+                <option value="budget">💚 Budget</option>
+                <option value="mid">🟡 Mid</option>
+                <option value="premium">🟠 Prémium</option>
+            </select>
+        </div>
+        <div class="fg"><label>Típus</label>
+            <select id="edit-tipus">
+                <option value="shop">🏪 Borbolt / Szaküzlet</option>
+                <option value="bar">🍸 Borbár</option>
+                <option value="boraszat">🏡 Borászat</option>
+            </select>
+        </div>
+        <div class="fg"><label>Megerősített</label>
+            <select id="edit-megeros">
+                <option value="false">❌ Nem megerősített</option>
+                <option value="true">✨ Megerősített</option>
+            </select>
+        </div>
+        <div class="modal-btns">
+            <button id="cancel-btn">Mégsem</button>
+            <button id="delete-confirm-btn">🗑️ Törlés</button>
+            <button id="save-btn">💾 Mentés</button>
+        </div>
+    </div>
+</div>
+
+<!-- GEOCODING MODAL -->
+<div id="geocode-modal">
+    <div id="geocode-box">
+        <h2>📍 Tömeges Geocoding</h2>
+        <p style="color:#888;font-size:0.78rem;margin-bottom:16px;">Automatikusan megkeresi a hiányzó koordinátákat a cím alapján (Nominatim OSM).</p>
+        <div id="geocode-preview" style="margin-bottom:16px;"></div>
+        <div id="geocode-progress-wrap" style="display:none;margin-bottom:16px;">
+            <div style="color:var(--rose);font-size:0.85rem;margin-bottom:8px;" id="geocode-progress-text">Feldolgozás...</div>
+            <div style="background:var(--brown);border-radius:4px;height:8px;overflow:hidden;">
+                <div id="geocode-progress-bar" style="height:100%;background:var(--rose);width:0%;transition:width 0.2s;border-radius:4px;"></div>
+            </div>
+        </div>
+        <div id="geocode-results" style="max-height:200px;overflow-y:auto;margin-bottom:16px;font-size:0.78rem;"></div>
+        <div style="display:flex;gap:8px;">
+            <button id="geocode-cancel-btn" style="flex:1;padding:12px;background:var(--brown);color:#aaa;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;">Bezárás</button>
+            <button id="geocode-start-btn" style="flex:2;padding:12px;background:var(--rose);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;">🚀 Indítás</button>
+        </div>
+    </div>
+</div>
+
+<!-- PROGRESS OVERLAY -->
+<div id="progress-overlay">
+    <div class="spinner"></div>
+    <div id="progress-text">Törlés folyamatban...</div>
+    <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(regs) {
+        regs.forEach(function(reg) { reg.unregister(); });
+    });
+    caches.keys().then(function(keys) {
+        keys.forEach(function(k) { caches.delete(k); });
+    });
+}
+</script>
+
+<script>
+var ADMIN_PASSWORD = 'zola19';
+var allDocs = [], filtered = [], currentTab = 'all', currentPage = 1, pageSize = 50, editingId = null;
+var selectedIds = new Set();
+
+// ── FIRESTORE REST API ──
+var PROJECT_ID = 'bor-vadasz';
+var DB_NAME    = '(default)';
+var API_KEY    = 'AIzaSyB_DckV1bWMOY64MvEN8g5tV65gvFIqkYI';
+var BASE = 'https://firestore.googleapis.com/v1/projects/' + PROJECT_ID + '/databases/' + encodeURIComponent(DB_NAME) + '/documents/';
+
+function parseDoc(doc) {
+    var id = doc.name.split('/').pop();
+    var data = {};
+    Object.keys(doc.fields || {}).forEach(function(k) {
+        var v = doc.fields[k];
+        if (v.stringValue  !== undefined) data[k] = v.stringValue;
+        else if (v.booleanValue !== undefined) data[k] = v.booleanValue;
+        else if (v.doubleValue  !== undefined) data[k] = v.doubleValue;
+        else if (v.integerValue !== undefined) data[k] = Number(v.integerValue);
+        else if (v.arrayValue   !== undefined) {
+            data[k] = (v.arrayValue.values || []).map(function(x) { return x.stringValue || ''; });
+        } else data[k] = null;
+    });
+    return Object.assign({ id: id }, data);
+}
+
+function toField(v) {
+    if (typeof v === 'boolean') return { booleanValue: v };
+    if (typeof v === 'number')  return { doubleValue: v };
+    if (Array.isArray(v))       return { arrayValue: { values: v.map(function(x){ return { stringValue: String(x) }; }) } };
+    return { stringValue: String(v == null ? '' : v) };
+}
+
+async function fsGet(col) {
+    var results = [], pageToken = null;
+    do {
+        var url = BASE + col + '?pageSize=300&key=' + API_KEY + (pageToken ? '&pageToken=' + pageToken : '');
+        var resp = await fetch(url);
+        if (!resp.ok) { var t = await resp.text(); throw new Error('GET ' + resp.status + ': ' + t); }
+        var json = await resp.json();
+        (json.documents || []).forEach(function(d) { results.push(parseDoc(d)); });
+        pageToken = json.nextPageToken || null;
+    } while (pageToken);
+    return results;
+}
+
+async function fsUpdate(col, id, data) {
+    var fields = {};
+    Object.keys(data).forEach(function(k) { fields[k] = toField(data[k]); });
+    var mask = Object.keys(data).map(function(k) { return 'updateMask.fieldPaths=' + encodeURIComponent(k); }).join('&');
+    var url = BASE + col + '/' + id + '?' + mask + '&key=' + API_KEY;
+    var resp = await fetch(url, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields: fields }) });
+    if (!resp.ok) { var t = await resp.text(); throw new Error('PATCH ' + resp.status + ': ' + t); }
+}
+
+async function fsDelete(col, id) {
+    var url = BASE + col + '/' + id + '?key=' + API_KEY;
+    var resp = await fetch(url, { method: 'DELETE' });
+    if (!resp.ok) { var t = await resp.text(); throw new Error('DELETE ' + resp.status + ': ' + t); }
+}
+
+async function fsCreate(col, data) {
+    var fields = {};
+    Object.keys(data).forEach(function(k) { fields[k] = toField(data[k]); });
+    var url = BASE + col + '?key=' + API_KEY;
+    var resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields: fields }) });
+    if (!resp.ok) { var t = await resp.text(); throw new Error('CREATE ' + resp.status + ': ' + t); }
+    var json = await resp.json();
+    return json.name.split('/').pop();
+}
+
+// ── LOGIN ──
+document.getElementById('login-btn').onclick = doLogin;
+document.getElementById('pw-input').onkeydown = function(e) { if (e.key === 'Enter') doLogin(); };
+
+function doLogin() {
+    if (document.getElementById('pw-input').value === ADMIN_PASSWORD) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('admin-ui').style.display = 'block';
+        loadData();
+    } else {
+        document.getElementById('login-error').style.display = 'block';
+        document.getElementById('pw-input').value = '';
+    }
+}
+
+// ── LOAD ──
+document.getElementById('reload-btn').onclick = loadData;
+
+function loadData() {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('table-wrap').style.display = 'none';
+    selectedIds.clear(); updateBulkBar();
+    fsGet('borbolts').then(function(docs) {
+        allDocs = docs;
+        updateStats(); applyFilter();
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('table-wrap').style.display = 'block';
+    }).catch(function(e) {
+        document.getElementById('loading').innerHTML = '<p style="color:#f87171;padding:20px">❌ ' + e.message + '</p>';
+    });
+}
+
+function updateStats() {
+    var meg  = allDocs.filter(function(d) { return d.megerositve === true; }).length;
+    var user = allDocs.filter(function(d) { return d.source === 'user_submit'; }).length;
+    var noXY = allDocs.filter(function(d) { return !d.lat || d.lat === 0; }).length;
+    document.getElementById('stats').textContent =
+        'Összes: ' + allDocs.length +
+        ' | Megerősített: ' + meg +
+        ' | Felhasználói: ' + user +
+        ' | Koordináta hiányzik: ' + noXY;
+}
+
+// ── FILTER / TABS ──
+document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.onclick = function() {
+        document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        currentTab = btn.getAttribute('data-tab');
+        var showDate = currentTab === 'user';
+        document.getElementById('datum-th').style.display = showDate ? '' : 'none';
+        document.querySelectorAll('.datum-cell').forEach(function(el) { el.style.display = showDate ? '' : 'none'; });
+        selectedIds.clear(); updateBulkBar(); applyFilter();
+    };
+});
+
+document.getElementById('search-bar').oninput = function() { currentPage = 1; applyFilter(); };
+
+function applyFilter() {
+    var q = document.getElementById('search-bar').value.toLowerCase();
+    filtered = allDocs.filter(function(d) {
+        var ok = !q || (d.nev||'').toLowerCase().includes(q) || (d.cim||'').toLowerCase().includes(q);
+        if (!ok) return false;
+        if (currentTab === 'nem_megeros') return !d.megerositve;
+        if (currentTab === 'megeros')     return d.megerositve === true;
+        if (currentTab === 'user')        return d.source === 'user_submit';
+        if (currentTab === 'no_koord')    return !d.lat || d.lat === 0;
+        if (currentTab === 'voros')       return Array.isArray(d.stilus) && d.stilus.includes('voros');
+        if (currentTab === 'feher')       return Array.isArray(d.stilus) && d.stilus.includes('feher');
+        if (currentTab === 'pezsgő')      return Array.isArray(d.stilus) && d.stilus.includes('pezsgő');
+        if (currentTab === 'boraszat')    return Array.isArray(d.stilus) && d.stilus.includes('boraszat');
+        return true;
+    });
+    if (currentTab === 'user') {
+        filtered.sort(function(a, b) {
+            return (b.datum||'').localeCompare(a.datum||'');
+        });
+    }
+    currentPage = 1;
+    renderTable();
+}
+
+// ── TABLE ──
+var styleLabels = { voros:'🔴', feher:'🥂', roze:'🌸', 'pezsgő':'✨', boraszat:'🏡', kostolo:'📅' };
+
+function stilusBadges(arr) {
+    if (!Array.isArray(arr) || !arr.length) return '<span style="color:#554">–</span>';
+    return arr.map(function(s){ return '<span class="stilus-badge">' + (styleLabels[s]||'') + ' ' + s + '</span>'; }).join('');
+}
+
+function priceBadge(cat) {
+    if (cat === 'budget')  return '<span class="price-badge price-budget">💚 Budget</span>';
+    if (cat === 'mid')     return '<span class="price-badge price-mid">🟡 Mid</span>';
+    if (cat === 'premium') return '<span class="price-badge price-premium">🟠 Prémium</span>';
+    return '<span style="color:#554">–</span>';
+}
+
+function megBadge(v) {
+    return v === true
+        ? '<span class="meg-badge meg-yes">✨ Igen</span>'
+        : '<span class="meg-badge meg-no">❌ Nem</span>';
+}
+
+function renderTable() {
+    var start = (currentPage - 1) * pageSize;
+    var page  = filtered.slice(start, start + pageSize);
+    var total = Math.max(1, Math.ceil(filtered.length / pageSize));
+    document.getElementById('page-info').textContent = currentPage + ' / ' + total + ' (' + filtered.length + ' rekord)';
+    document.getElementById('prev-btn').disabled = currentPage <= 1;
+    document.getElementById('next-btn').disabled = currentPage >= total;
+    document.getElementById('select-all-cb').checked = false;
+
+    var html = '';
+    page.forEach(function(d, i) {
+        var ch = selectedIds.has(d.id) ? 'checked' : '';
+        var tipus = d.tipus === 'bar' ? '🍸 Borbár' : d.tipus === 'boraszat' ? '🏡 Borászat' : '🏪 Bolt';
+        html += '<tr>'
+            + '<td><input type="checkbox" class="row-cb" data-id="' + d.id + '" ' + ch + '></td>'
+            + '<td style="color:#554;font-size:0.72rem">' + (start+i+1) + '</td>'
+            + '<td class="td-nev" title="' + (d.nev||'') + '">' + (d.nev||'–') + '</td>'
+            + '<td class="td-cim" title="' + (d.cim||'') + '">' + (d.cim||'–') + '</td>'
+            + '<td>' + stilusBadges(d.stilus) + '</td>'
+            + '<td>' + priceBadge(d.arkategoria) + '</td>'
+            + '<td style="font-size:0.78rem;color:#ccc">' + tipus + '</td>'
+            + '<td>' + megBadge(d.megerositve) + '</td>'
+            + '<td class="td-source">'
+                + (d.source === 'user_submit' ? '<span style="color:#4ade80">👤 user</span>'
+                : d.source === 'manual' ? '<span style="color:var(--gold)">admin</span>'
+                : (d.source||'–'))
+            + '</td>'
+            + '<td class="datum-cell" style="display:' + (currentTab==='user'?'':'none') + ';color:#888;font-size:0.72rem;white-space:nowrap;">'
+                + (d.datum ? d.datum.substring(0,10) : '–')
+            + '</td>'
+            + '<td style="white-space:nowrap">'
+            + (d.megerositve ? '' : '<button class="approve-btn" data-id="' + d.id + '">✅</button>')
+            + '<button class="edit-btn" data-id="' + d.id + '">✏️</button>'
+            + '<button class="del-btn"  data-id="' + d.id + '">🗑️</button>'
+            + '</td></tr>';
+    });
+    document.getElementById('table-body').innerHTML = html || '<tr><td colspan="11" style="text-align:center;color:#554;padding:30px">Nincs találat</td></tr>';
+
+    document.querySelectorAll('.edit-btn').forEach(function(b) {
+        b.onclick = function() { openEdit(b.getAttribute('data-id')); };
+    });
+    document.querySelectorAll('.del-btn').forEach(function(b) {
+        b.onclick = function() { deleteSingle(b.getAttribute('data-id')); };
+    });
+    document.querySelectorAll('.approve-btn').forEach(function(b) {
+        b.onclick = function() { approveSingle(b.getAttribute('data-id')); };
+    });
+    document.querySelectorAll('.row-cb').forEach(function(cb) {
+        cb.onchange = function() {
+            if (cb.checked) selectedIds.add(cb.getAttribute('data-id'));
+            else selectedIds.delete(cb.getAttribute('data-id'));
+            updateBulkBar();
+        };
+    });
+}
+
+// ── SELECT ALL ──
+document.getElementById('select-all-cb').onchange = function() {
+    var ch = this.checked;
+    var page = filtered.slice((currentPage-1)*pageSize, currentPage*pageSize);
+    page.forEach(function(d) { if (ch) selectedIds.add(d.id); else selectedIds.delete(d.id); });
+    document.querySelectorAll('.row-cb').forEach(function(cb) { cb.checked = ch; });
+    updateBulkBar();
+};
+
+function updateBulkBar() {
+    var cnt = selectedIds.size;
+    [document.getElementById('bulk-bar'), document.getElementById('bulk-bar-bottom')].forEach(function(b) {
+        b.classList.toggle('visible', cnt > 0);
+    });
+    document.getElementById('bulk-label').textContent = cnt + ' rekord kijelölve';
+    document.getElementById('bulk-label-bottom').textContent = cnt + ' rekord kijelölve';
+}
+
+// ── PAGINATION ──
+document.getElementById('prev-btn').onclick = function() { changePage(-1); };
+document.getElementById('next-btn').onclick = function() { changePage(1); };
+function changePage(d) {
+    currentPage = Math.max(1, Math.min(Math.ceil(filtered.length/pageSize), currentPage+d));
+    renderTable(); window.scrollTo(0,0);
+}
+
+// ── APPROVE ──
+function approveSingle(id) {
+    fsUpdate('borbolts', id, { megerositve: true }).then(function() {
+        var idx = allDocs.findIndex(function(x) { return x.id === id; });
+        if (idx !== -1) allDocs[idx].megerositve = true;
+        applyFilter(); showToast('✅ Megerősítve!');
+    }).catch(function(e) { showToast('❌ ' + e.message, true); });
+}
+
+// ── DELETE SINGLE ──
+function deleteSingle(id) {
+    var d = allDocs.find(function(x) { return x.id === id; });
+    if (!confirm('Törlöd ezt?\n\n' + (d ? d.nev + '\n' + (d.cim||'') : id))) return;
+    fsDelete('borbolts', id).then(function() {
+        allDocs = allDocs.filter(function(x) { return x.id !== id; });
+        selectedIds.delete(id); updateStats(); applyFilter(); showToast('🗑️ Törölve!');
+    }).catch(function(e) { showToast('❌ ' + e.message, true); });
+}
+
+// ── BULK DELETE ──
+async function doBulkDelete() {
+    var ids = Array.from(selectedIds);
+    if (!ids.length) return;
+    if (!confirm('⚠️ Biztosan törlöd ezt a ' + ids.length + ' rekordot?\nEz visszafordíthatatlan!')) return;
+    var overlay = document.getElementById('progress-overlay');
+    var bar = document.getElementById('progress-bar');
+    var txt = document.getElementById('progress-text');
+    overlay.classList.add('active');
+    var done = 0;
+    for (var i = 0; i < ids.length; i += 20) {
+        var chunk = ids.slice(i, i+20);
+        await Promise.all(chunk.map(function(id) { return fsDelete('borbolts', id); }));
+        done += Math.min(20, ids.length - i);
+        bar.style.width = Math.round(done/ids.length*100) + '%';
+        txt.textContent = 'Törlés: ' + done + ' / ' + ids.length;
+    }
+    overlay.classList.remove('active');
+    allDocs = allDocs.filter(function(d) { return !selectedIds.has(d.id); });
+    selectedIds.clear(); updateBulkBar(); updateStats(); applyFilter();
+    showToast('✅ ' + done + ' rekord törölve!');
+}
+
+document.getElementById('bulk-delete-btn').onclick = doBulkDelete;
+document.getElementById('bulk-delete-btn-bottom').onclick = doBulkDelete;
+
+// ── NEW BOLT ──
+document.getElementById('new-btn').onclick = function() {
+    editingId = null;
+    document.getElementById('modal-title').textContent = '➕ Új bolt hozzáadása';
+    document.getElementById('edit-nev').value = '';
+    document.getElementById('edit-cim').value = '';
+    document.getElementById('edit-leiras').value = '';
+    document.getElementById('edit-lat').value = '';
+    document.getElementById('edit-lng').value = '';
+    document.getElementById('edit-arkategoria').value = '';
+    document.getElementById('edit-tipus').value = 'shop';
+    document.getElementById('edit-megeros').value = 'false';
+    document.querySelectorAll('#stilus-checkboxes input').forEach(function(cb){ cb.checked = false; });
+    document.getElementById('delete-confirm-btn').style.display = 'none';
+    document.getElementById('modal-overlay').classList.add('active');
+};
+
+// ── EDIT MODAL ──
+function openEdit(id) {
+    var d = allDocs.find(function(x) { return x.id === id; });
+    if (!d) return;
+    editingId = id;
+    document.getElementById('modal-title').textContent = '✏️ Bolt szerkesztése';
+    document.getElementById('edit-nev').value  = d.nev  || '';
+    document.getElementById('edit-cim').value  = d.cim  || '';
+    document.getElementById('edit-leiras').value = d.leiras || '';
+    document.getElementById('edit-lat').value  = d.lat  || '';
+    document.getElementById('edit-lng').value  = d.lng  || '';
+    document.getElementById('edit-arkategoria').value = d.arkategoria || '';
+    document.getElementById('edit-tipus').value = d.tipus || 'shop';
+    document.getElementById('edit-megeros').value = d.megerositve ? 'true' : 'false';
+    var stilArr = Array.isArray(d.stilus) ? d.stilus : [];
+    document.querySelectorAll('#stilus-checkboxes input').forEach(function(cb){
+        cb.checked = stilArr.includes(cb.value);
+    });
+    document.getElementById('delete-confirm-btn').style.display = '';
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('active'); editingId = null; }
+document.getElementById('cancel-btn').onclick = closeModal;
+document.getElementById('modal-overlay').onclick = function(e) { if (e.target === this) closeModal(); };
+
+document.getElementById('save-btn').onclick = function() {
+    var nev = document.getElementById('edit-nev').value.trim();
+    if (!nev) { showToast('❌ A bolt neve kötelező!', true); return; }
+    var stilArr = [];
+    document.querySelectorAll('#stilus-checkboxes input:checked').forEach(function(cb){ stilArr.push(cb.value); });
+    var data = {
+        nev:         nev,
+        cim:         document.getElementById('edit-cim').value.trim(),
+        leiras:      document.getElementById('edit-leiras').value.trim(),
+        lat:         parseFloat(document.getElementById('edit-lat').value) || 0,
+        lng:         parseFloat(document.getElementById('edit-lng').value) || 0,
+        stilus:      stilArr,
+        arkategoria: document.getElementById('edit-arkategoria').value,
+        tipus:       document.getElementById('edit-tipus').value,
+        megerositve: document.getElementById('edit-megeros').value === 'true',
+        datum:       new Date().toISOString()
+    };
+    if (editingId) {
+        fsUpdate('borbolts', editingId, data).then(function() {
+            var idx = allDocs.findIndex(function(x) { return x.id === editingId; });
+            if (idx !== -1) allDocs[idx] = Object.assign(allDocs[idx], data);
+            closeModal(); applyFilter(); updateStats(); showToast('✅ Elmentve!');
+        }).catch(function(e) { showToast('❌ ' + e.message, true); });
+    } else {
+        data.source = 'manual';
+        fsCreate('borbolts', data).then(function(newId) {
+            data.id = newId;
+            allDocs.unshift(data);
+            closeModal(); applyFilter(); updateStats(); showToast('✅ Új bolt hozzáadva!');
+        }).catch(function(e) { showToast('❌ ' + e.message, true); });
+    }
+};
+
+document.getElementById('delete-confirm-btn').onclick = function() {
+    if (!editingId) return;
+    var id = editingId; closeModal(); deleteSingle(id);
+};
+
+// ── GEOCODING ──
+document.getElementById('geocode-btn').onclick = function() {
+    var missing = allDocs.filter(function(d) {
+        return (!d.lat || d.lat === 0) && d.cim && d.cim !== '';
+    });
+    document.getElementById('geocode-preview').innerHTML =
+        '<div style="background:#1a1a4a;border-radius:8px;padding:10px 14px;">'
+        + '<span style="color:#818cf8;font-weight:bold;">' + missing.length + ' bolt</span>'
+        + '<span style="color:#888;"> hiányzó koordinátával</span>'
+        + (missing.length > 0 ? '<div style="color:#aaa;font-size:0.75rem;margin-top:6px;">Pl: ' + (missing[0].nev||'?') + ' – ' + (missing[0].cim||'?') + '</div>' : '')
+        + '</div>';
+    document.getElementById('geocode-progress-wrap').style.display = 'none';
+    document.getElementById('geocode-results').innerHTML = '';
+    document.getElementById('geocode-start-btn').disabled = missing.length === 0;
+    document.getElementById('geocode-start-btn').textContent = missing.length > 0 ? '🚀 Indítás (' + missing.length + ' db)' : '✅ Nincs teendő';
+    document.getElementById('geocode-modal').classList.add('active');
+};
+
+document.getElementById('geocode-cancel-btn').onclick = function() {
+    document.getElementById('geocode-modal').classList.remove('active');
+};
+
+document.getElementById('geocode-start-btn').onclick = async function() {
+    var missing = allDocs.filter(function(d) {
+        return (!d.lat || d.lat === 0) && d.cim && d.cim !== '';
+    });
+    if (!missing.length) return;
+    document.getElementById('geocode-start-btn').disabled = true;
+    document.getElementById('geocode-progress-wrap').style.display = 'block';
+    var bar = document.getElementById('geocode-progress-bar');
+    var txt = document.getElementById('geocode-progress-text');
+    var results = document.getElementById('geocode-results');
+    results.innerHTML = '';
+    var ok = 0, fail = 0;
+    for (var i = 0; i < missing.length; i++) {
+        var d = missing[i];
+        bar.style.width = Math.round((i+1)/missing.length*100) + '%';
+        txt.textContent = (i+1) + ' / ' + missing.length + ' – ' + (d.nev||'?');
+        try {
+            var q = d.cim + ', Magyarország';
+            var resp = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=hu&q=' + encodeURIComponent(q),
+                { headers: { 'Accept-Language': 'hu', 'User-Agent': 'BorVadasz/1.0' } });
+            var json = await resp.json();
+            if (!json || !json.length) {
+                await new Promise(function(r){ setTimeout(r,200); });
+                var q2 = (d.nev||'') + ' ' + d.cim + ', Magyarország';
+                resp = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=hu&q=' + encodeURIComponent(q2),
+                    { headers: { 'Accept-Language': 'hu', 'User-Agent': 'BorVadasz/1.0' } });
+                json = await resp.json();
+            }
+            if (json && json.length > 0) {
+                var lat = parseFloat(json[0].lat), lng = parseFloat(json[0].lon);
+                await fsUpdate('borbolts', d.id, { lat: lat, lng: lng });
+                var idx = allDocs.findIndex(function(x) { return x.id === d.id; });
+                if (idx !== -1) { allDocs[idx].lat = lat; allDocs[idx].lng = lng; }
+                results.innerHTML += '<div style="color:#4ade80;padding:2px 0;">✅ ' + (d.nev||'?') + ' → ' + lat.toFixed(4) + ', ' + lng.toFixed(4) + '</div>';
+                ok++;
+            } else {
+                results.innerHTML += '<div style="color:#f87171;padding:2px 0;">❌ ' + (d.nev||'?') + ' – nem található</div>';
+                fail++;
+            }
+        } catch(e) {
+            results.innerHTML += '<div style="color:#f87171;padding:2px 0;">❌ ' + (d.nev||'?') + ' – ' + e.message + '</div>';
+            fail++;
+        }
+        results.scrollTop = results.scrollHeight;
+        await new Promise(function(r) { setTimeout(r, 1100); });
+    }
+    txt.textContent = '✅ Kész! ' + ok + ' sikeres, ' + fail + ' sikertelen.';
+    bar.style.width = '100%';
+    document.getElementById('geocode-start-btn').textContent = '✅ Befejezve';
+    showToast('📍 Geocoding kész: ' + ok + ' koordináta mentve!');
+};
+
+// ── NÉZET VÁLTÁS ──
+var currentView = 'bolts';
+function switchView(view) {
+    currentView = view;
+    var isBolts = view === 'bolts';
+    document.getElementById('btn-view-bolts').classList.toggle('active', isBolts);
+    document.getElementById('btn-view-events').classList.toggle('active', !isBolts);
+    // Bolt elemek
+    ['toolbar','filter-tabs','bulk-bar','loading','table-wrap','pagination','bulk-bar-bottom'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.style.display = isBolts ? '' : 'none';
+    });
+    // Esemény szekció
+    var evSec = document.getElementById('events-section');
+    if (isBolts) { evSec.classList.remove('visible'); }
+    else { evSec.classList.add('visible'); loadEventsAdmin(); }
+}
+
+// ── ESEMÉNYEK ADMIN ──
+var allEvents = [];
+async function loadEventsAdmin() {
+    document.getElementById('events-loading').style.display = 'block';
+    document.getElementById('events-list').innerHTML = '';
+    document.getElementById('events-empty').style.display = 'none';
+    try {
+        allEvents = await fsGet('events');
+        allEvents.sort(function(a, b) { return (b.feltoltve||'').localeCompare(a.feltoltve||''); });
+        renderEventsAdmin();
+    } catch(e) {
+        document.getElementById('events-loading').innerHTML = '<p style="color:#f87171">❌ ' + e.message + '</p>';
+    }
+}
+
+function renderEventsAdmin() {
+    document.getElementById('events-loading').style.display = 'none';
+    var list = document.getElementById('events-list');
+    if (!allEvents.length) {
+        document.getElementById('events-empty').style.display = 'block';
+        list.innerHTML = '';
+        return;
+    }
+    document.getElementById('events-empty').style.display = 'none';
+    var typeLbl = { kostolo: '🍷 Kóstoló', akcios: '💰 Akció', private: '🔒 Zártkörű' };
+    var rows = '';
+    allEvents.forEach(function(e) {
+        var approved = e.ellenorizve === true;
+        var feltoltve = e.feltoltve ? e.feltoltve.substring(0,10) : '–';
+        var badgeCls = approved ? 'ev-ok' : 'ev-new';
+        var badgeTxt = approved ? '✅ Jóváhagyva' : '⏳ Új';
+        var typeTxt = typeLbl[e.tipus] || e.tipus || '–';
+        var approveBtnHtml = '';
+        if (!approved) {
+            approveBtnHtml = '<button class="ev-approve-btn" data-eid="' + e.id + '" onclick="approveEventById(this.dataset.eid)">✅ Jóváhagy</button>';
+        }
+        var deleteBtnHtml = '<button class="ev-delete-btn" data-eid="' + e.id + '" onclick="deleteEventById(this.dataset.eid)">🗑️ Törlés</button>';
+        rows += '<div class="event-row">'
+            + '<div class="event-info">'
+            + '<div class="event-nev">' + (e.cim||'?') + ' <span class="ev-badge ' + badgeCls + '">' + badgeTxt + '</span></div>'
+            + '<div class="event-meta">📅 ' + (e.datum||'–') + ' &nbsp;·&nbsp; 📍 ' + (e.hely||'–') + ' &nbsp;·&nbsp; ' + typeTxt + '</div>'
+            + (e.leiras ? '<div class="event-leiras">📝 ' + e.leiras + '</div>' : '')
+            + '<div class="event-meta" style="margin-top:4px;color:#554">Feltöltve: ' + feltoltve + '</div>'
+            + '</div>'
+            + '<div class="ev-actions">' + approveBtnHtml + deleteBtnHtml + '</div>'
+            + '</div>';
+    });
+    list.innerHTML = rows;
+}
+
+async function approveEventById(id) {
+    try {
+        await fsUpdate('events', id, { ellenorizve: true });
+        var idx = allEvents.findIndex(function(e) { return e.id === id; });
+        if (idx !== -1) allEvents[idx].ellenorizve = true;
+        renderEventsAdmin();
+        showToast('✅ Esemény jóváhagyva!');
+    } catch(e) { showToast('❌ ' + e.message, true); }
+}
+
+async function deleteEventById(id) {
+    var ev = allEvents.find(function(e) { return e.id === id; });
+    var nevStr = ev ? ev.cim : id;
+    var msg = 'Törlöd ezt az eseményt? ' + nevStr;
+    if (!confirm(msg)) return;
+    try {
+        await fsDelete('events', id);
+        allEvents = allEvents.filter(function(e) { return e.id !== id; });
+        renderEventsAdmin();
+        showToast('🗑️ Esemény törölve!');
+    } catch(e) { showToast('❌ ' + e.message, true); }
+}
+
+
+// ── TOAST ──
+function showToast(msg, isError) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.style.display = 'block';
+    t.style.borderColor = isError ? '#dc2626' : 'var(--gold)';
+    t.style.color = isError ? '#f87171' : 'var(--gold)';
+    setTimeout(function() { t.style.display = 'none'; }, 2500);
+}
+</script>
+</body>
+</html>

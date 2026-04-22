@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrimalScan Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black:#000; --dark:#0a0a0a; --panel:#111; --border:#222;
+            --muted:#444; --dim:#666; --white:#f0f0f0;
+            --green:#00ff88; --yellow:#ffcc00; --red:#ff3333; --blue:#4488ff;
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:var(--black);color:var(--white);font-family:'IBM Plex Sans',sans-serif;min-height:100vh}
+
+        /* ── HEADER ── */
+        .admin-header{background:var(--panel);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+        .admin-title{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:4px;color:var(--green)}
+        .admin-sub{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:var(--dim);letter-spacing:2px;margin-top:2px}
+        .logout-btn{background:transparent;border:1px solid var(--border);color:var(--dim);padding:8px 16px;border-radius:6px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:1px}
+        .logout-btn:hover{border-color:var(--red);color:var(--red)}
+
+        /* ── LOGIN ── */
+        #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+        .login-box{background:var(--panel);border:1px solid var(--green);border-radius:16px;padding:40px 32px;max-width:360px;width:100%;text-align:center}
+        .login-box h2{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:4px;color:var(--green);margin-bottom:8px}
+        .login-box p{font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:var(--dim);margin-bottom:28px;letter-spacing:1px}
+        .pw-input{width:100%;padding:12px 16px;background:var(--dark);border:1px solid var(--border);color:var(--white);border-radius:8px;font-size:1rem;outline:none;margin-bottom:12px;font-family:'IBM Plex Mono',monospace;text-align:center;letter-spacing:3px}
+        .pw-input:focus{border-color:var(--green)}
+        .login-submit{width:100%;padding:14px;background:var(--green);color:#000;border:none;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:3px;cursor:pointer}
+        .login-submit:hover{background:#00dd77}
+        .login-error{color:var(--red);font-family:'IBM Plex Mono',monospace;font-size:0.75rem;margin-top:10px;min-height:20px}
+
+        /* ── MAIN ── */
+        #admin-screen{display:none}
+        .main-content{padding:24px;max-width:1200px;margin:0 auto}
+
+        /* ── STAT CARDS ── */
+        .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px}
+        .stat-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center}
+        .stat-card.green{border-color:var(--green)}.stat-card.yellow{border-color:var(--yellow)}.stat-card.blue{border-color:var(--blue)}.stat-card.red{border-color:var(--red)}
+        .stat-num{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;letter-spacing:2px;line-height:1}
+        .stat-card.green .stat-num{color:var(--green)}.stat-card.yellow .stat-num{color:var(--yellow)}.stat-card.blue .stat-num{color:var(--blue)}.stat-card.red .stat-num{color:var(--red)}
+        .stat-lbl{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:var(--dim);letter-spacing:2px;margin-top:6px;text-transform:uppercase}
+
+        /* ── TOOLBAR ── */
+        .toolbar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+        .search-input{flex:1;min-width:200px;padding:10px 16px;background:var(--panel);border:1px solid var(--border);color:var(--white);border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:0.85rem;outline:none}
+        .search-input:focus{border-color:var(--green)}
+        .toolbar-btn{padding:10px 20px;background:transparent;border:1px solid var(--border);color:var(--dim);border-radius:8px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:0.75rem;letter-spacing:1px;white-space:nowrap}
+        .toolbar-btn:hover{border-color:var(--green);color:var(--green)}
+
+        /* ── TABLE ── */
+        .section-label{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:4px;color:var(--dim);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+        .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+        .users-table{width:100%;border-collapse:collapse}
+        .users-table th{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--dim);padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+        .users-table td{padding:12px;border-bottom:1px solid #1a1a1a;font-size:0.85rem;vertical-align:middle}
+        .users-table tr:hover td{background:rgba(255,255,255,0.02)}
+        .user-name{font-weight:600;color:var(--white);margin-bottom:2px}
+        .user-email{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--dim)}
+        .credit-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:20px;padding:3px 10px;font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:var(--green);font-weight:bold}
+        .credit-badge.low{background:rgba(255,204,0,0.1);border-color:rgba(255,204,0,0.3);color:var(--yellow)}
+        .credit-badge.zero{background:rgba(255,51,51,0.15);border-color:var(--red);color:var(--red)}
+        .scan-count{font-family:'IBM Plex Mono',monospace;font-size:0.8rem;color:#888}
+        .date-text{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--muted)}
+        .action-btns{display:flex;gap:6px;flex-wrap:wrap}
+        .btn-add{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:var(--green);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:0.75rem;font-family:'IBM Plex Mono',monospace}
+        .btn-add:hover{background:rgba(0,255,136,0.2)}
+        .btn-remove{background:rgba(255,51,51,0.1);border:1px solid rgba(255,51,51,0.3);color:var(--red);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:0.75rem;font-family:'IBM Plex Mono',monospace}
+        .btn-remove:hover{background:rgba(255,51,51,0.2)}
+        .btn-set{background:rgba(68,136,255,0.1);border:1px solid rgba(68,136,255,0.3);color:var(--blue);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:0.75rem;font-family:'IBM Plex Mono',monospace}
+        .btn-set:hover{background:rgba(68,136,255,0.2)}
+        .empty-row td,.loading-row td{text-align:center;padding:40px;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:0.8rem}
+        .loading-row td{color:var(--green)}
+
+        /* ── MODAL ── */
+        #modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+        #modal-overlay.active{display:flex}
+        .modal-box{background:var(--panel);border:1px solid var(--green);border-radius:16px;padding:28px 24px;max-width:340px;width:100%}
+        .modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;color:var(--green);margin-bottom:6px}
+        .modal-user{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--dim);margin-bottom:20px;line-height:1.6}
+        .modal-input{width:100%;padding:12px;background:var(--dark);border:1px solid var(--border);color:var(--white);border-radius:8px;font-size:1.4rem;text-align:center;outline:none;font-family:'IBM Plex Mono',monospace;margin-bottom:12px}
+        .modal-input:focus{border-color:var(--green)}
+        .modal-presets{display:flex;gap:8px;margin-bottom:12px}
+        .preset-btn{flex:1;padding:8px;background:var(--dark);border:1px solid var(--border);color:var(--dim);border-radius:6px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:0.85rem;text-align:center}
+        .preset-btn:hover{border-color:var(--green);color:var(--green)}
+        .modal-btns{display:flex;gap:10px}
+        .modal-ok{flex:1;padding:12px;background:var(--green);color:#000;border:none;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;cursor:pointer}
+        .modal-cancel{padding:12px 20px;background:transparent;border:1px solid var(--border);color:var(--dim);border-radius:8px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:0.8rem}
+
+        .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--green);border-radius:8px;padding:10px 20px;font-family:'IBM Plex Mono',monospace;font-size:0.8rem;color:var(--green);z-index:9999;display:none;white-space:nowrap}
+        #toast.error{border-color:var(--red);color:var(--red)}
+
+        @media(max-width:700px){.users-table th:nth-child(4),.users-table td:nth-child(4){display:none}}
+    </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+    <div class="login-box">
+        <div style="font-size:2.5rem;margin-bottom:12px">⚡</div>
+        <h2>ADMIN</h2>
+        <p>PRIMALSCAN · FELHASZNÁLÓKEZELÉS</p>
+        <input class="pw-input" type="password" id="pw-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="login-submit" onclick="doLogin()">BELÉPÉS</button>
+        <div class="login-error" id="login-error"></div>
+    </div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-screen">
+    <div class="admin-header">
+        <div>
+            <div class="admin-title">⚡ PRIMALSCAN ADMIN</div>
+            <div class="admin-sub">FELHASZNÁLÓKEZELÉS · PRIMALSCAN-73C5C</div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()">KILÉPÉS</button>
+    </div>
+    <div class="main-content">
+        <div class="stat-grid">
+            <div class="stat-card green"><div class="stat-num" id="s-users">—</div><div class="stat-lbl">Felhasználó</div></div>
+            <div class="stat-card blue"><div class="stat-num" id="s-scans">—</div><div class="stat-lbl">Összes scan</div></div>
+            <div class="stat-card yellow"><div class="stat-num" id="s-credits">—</div><div class="stat-lbl">Összes kredit</div></div>
+            <div class="stat-card red"><div class="stat-num" id="s-zero">—</div><div class="stat-lbl">Nulla kredit</div></div>
+        </div>
+        <div class="toolbar">
+            <input class="search-input" type="text" id="search-input" placeholder="🔍 Email vagy név..." oninput="filterUsers()">
+            <button class="toolbar-btn" onclick="sortBy('credits')">⚡ Kredit</button>
+            <button class="toolbar-btn" onclick="sortBy('totalScans')">📸 Scan</button>
+            <button class="toolbar-btn" onclick="sortBy('createdAt')">📅 Dátum</button>
+            <button class="toolbar-btn" onclick="loadUsers()">🔄 Frissítés</button>
+        </div>
+        <div class="section-label">FELHASZNÁLÓK</div>
+        <div style="overflow-x:auto">
+            <table class="users-table">
+                <thead><tr>
+                    <th>FELHASZNÁLÓ</th><th>KREDIT</th><th>SCANEK</th><th>REGISZTRÁCIÓ</th><th>MŰVELETEK</th>
+                </tr></thead>
+                <tbody id="users-tbody">
+                    <tr class="loading-row"><td colspan="5"><span class="spinner"></span>Betöltés...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-title" id="modal-title">KREDIT</div>
+        <div class="modal-user" id="modal-user"></div>
+        <div class="modal-presets" id="modal-presets"></div>
+        <input class="modal-input" type="number" id="modal-input" min="0" max="9999" value="40">
+        <div style="margin-bottom:12px"></div>
+        <div class="modal-btns">
+            <button class="modal-cancel" onclick="closeModal()">Mégsem</button>
+            <button class="modal-ok" onclick="confirmModal()">MENTÉS</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────
+const ADMIN_PASSWORD = 'zola19';
+const PROJECT_ID     = 'primalscan-73c5c';
+const API_KEY        = 'AIzaSyCUNL2R-urY-n2ybFdLEhU1b_ffZrEHT9M';
+const FS_BASE        = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+
+// ── STATE ─────────────────────────────────────────────────
+let allUsers    = [];
+let filtered    = [];
+let currentSort = 'createdAt';
+let modalAction = null;
+
+// ── LOGIN ─────────────────────────────────────────────────
+function doLogin() {
+    const pw = document.getElementById('pw-input').value;
+    if (pw === ADMIN_PASSWORD) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('admin-screen').style.display = 'block';
+        loadUsers();
+    } else {
+        document.getElementById('login-error').textContent = '❌ Hibás jelszó!';
+        document.getElementById('pw-input').value = '';
+    }
+}
+
+function doLogout() {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('admin-screen').style.display = 'none';
+    document.getElementById('pw-input').value = '';
+    allUsers = []; filtered = [];
+}
+
+// ── FIRESTORE REST API ────────────────────────────────────
+async function fsGet(path) {
+    const url = `${FS_BASE}/${path}?key=${API_KEY}`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    return resp.json();
+}
+
+async function fsPatch(path, fields) {
+    const fieldMask = Object.keys(fields).map(f => `updateMask.fieldPaths=${f}`).join('&');
+    const url = `${FS_BASE}/${path}?key=${API_KEY}&${fieldMask}`;
+    const body = { fields: {} };
+    for (const [k, v] of Object.entries(fields)) {
+        if (typeof v === 'number') body.fields[k] = { integerValue: v };
+        else body.fields[k] = { stringValue: String(v) };
+    }
+    const resp = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+    if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `HTTP ${resp.status}`);
+    }
+    return resp.json();
+}
+
+function parseField(field) {
+    if (!field) return null;
+    if (field.integerValue  !== undefined) return parseInt(field.integerValue);
+    if (field.doubleValue   !== undefined) return parseFloat(field.doubleValue);
+    if (field.stringValue   !== undefined) return field.stringValue;
+    if (field.booleanValue  !== undefined) return field.booleanValue;
+    if (field.timestampValue !== undefined) return field.timestampValue;
+    return null;
+}
+
+function docToUser(doc) {
+    const uid    = doc.name.split('/').pop();
+    const fields = doc.fields || {};
+    return {
+        uid,
+        email:       parseField(fields.email)       || '',
+        displayName: parseField(fields.displayName) || '',
+        credits:     parseField(fields.credits)     ?? 0,
+        totalScans:  parseField(fields.totalScans)  ?? 0,
+        createdAt:   parseField(fields.createdAt)   || '',
+    };
+}
+
+// ── LOAD USERS ────────────────────────────────────────────
+async function loadUsers() {
+    const tbody = document.getElementById('users-tbody');
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="5"><span class="spinner"></span>Betöltés...</td></tr>';
+    try {
+        const data = await fsGet('users');
+        allUsers = (data.documents || []).map(docToUser);
+        updateStats();
+        sortBy(currentSort, false);
+        filterUsers();
+    } catch(e) {
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="5">❌ Hiba: ${e.message}</td></tr>`;
+    }
+}
+
+// ── STATS ─────────────────────────────────────────────────
+function updateStats() {
+    document.getElementById('s-users').textContent   = allUsers.length;
+    document.getElementById('s-scans').textContent   = allUsers.reduce((s,u) => s+(u.totalScans||0), 0);
+    document.getElementById('s-credits').textContent = allUsers.reduce((s,u) => s+(u.credits||0),    0);
+    document.getElementById('s-zero').textContent    = allUsers.filter(u => (u.credits||0) <= 0).length;
+}
+
+// ── SORT ──────────────────────────────────────────────────
+function sortBy(field, rerender = true) {
+    currentSort = field;
+    allUsers.sort((a, b) => {
+        if (field === 'credits')    return (b.credits||0)    - (a.credits||0);
+        if (field === 'totalScans') return (b.totalScans||0) - (a.totalScans||0);
+        return (b.createdAt||'') > (a.createdAt||'') ? 1 : -1;
+    });
+    if (rerender) filterUsers();
+}
+
+// ── FILTER ────────────────────────────────────────────────
+function filterUsers() {
+    const q = (document.getElementById('search-input').value || '').toLowerCase();
+    filtered = q
+        ? allUsers.filter(u =>
+            (u.email||'').toLowerCase().includes(q) ||
+            (u.displayName||'').toLowerCase().includes(q))
+        : [...allUsers];
+    renderTable();
+}
+
+// ── RENDER ────────────────────────────────────────────────
+function renderTable() {
+    const tbody = document.getElementById('users-tbody');
+    if (!filtered.length) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Nincs találat.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = filtered.map(u => {
+        const credits = u.credits ?? 0;
+        const cls     = credits <= 0 ? 'zero' : credits <= 3 ? 'low' : '';
+        const date    = u.createdAt ? new Date(u.createdAt).toLocaleDateString('hu-HU') : '—';
+        const ne      = (u.displayName||'').replace(/'/g,"\\'");
+        const ee      = (u.email||'').replace(/'/g,"\\'");
+        return `<tr>
+            <td><div class="user-name">${u.displayName||'—'}</div><div class="user-email">${u.email||'—'}</div></td>
+            <td><span class="credit-badge ${cls}">⚡ ${credits}</span></td>
+            <td><span class="scan-count">📸 ${u.totalScans||0}</span></td>
+            <td><span class="date-text">${date}</span></td>
+            <td><div class="action-btns">
+                <button class="btn-add"    onclick="openModal('add','${u.uid}','${ne}','${ee}')">+ Kredit</button>
+                <button class="btn-remove" onclick="openModal('remove','${u.uid}','${ne}','${ee}')">− Kredit</button>
+                <button class="btn-set"    onclick="openModal('set','${u.uid}','${ne}','${ee}')">= Beállít</button>
+            </div></td>
+        </tr>`;
+    }).join('');
+}
+
+// ── MODAL ─────────────────────────────────────────────────
+function openModal(type, uid, name, email) {
+    modalAction = { type, uid, name, email };
+    const titles = { add:'+ KREDIT HOZZÁADÁS', remove:'− KREDIT ELVÉTEL', set:'= KREDIT BEÁLLÍTÁS' };
+    document.getElementById('modal-title').textContent = titles[type];
+    document.getElementById('modal-user').textContent  = name + '\n' + email;
+    document.getElementById('modal-input').value       = type === 'remove' ? '10' : '40';
+    const presets = type === 'add' ? [10,20,40,100] : type === 'remove' ? [1,5,10,20] : [0,3,40,100];
+    document.getElementById('modal-presets').innerHTML = presets.map(n =>
+        `<button class="preset-btn" onclick="document.getElementById('modal-input').value=${n}">${n}</button>`
+    ).join('');
+    document.getElementById('modal-overlay').classList.add('active');
+    setTimeout(() => document.getElementById('modal-input').select(), 100);
+}
+
+function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('active');
+    modalAction = null;
+}
+
+async function confirmModal() {
+    if (!modalAction) return;
+    const val = parseInt(document.getElementById('modal-input').value);
+    if (isNaN(val) || val < 0) { showToast('❌ Érvénytelen szám!', true); return; }
+    const { type, uid, name } = modalAction;
+    const u = allUsers.find(u => u.uid === uid);
+    const current = u ? (u.credits || 0) : 0;
+    let newVal;
+    if (type === 'add')    newVal = current + val;
+    if (type === 'remove') newVal = Math.max(0, current - val);
+    if (type === 'set')    newVal = val;
+    try {
+        await fsPatch(`users/${uid}`, { credits: newVal });
+        if (u) u.credits = newVal;
+        updateStats();
+        filterUsers();
+        closeModal();
+        showToast(`✅ ${name}: ${current} → ${newVal} kredit`);
+    } catch(e) {
+        showToast('❌ ' + e.message, true);
+    }
+}
+
+document.getElementById('modal-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+document.getElementById('modal-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter')  confirmModal();
+    if (e.key === 'Escape') closeModal();
+});
+
+// ── TOAST ─────────────────────────────────────────────────
+function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className   = isError ? 'error' : '';
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 3500);
+}
+</script>
+</body>
+</html>

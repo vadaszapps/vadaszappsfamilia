@@ -1,0 +1,39 @@
+{
+  "name": "Hangszerbolt Vadász",
+  "short_name": "Hangszerbolt",
+  "description": "Hangszerbolt kereső alkalmazás – találd meg a legközelebbi hangszerboltot!",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#111111",
+  "theme_color": "#FFD700",
+  "lang": "hu",
+  "icons": [
+    {
+      "src": "/ikon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/ikon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/ikon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/ikon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["shopping", "navigation", "utilities"],
+  "prefer_related_applications": false
+}

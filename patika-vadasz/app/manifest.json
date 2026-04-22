@@ -1,0 +1,22 @@
+{
+  "name": "Patika Vadász",
+  "short_name": "Patika Vadász",
+  "description": "Magyarország gyógyszertár keresője",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D3B2E",
+  "theme_color": "#0D3B2E",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://patika-vadasz.web.app/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://patika-vadasz.web.app/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

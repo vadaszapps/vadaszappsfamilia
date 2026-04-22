@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vadász Apps – Magyar kereső alkalmazások</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --green:#0D3B2E; --green-mid:#1a6649; --green-light:#2e9e6b; --gold:#FFD700; --gold2:#e6c200; --cream:#F9F7F2; --gray:#6b7280; --gray-light:#f3f4f6; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body { font-family:'Lato',sans-serif; background:var(--cream); color:#1a1a1a; overflow-x:hidden; }
+        nav { position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(255,255,255,0.95); backdrop-filter:blur(12px); border-bottom:1px solid rgba(13,59,46,0.10); padding:0 40px; height:64px; display:flex; align-items:center; justify-content:space-between; }
+        .nav-logo { display:flex; align-items:center; gap:10px; font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--green); text-decoration:none; }
+        .nav-shield { width:28px; height:33px; border:2.5px solid var(--green); border-radius:3px 3px 14px 14px; display:flex; justify-content:center; align-items:center; flex-shrink:0; }
+        .nav-arrow { width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-bottom:12px solid var(--green); margin-top:-4px; }
+        .nav-links { display:flex; gap:28px; align-items:center; }
+        .nav-links a { text-decoration:none; color:var(--gray); font-size:0.9rem; font-weight:400; transition:color 0.2s; }
+        .nav-links a:hover { color:var(--green); }
+        .nav-cta { background:var(--green); color:var(--gold) !important; padding:8px 20px; border-radius:8px; font-weight:700 !important; transition:background 0.2s !important; }
+        .nav-cta:hover { background:var(--green-mid) !important; }
+        .hero { min-height:100vh; background:var(--green); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:100px 20px 60px; position:relative; overflow:hidden; }
+        .hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 60% 50% at 20% 50%,rgba(255,215,0,0.06) 0%,transparent 60%),radial-gradient(ellipse 40% 60% at 80% 30%,rgba(46,158,107,0.15) 0%,transparent 60%); }
+        .hero-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(255,215,0,0.12); border:1px solid rgba(255,215,0,0.3); color:var(--gold); font-size:0.8rem; font-weight:700; padding:6px 16px; border-radius:100px; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:32px; animation:fadeUp 0.6s ease both; }
+        .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(2.8rem,7vw,5.5rem); font-weight:900; color:white; line-height:1.05; letter-spacing:-1px; margin-bottom:24px; animation:fadeUp 0.6s 0.1s ease both; }
+        .hero h1 span { color:var(--gold); }
+        .hero-sub { font-size:1.15rem; color:rgba(255,255,255,0.7); max-width:520px; line-height:1.7; font-weight:300; margin-bottom:44px; animation:fadeUp 0.6s 0.2s ease both; }
+        .hero-btns { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; animation:fadeUp 0.6s 0.3s ease both; }
+        .btn-gold { background:var(--gold); color:var(--green); padding:14px 32px; border-radius:10px; font-family:'Lato',sans-serif; font-size:1rem; font-weight:700; text-decoration:none; transition:all 0.2s; }
+        .btn-gold:hover { background:var(--gold2); transform:translateY(-2px); }
+        .btn-outline { background:transparent; color:rgba(255,255,255,0.85); padding:14px 32px; border-radius:10px; font-family:'Lato',sans-serif; font-size:1rem; font-weight:400; text-decoration:none; border:1.5px solid rgba(255,255,255,0.3); transition:all 0.2s; }
+        .btn-outline:hover { border-color:rgba(255,255,255,0.7); color:white; }
+        .hero-stats { display:flex; gap:48px; margin-top:72px; padding-top:40px; border-top:1px solid rgba(255,255,255,0.12); animation:fadeUp 0.6s 0.4s ease both; }
+        .stat { text-align:center; }
+        .stat-num { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:700; color:var(--gold); line-height:1; }
+        .stat-lbl { font-size:0.78rem; color:rgba(255,255,255,0.5); margin-top:4px; text-transform:uppercase; letter-spacing:0.8px; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+        .section { padding:96px 20px; }
+        .section-inner { max-width:1100px; margin:0 auto; }
+        .section-label { font-size:0.78rem; font-weight:700; color:var(--green-light); letter-spacing:2px; text-transform:uppercase; margin-bottom:12px; }
+        .section-title { font-family:'Playfair Display',serif; font-size:clamp(2rem,4vw,3rem); color:var(--green); line-height:1.15; margin-bottom:16px; letter-spacing:-0.5px; }
+        .section-sub { font-size:1rem; color:var(--gray); max-width:540px; line-height:1.7; margin-bottom:56px; }
+        .apps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:24px; }
+        .app-card { background:white; border-radius:20px; padding:32px 28px; border:1.5px solid rgba(13,59,46,0.08); box-shadow:0 2px 16px rgba(13,59,46,0.06); transition:all 0.25s; display:flex; flex-direction:column; gap:16px; text-decoration:none; color:inherit; position:relative; overflow:hidden; }
+        .app-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--green),var(--green-light)); transform:scaleX(0); transform-origin:left; transition:transform 0.3s; }
+        .app-card:hover { transform:translateY(-6px); box-shadow:0 16px 40px rgba(13,59,46,0.14); border-color:rgba(13,59,46,0.2); }
+        .app-card:hover::before { transform:scaleX(1); }
+        .app-card.featured { background:var(--green); border-color:var(--green); }
+        .app-card.featured::before { background:linear-gradient(90deg,var(--gold),#ffe566); }
+        .app-card.featured .app-name { color:var(--gold); }
+        .app-card.featured .app-desc { color:rgba(255,255,255,0.7); }
+        .app-card.featured .app-tag { background:rgba(255,215,0,0.15); color:var(--gold); border-color:rgba(255,215,0,0.3); }
+        .app-card.featured .app-link { background:var(--gold); color:var(--green); }
+        .app-icon-wrap { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; flex-shrink:0; }
+        .app-header { display:flex; align-items:center; gap:14px; }
+        .app-name { font-family:'Playfair Display',serif; font-size:1.25rem; color:var(--green); font-weight:700; line-height:1.2; }
+        .app-status { font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:100px; text-transform:uppercase; letter-spacing:0.5px; }
+        .status-live { background:rgba(34,197,94,0.12); color:#16a34a; }
+        .status-soon { background:rgba(251,146,60,0.12); color:#ea580c; }
+        .app-desc { font-size:0.9rem; color:var(--gray); line-height:1.6; flex:1; }
+        .app-tags { display:flex; gap:6px; flex-wrap:wrap; }
+        .app-tag { font-size:0.7rem; font-weight:600; padding:3px 10px; border-radius:100px; background:rgba(13,59,46,0.07); color:var(--green); border:1px solid rgba(13,59,46,0.12); }
+        .app-link { display:inline-flex; align-items:center; gap:6px; background:var(--green); color:white; padding:10px 20px; border-radius:10px; font-size:0.85rem; font-weight:700; text-decoration:none; transition:all 0.2s; align-self:flex-start; }
+        .app-link:hover { background:var(--green-mid); transform:translateX(2px); }
+        .app-link.disabled { background:var(--gray-light); color:#aaa; pointer-events:none; }
+        .about-section { background:var(--green); padding:96px 20px; }
+        .about-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+        .about-label { font-size:0.78rem; font-weight:700; color:rgba(255,215,0,0.7); letter-spacing:2px; text-transform:uppercase; margin-bottom:12px; }
+        .about-title { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,3.5vw,2.6rem); color:white; line-height:1.2; margin-bottom:20px; }
+        .about-title span { color:var(--gold); }
+        .about-text { color:rgba(255,255,255,0.7); line-height:1.8; font-size:0.95rem; margin-bottom:16px; }
+        .about-name { color:var(--gold); font-weight:700; font-size:1.05rem; margin-top:24px; }
+        .about-role { color:rgba(255,255,255,0.5); font-size:0.85rem; margin-top:4px; }
+        .about-cards { display:flex; flex-direction:column; gap:16px; }
+        .about-card { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:22px 24px; }
+        .about-card-icon { font-size:1.8rem; margin-bottom:10px; }
+        .about-card-title { color:var(--gold); font-weight:700; font-size:0.95rem; margin-bottom:6px; font-family:'Playfair Display',serif; }
+        .about-card-text { color:rgba(255,255,255,0.6); font-size:0.82rem; line-height:1.6; }
+        .contact-section { padding:96px 20px; background:var(--cream); }
+        .contact-inner { max-width:680px; margin:0 auto; text-align:center; }
+        .contact-icon { font-size:3rem; margin-bottom:20px; }
+        .contact-title { font-family:'Playfair Display',serif; font-size:2.2rem; color:var(--green); margin-bottom:16px; }
+        .contact-sub { color:var(--gray); line-height:1.7; margin-bottom:36px; font-size:0.95rem; }
+        .contact-cards { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+        .contact-card { background:white; border:1.5px solid rgba(13,59,46,0.1); border-radius:14px; padding:22px 28px; text-decoration:none; color:inherit; transition:all 0.2s; min-width:180px; text-align:center; }
+        .contact-card:hover { border-color:var(--green); transform:translateY(-3px); box-shadow:0 8px 24px rgba(13,59,46,0.1); }
+        .contact-card-icon { font-size:1.8rem; margin-bottom:8px; }
+        .contact-card-title { font-weight:700; color:var(--green); font-size:0.9rem; margin-bottom:4px; }
+        .contact-card-sub { font-size:0.78rem; color:var(--gray); }
+        .install-section { padding:96px 20px; background:#f0faf4; }
+        .install-inner { max-width:1100px; margin:0 auto; }
+        .install-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:24px; margin-top:48px; }
+        .install-card { background:white; border-radius:20px; padding:28px 24px; border:1.5px solid rgba(13,59,46,0.10); box-shadow:0 2px 16px rgba(13,59,46,0.06); }
+        .install-card-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+        .install-os-icon { font-size:2rem; }
+        .install-os-name { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--green); font-weight:700; }
+        .install-os-sub { font-size:0.75rem; color:var(--gray); }
+        .install-steps { list-style:none; display:flex; flex-direction:column; gap:10px; }
+        .install-step { display:flex; gap:10px; align-items:flex-start; }
+        .install-step-num { width:24px; height:24px; border-radius:50%; background:var(--green); color:var(--gold); font-size:0.7rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+        .install-step-txt { font-size:0.85rem; color:#444; line-height:1.5; }
+        .install-step-txt b { color:var(--green); }
+        .install-note { margin-top:16px; background:rgba(13,59,46,0.05); border-radius:10px; padding:10px 14px; font-size:0.78rem; color:var(--green); line-height:1.5; }
+        footer { background:#060e09; padding:40px 20px; text-align:center; }
+        .footer-logo { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--gold); margin-bottom:12px; }
+        .footer-links { display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-bottom:20px; }
+        .footer-links a { color:rgba(255,255,255,0.4); text-decoration:none; font-size:0.82rem; transition:color 0.2s; }
+        .footer-links a:hover { color:var(--gold); }
+        .footer-copy { color:rgba(255,255,255,0.25); font-size:0.75rem; }
+        .app-qr-wrap { display:flex; align-items:center; gap:12px; margin-top:4px; padding-top:12px; border-top:1px solid rgba(0,0,0,0.07); pointer-events:none; }
+        .app-card.featured .app-qr-wrap { border-top-color:rgba(255,255,255,0.12); }
+        .app-qr-box { border-radius:8px; flex-shrink:0; background:white; padding:4px; width:80px; height:80px; overflow:hidden; }
+        .app-qr-box img { width:72px !important; height:72px !important; }
+        .app-qr-label { font-size:0.72rem; line-height:1.5; color:var(--gray); }
+        .app-card.featured .app-qr-label { color:rgba(255,255,255,0.5); }
+        .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:8px; background:none; border:none; }
+        .hamburger span { width:24px; height:2px; background:var(--green); display:block; transition:all 0.3s; }
+        .mobile-menu { display:none; position:fixed; top:64px; left:0; right:0; background:white; border-bottom:2px solid var(--green); z-index:99; padding:16px 20px; flex-direction:column; gap:12px; box-shadow:0 8px 24px rgba(0,0,0,0.1); }
+        .mobile-menu.open { display:flex; }
+        .mobile-menu a { color:var(--green); text-decoration:none; font-size:1rem; padding:8px 0; border-bottom:1px solid #eee; font-family:'Lato',sans-serif; }
+        .mobile-menu a:last-child { border-bottom:none; }
+        .mobile-menu .nav-cta { background:var(--green); color:var(--gold) !important; padding:12px 20px; border-radius:8px; text-align:center; border-bottom:none !important; font-weight:700; }
+        @media (max-width:768px) { nav{padding:0 20px} .nav-links{display:none} .hamburger{display:flex} .hero-stats{gap:28px} .about-inner{grid-template-columns:1fr;gap:40px} .hero-btns{flex-direction:column;align-items:center} }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a class="nav-logo" href="#">
+        <div class="nav-shield"><div class="nav-arrow"></div></div>
+        Vadász Apps
+    </a>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menü"><span></span><span></span><span></span></button>
+    <div class="nav-links">
+        <a href="#apps">Alkalmazások</a>
+        <a href="#rolunk">Rólunk</a>
+        <a href="#telepites">Telepítés</a>
+        <a href="#kapcsolat">Kapcsolat</a>
+        <a href="mailto:vadaszapps@gmail.com" class="nav-cta">📧 Írj nekünk!</a>
+    </div>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+    <a href="#apps" onclick="closeMenu()">🗺️ Alkalmazások</a>
+    <a href="#telepites" onclick="closeMenu()">📱 Telepítés</a>
+    <a href="#rolunk" onclick="closeMenu()">👨‍💻 Rólunk</a>
+    <a href="#kapcsolat" onclick="closeMenu()">✉️ Kapcsolat</a>
+    <a href="mailto:vadaszapps@gmail.com" class="nav-cta">📧 Írj nekünk!</a>
+</div>
+<script>function toggleMenu(){document.getElementById('mobile-menu').classList.toggle('open')}function closeMenu(){document.getElementById('mobile-menu').classList.remove('open')}</script>
+
+<section class="hero">
+    <div class="hero-badge">🗺️ Magyar kereső alkalmazások</div>
+    <h1>A <span>Vadász</span> app-família</h1>
+    <p class="hero-sub">Ingyenes, magyar nyelvű kereső alkalmazások – megtalálsz mindent, ami fontos. Gyógyszertártól specialty sörözőig.</p>
+    <div class="hero-btns">
+        <a href="#apps" class="btn-gold">🗺️ Összes app</a>
+        <a href="#rolunk" class="btn-outline">Rólunk →</a>
+    </div>
+    <div class="hero-stats">
+        <div class="stat"><div class="stat-num">13</div><div class="stat-lbl">Aktív app</div></div>
+        <div class="stat"><div class="stat-num">5 000+</div><div class="stat-lbl">Adatbázis elem</div></div>
+        <div class="stat"><div class="stat-num">100%</div><div class="stat-lbl">Ingyenes</div></div>
+    </div>
+</section>
+
+<section class="section" id="apps">
+    <div class="section-inner">
+        <div class="section-label">🗺️ Vadász alkalmazások</div>
+        <h2 class="section-title">Minden appunk egy helyen</h2>
+        <p class="section-sub">Kattints bármelyik alkalmazásra, és azonnal megnyílik. Telefonon add hozzá a kezdőképernyőhöz – úgy érzi magát mint egy natív app!</p>
+        <div class="apps-grid">
+
+            <a class="app-card" href="https://cigar-hunter.web.app/landing.html" target="_blank" style="border-color:#5a3010;background:linear-gradient(160deg,#1a0f0a,#0d0804);color:white">
+                <div class="app-header"><div class="app-icon-wrap" style="background:#2C1B12">🚬</div><div><div class="app-name" style="color:#D4AF37">Cigar Hunter</div><span class="app-status" style="background:rgba(212,175,55,0.15);color:#D4AF37">● Élő</span></div></div>
+                <p class="app-desc" style="color:rgba(255,255,255,0.65)">Európa prémium szivarbolt térképe. Habanos adatbázis, humidor minősítés, AI szivarszkenner, személyes kollekció és eseménynaptár — 30+ ország lefedve.</p>
+                <div class="app-tags"><span class="app-tag" style="background:rgba(212,175,55,0.12);color:#D4AF37;border-color:rgba(212,175,55,0.25)">🗺️ Európa térkép</span><span class="app-tag" style="background:rgba(212,175,55,0.12);color:#D4AF37;border-color:rgba(212,175,55,0.25)">🤖 AI Scanner</span><span class="app-tag" style="background:rgba(212,175,55,0.12);color:#D4AF37;border-color:rgba(212,175,55,0.25)">🌍 30+ ország</span></div>
+                <span class="app-link" style="background:#D4AF37;color:#1a0f0a">Megnyitás →</span>
+                <div class="app-qr-wrap"><div class="app-qr-box" id="qr-cigarhunter"></div><div class="app-qr-label" style="color:rgba(255,255,255,0.5)">📱 Szkenneld be<br>a QR kódot<br>a megnyitáshoz</div></div>
+            </a>
+
+            <a class="app-card" href="https://szivar-vadasz.web.app/landing.html" target="_blank" style="border-color:#5a3010;background:linear-gradient(160deg,#2C1B12,#1a0f0a);color:white">
+                <div class="app-header"><div class="app-icon-wrap" style="background:#3d2010">🚬</div><div><div class="app-name" style="color:#D4AF37">Szivar Vadász</div><span class="app-status" style="background:rgba(212,175,55,0.15);color:#D4AF37">● Élő</span></div></div>
+                <p class="app-desc" style="color:rgba(255,255,255,0.65)">Közösségi szivarbolt térkép. Prémium szivar szaküzletek, lounge-ok és dohányboltok megtalálása egyszerűen. Natív navigáció: Apple Maps, Google Maps vagy Waze.</p>
+                <div class="app-tags"><span class="app-tag" style="background:rgba(212,175,55,0.12);color:#D4AF37;border-color:rgba(212,175,55,0.25)">🚬 Szivarbolt</span><span class="app-tag" style="background:rgba(212,175,55,0.12);color:#D4AF37;border-color:rgba(212,175,55,0.25)">🗺️ Térkép</span><span class="app-tag" style="background:rgba(212,175,55,0.12);color:#D4AF37;border-color:rgba(212,175,55,0.25)">🧭 Natív navigáció</span></div>
+                <span class="app-link" style="background:#D4AF37;color:#1a0f0a">Megnyitás →</span>
+                <div class="app-qr-wrap"><div class="app-qr-box" id="qr-szivar"></div><div class="app-qr-label">📱 Szkenneld be<br>a QR kódot<br>a megnyitáshoz</div></div>
+            </a>
+
+            <a class="app-card" href="https://primal-vadasz.web.app/landing.html" target="_blank" style="border-color:#1a3a1a;background:linear-gradient(160deg,#0a0a0a,#050f05);color:white">
+                <div class="app-header"><div class="app-icon-wrap" style="background:#0d1f0d">📸</div><div><div class="app-name" style="color:#00ff88">PrimalScan</div><span class="app-status" style="background:rgba(0,255,136,0.15);color:#00ff88">● Élő</span></div></div>
+                <p class="app-desc" style="color:rgba(255,255,255,0.65)">AI-alapú élelmiszer elemző. Fényképezd le a terméket – a Gemini Vision és az OpenFoodFacts adatbázis alapján azonnal megkapod az összetevők értékelését, egészség pontszámát és az adalékanyagokat.</p>
+                <div class="app-tags"><span class="app-tag" style="background:rgba(0,255,136,0.12);color:#00ff88;border-color:rgba(0,255,136,0.25)">🤖 Gemini AI</span><span class="app-tag" style="background:rgba(0,255,136,0.12);color:#00ff88;border-color:rgba(0,255,136,0.25)">🥗 Összetevők</span><span class="app-tag" style="background:rgba(0,255,136,0.12);color:#00ff88;border-color:rgba(0,255,136,0.25)">📊 Egészség pontszám</span></div>
+                <span class="app-link" style="background:#00ff88;color:#000">Megnyitás →</span>
+                <div class="app-qr-wrap"><div class="app-qr-box" id="qr-primal"></div><div class="app-qr-label" style="color:rgba(255,255,255,0.5)">📱 Szkenneld be<br>a QR kódot<br>a megnyitáshoz</div></div>
+            </a>
+
+            <a class="app-card" href="https://whiskey-vadasz.web.app/landing.html" target="_blank" style="border-color:#8B4513;background:linear-gradient(160deg,#2A1200,#1a0c00);color:white">
+                <div class="app-header"><div class="app-icon-wrap" style="background:#3d1e00">🥃</div><div><div class="app-name" style="color:#FFD700">Whiskey Vadász</div><span class="app-status status-live">● Élő</span></div></div>
+                <p class="app-desc" style="color:rgba(255,255,255,0.7)">Prémium whiskey szaküzlet és bár kereső. Single Malt, Bourbon, Japán és Ír whiskey – stílus szűrővel, bárpult móddal, kóstolók naptárral és natív navigációval.</p>
+                <div class="app-tags"><span class="app-tag" style="background:rgba(255,215,0,0.15);color:#FFD700;border-color:rgba(255,215,0,0.3)">🥃 Szaküzlet</span><span class="app-tag" style="background:rgba(255,215,0,0.15);color:#FFD700;border-color:rgba(255,215,0,0.3)">🍸 Whiskey Bár</span><span class="app-tag" style="background:rgba(255,215,0,0.15);color:#FFD700;border-color:rgba(255,215,0,0.3)">🧭 Natív navigáció</span></div>
+                <span class="app-link" style="background:#FFD700;color:#2A1200">Megnyitás →</span>
+                <div class="app-qr-wrap"><div class="app-qr-box" id="qr-whiskey"></div><div class="app-qr-label">📱 Szkenneld be<br>a QR kódot<br>a megnyitáshoz</div></div>
+            </a>
+
+            <a class="app-card featured" href="https://patika-vadasz.web.app/landing.html" target="_blank">
+                <div class="app-header"><div class="app-icon-wrap" style="background:rgba(255,215,0,0.15)">💊</div><div><div class="app-name">Patika Vadász</div><span class="app-status status-live">● Élő</span></div></div>
+                <p class="app-desc">Magyarország összes ~2300 gyógyszertára egy helyen. Térkép, ügyelet kereső és natív navigáció – Apple Maps, Google Maps vagy Waze. ⏳ Első betöltés ~10mp az OpenStreetMap adatbázisból.</p>
+                <div class="app-tags"><span class="app-tag">💊 ~2300 patika</span><span class="app-tag">🌙 Ügyelet</span><span class="app-tag">🧭 Natív navigáció</span></div>
+                <span class="app-link">Megnyitás →</span>
+                <div class="app-qr-wrap"><div class="app-qr-box" id="qr-patika"></div><div class="app-qr-label" style="color:rgba(255,255,255,0.5)">📱 Szkenneld be<br>a QR kódot<br>a megnyitáshoz</div></div>
+            </a>
+
+            <a class="app-card" href="https://pizza-vadasz.web.app/landing.html" target="_blank" style="border-color:#c0392b;background:linear-gradient(160deg,#fff8f0,#fff3e0)">
+                <div class="app-header"><div class="app-icon-wrap" style="background:#fde8d8">🍕</div><div><div class="app-name" style="color:#c0392b">Pizza Vadász</div><span class="app-status status-live">● Élő</span></div></div>
+                <p class="app-desc">A legközelebbi pizzázó megtalálása egy koppintással. Térkép, lista, „ÉHES VAGYOK!" gomb – és natív navigáció Apple Maps, Google Maps vagy Waze segítségével.</p>
+                <div class="app-tags"><span class="app-tag" style="background:rgba(192,57,43,0.08);color:#c0392b;border-color:rgba(192,57,43,0.2)">🍕 Pizzázó</span><span class="app-tag" style="background:rgba(192,57,43,0.08);color:#c0392b;border-color:rgba(192,57,43,0.2)">🗺️ Térkép</span><span class="app-tag" style="background:rgba(192,57,43,0.08);color:#c0392b;border-color:rgba(192,57,43,0.2)">🧭 Natív navigáció</span></div>
+                <span class="app-link" style="background:#c0392b">Megnyitás →</span>
+                <div class="app-qr-wrap"><div class="app-qr-box" id="qr-pizza"></div><div class="app-qr-label">📱 Szkenneld be<br>a QR kódot<br>a megnyitáshoz</div></div>
+            </a>
+
+            <a class="app-card" href="https://hangszerbolt-vadasz.web.app/landing.html" target="_blank" style="border-color:#222;background:linear-gradient(160deg,#1a1a1a,#0d0d0d);color:white">
+                <div class="app-header"><div class="app-icon-wrap" style="background:#2a2a2a">🎸</div><div><div class="app-name" style="color:#FFD700">Hangszerbolt Vadász</div><span class="app-status" style="background:rgba(255,215,0,0.15);color:#FFD700">● Élő</span></div></div>
+                <p class="app-desc" style="color:rgba(255,255,255,0.65)">Találd meg a legközelebbi hangszerboltot! Gitár, zongora, dob, fúvós – kategóriák szerint szűrve, térképen megjelenítve, natív navigációval.</p>
+                <div class="app-tags"><span class="app-tag" style="background:rgba(255,215,0,0.12);color:#FFD700;border-color:rgba(255,215,0,0.25)">🎸 Gitár</span><span class="app-tag" style="background:rgba(255,215,0,0.12);color:#FFD700;border-color:rgba(255,215,0,0.25)">🎹 Zongora</span><span class="app-tag" style="background:rgba(255,215,0,0.12);color:#FFD700;border-color:rgba(255,215,0,0.25)">🧭 Natív navigáció</span></div>
+                <span class="app-link" style="background:#FFD700;color:#111">Megnyitás →</span>
+                <div class="app-qr-wrap"><div class="app-qr-box" id="qr-hangszer"></div><div class="app-qr-label" style="color:rgba(255,255,255,0.5)">📱 Szkenneld be<br>a QR kódot<br>a megnyitáshoz</div></div>
+            </a>
+
+            <a class="app-card" href="https://trafik-vadasz.web.app/landing.html" target="_blank" style="border-color:#166534;background:linear-gradient(160deg,#f0fdf4,#dcfce7)">
+                <div class="app-header"><div class="app-icon-wrap" style="background:#bbf7d0">🏪</div><div><div class="app-name" style="color:#166534">Trafik Vadász</div><span class="app-status status-live">● Élő</span></div></div>
+                <p class="app-desc">Nemzeti dohánybolt kereső. Az összes trafik megtalálása a közelben, Google Places alapú kereséssel és natív navigációval – Apple Maps, Google Maps vagy Waze.</p>
+                <div class="app-tags"><span class="app-tag" style="background:rgba(22,101,52,0.08);color:#166534;border-color:rgba(22,101,52,0.2)">🏪 Trafik</span><span class="app-tag" style="background:rgba(22,101,52,0.08);color:#166534;border-color:rgba(22,101,52,0.2)">🗺️ Térkép</span><span class="app-tag" style="background:rgba(22,101,52,0.08);color:#166534;border-color:rgba(22,101,52,0.2)">🧭 Natív navigáció</span></div>
+                <span class="app-link" style="background:#166534">Megnyitás →</span>
+                <div class="app-qr-wrap"><div class="app-qr-box" id="qr-trafik"></div><div class="app-qr-label">📱 Szkenneld be<br>a QR kódot<br>a megnyitáshoz</div></div>
+            </a>
+
+            <a class="app-card" href="https://kave-vadasz.web.app/landing.html" target="_blank" style="border-color:#3B1F0C;background:linear-gradient(160deg,#FDFAF6,#F5EDE0)">
+                <div class="app-header"><div class="app-icon-wrap" style="background:#F0D9BC">☕</div><div><div class="app-name" style="color:#3B1F0C">Kávé Vadász</div><span class="app-status status-live">● Élő</span></div></div>
+                <p class="app-desc">Specialty coffee kereső. Kávézók, kávéházak és pékség-kávézók a közeledben – kategória szűrővel, térképpel, listával és natív navigációval.</p>
+                <div class="app-tags"><span class="app-tag" style="background:rgba(59,31,12,0.08);color:#3B1F0C;border-color:rgba(59,31,12,0.2)">☕ Kávézó</span><span class="app-tag" style="background:rgba(59,31,12,0.08);color:#3B1F0C;border-color:rgba(59,31,12,0.2)">🗺️ Térkép</span><span class="app-tag" style="background:rgba(59,31,12,0.08);color:#3B1F0C;border-color:rgba(59,31,12,0.2)">🧭 Natív navigáció</span></div>
+                <span class="app-link" style="background:#3B1F0C">Megnyitás →</span>
+                <div class="app-qr-wrap"><div class="app-qr-box" id="qr-kave"></div><div class="app-qr-label">📱 Szkenneld be<br>a QR kódot<br>a megnyitáshoz</div></div>
+            </a>
+
+            <a class="app-card" href="https://sor-vadasz.web.app/landing.html" target="_blank" style="border-color:#C8860A;background:linear-gradient(160deg,#FFF8E7,#FEF0C7)">
+                <div class="app-header"><div class="app-icon-wrap" style="background:#FDE68A">🍺</div><div><div class="app-name" style="color:#92400E">Sör Vadász</div><span class="app-status status-live">● Élő</span></div></div>
+                <p class="app-desc" style="color:#78350F">Craft sörözők, sörbárok és sörfőzdék keresője. IPA, stout, lager – stílus szűrővel, térképpel és natív navigációval.</p>
+                <div class="app-tags"><span class="app-tag" style="background:rgba(146,64,14,0.08);color:#92400E;border-color:rgba(146,64,14,0.2)">🍺 Söröző</span><span class="app-tag" style="background:rgba(146,64,14,0.08);color:#92400E;border-color:rgba(146,64,14,0.2)">🗺️ Térkép</span><span class="app-tag" style="background:rgba(146,64,14,0.08);color:#92400E;border-color:rgba(146,64,14,0.2)">🧭 Natív navigáció</span></div>
+                <span class="app-link" style="background:#92400E">Megnyitás →</span>
+                <div class="app-qr-wrap"><div class="app-qr-box" id="qr-sor"></div><div class="app-qr-label">📱 Szkenneld be<br>a QR kódot<br>a megnyitáshoz</div></div>
+            </a>
+
+            <a class="app-card" href="https://street-food-vadasz.web.app/landing.html" target="_blank" style="border-color:#1565C0;background:linear-gradient(160deg,#E3F2FD,#BBDEFB)">
+                <div class="app-header"><div class="app-icon-wrap" style="background:#90CAF9">🌮</div><div><div class="app-name" style="color:#0D47A1">Street Food Vadász</div><span class="app-status status-live">● Élő</span></div></div>
+                <p class="app-desc" style="color:#1E3A5F">Food truckok, street food fesztiválok és helyi ételcsodák kereső appja. Burger, pizza, gyros, ázsiai – stílus szűrővel, fesztiválnaptárral és natív navigációval.</p>
+                <div class="app-tags"><span class="app-tag" style="background:rgba(21,101,192,0.08);color:#1565C0;border-color:rgba(21,101,192,0.2)">🚚 Food Truck</span><span class="app-tag" style="background:rgba(21,101,192,0.08);color:#1565C0;border-color:rgba(21,101,192,0.2)">🗺️ Térkép</span><span class="app-tag" style="background:rgba(255,107,53,0.1);color:#E85D2A;border-color:rgba(255,107,53,0.25)">📅 Fesztiválok</span></div>
+                <span class="app-link" style="background:#FF6B35;color:white">Megnyitás →</span>
+                <div class="app-qr-wrap"><div class="app-qr-box" id="qr-streetfood"></div><div class="app-qr-label">📱 Szkenneld be<br>a QR kódot<br>a megnyitáshoz</div></div>
+            </a>
+
+            <a class="app-card" href="https://bor-vadasz.web.app/landing.html" target="_blank" style="border-color:#7B2D8B;background:linear-gradient(160deg,#F9F0FF,#F3E8FF)">
+                <div class="app-header"><div class="app-icon-wrap" style="background:#E9D5FF">🍷</div><div><div class="app-name" style="color:#6B21A8">Bor Vadász</div><span class="app-status status-live">● Élő</span></div></div>
+                <p class="app-desc" style="color:#581C87">Magyar borvidékek, borboltok és bárszinű borbárok kereső appja. Vörös, fehér, rozé – stílus szűrővel, térképpel és natív navigációval.</p>
+                <div class="app-tags"><span class="app-tag" style="background:rgba(107,33,168,0.08);color:#6B21A8;border-color:rgba(107,33,168,0.2)">🍷 Borbolt</span><span class="app-tag" style="background:rgba(107,33,168,0.08);color:#6B21A8;border-color:rgba(107,33,168,0.2)">🗺️ Térkép</span><span class="app-tag" style="background:rgba(107,33,168,0.08);color:#6B21A8;border-color:rgba(107,33,168,0.2)">🧭 Natív navigáció</span></div>
+                <span class="app-link" style="background:#6B21A8">Megnyitás →</span>
+                <div class="app-qr-wrap"><div class="app-qr-box" id="qr-bor"></div><div class="app-qr-label">📱 Szkenneld be<br>a QR kódot<br>a megnyitáshoz</div></div>
+            </a>
+
+            <div class="app-card" style="border-style:dashed;opacity:0.6;">
+                <div class="app-header"><div class="app-icon-wrap" style="background:#f3f4f6">🔜</div><div><div class="app-name" style="color:#aaa">Következő Vadász</div><span class="app-status status-soon">⏳ Hamarosan</span></div></div>
+                <p class="app-desc" style="color:#bbb">A Vadász família bővül! Kövesd az oldalunkat, hogy elsőként értesülj az új alkalmazásokról.</p>
+                <div class="app-tags"><span class="app-tag" style="color:#bbb;border-color:#ddd">🔜 Vadász Apps</span></div>
+                <span class="app-link disabled">Hamarosan →</span>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- MYSTIC MASTERS SECTION -->
+<section style="padding:80px 20px;background:linear-gradient(180deg,#0B0B0F 0%,#13131A 100%);position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 50%,rgba(212,175,55,0.07) 0%,transparent 70%);pointer-events:none;"></div>
+  <div style="max-width:1100px;margin:0 auto;position:relative;z-index:1;">
+    <div style="text-align:center;margin-bottom:48px;">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25);color:#D4AF37;font-size:0.78rem;font-weight:700;padding:6px 18px;border-radius:100px;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;">&#10022; Különleges alkalmazás</div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);color:#F0EDE6;line-height:1.15;margin-bottom:14px;letter-spacing:-0.5px;">Mystic Masters</h2>
+      <p style="color:#8888aa;font-size:1rem;max-width:520px;margin:0 auto;line-height:1.7;">Az ókori bölcsesség és a modern AI találkozása. Nem helykereső — hanem önismereti és misztikus elemzőeszköz.</p>
+    </div>
+    <div style="max-width:560px;margin:0 auto;">
+      <a href="https://mystic-masters.web.app/landing.html" target="_blank" style="display:flex;flex-direction:column;gap:18px;background:#13131A;border:1.5px solid #D4AF37;border-radius:24px;padding:32px 28px;text-decoration:none;color:inherit;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(212,175,55,0.06),transparent 60%);pointer-events:none;"></div>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#1a1505,#0d0d1a);border:1px solid #9a7d20;display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;">&#128303;</div>
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.4rem;color:#D4AF37;font-weight:700;margin-bottom:4px;">Mystic Masters</div>
+            <span style="font-size:0.7rem;font-weight:700;padding:2px 10px;border-radius:100px;background:rgba(212,175,55,0.12);color:#D4AF37;border:1px solid rgba(212,175,55,0.3);letter-spacing:0.5px;">&#9679; ÉLŐ</span>
+          </div>
+        </div>
+        <p style="color:#8888aa;font-size:0.9rem;line-height:1.65;">Tenyérolvasás Gemini AI-jal, numerológia, tarot, születési térkép, bioritmus, kínai horoszkóp, archetípus elemzés és hermetikus összegzés — mindezt egyetlen appban, Google bejelentkezéssel.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:0.7rem;font-weight:600;padding:3px 10px;border-radius:100px;background:rgba(212,175,55,0.1);color:#D4AF37;border:1px solid rgba(212,175,55,0.2);">&#128302; Cheiro AI</span>
+          <span style="font-size:0.7rem;font-weight:600;padding:3px 10px;border-radius:100px;background:rgba(212,175,55,0.1);color:#D4AF37;border:1px solid rgba(212,175,55,0.2);">&#127183; Tarot</span>
+          <span style="font-size:0.7rem;font-weight:600;padding:3px 10px;border-radius:100px;background:rgba(212,175,55,0.1);color:#D4AF37;border:1px solid rgba(212,175,55,0.2);">&#127756; Születési térkép</span>
+          <span style="font-size:0.7rem;font-weight:600;padding:3px 10px;border-radius:100px;background:rgba(212,175,55,0.1);color:#D4AF37;border:1px solid rgba(212,175,55,0.2);">&#128202; Bioritmus</span>
+          <span style="font-size:0.7rem;font-weight:600;padding:3px 10px;border-radius:100px;background:rgba(212,175,55,0.1);color:#D4AF37;border:1px solid rgba(212,175,55,0.2);">&#128303; Hermetikus</span>
+        </div>
+        <span style="display:inline-flex;align-items:center;gap:8px;background:#D4AF37;color:#0B0B0F;padding:12px 24px;border-radius:12px;font-size:0.9rem;font-weight:700;align-self:flex-start;">&#10022; Megnyitás &rarr;</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="about-section" id="rolunk">
+    <div class="about-inner">
+        <div>
+            <div class="about-label">👨‍💻 A fejlesztőről</div>
+            <h2 class="about-title">Magyar appok,<br><span>magyar embereknek</span></h2>
+            <p class="about-text">A Vadász app-família mögött egy szenvedélyes fejlesztő áll, aki úgy gondolta: az egyszerű, praktikus dolgokat meg kell könnyíteni.</p>
+            <p class="about-text">Minden alkalmazás ingyenes, reklámmentes és azonnal használható – telefonon, tableten, számítógépen egyaránt. Nem kell letölteni semmit, csak megnyitod és kész.</p>
+            <p class="about-text">A cél egyszerű: minden fontos helyet megtalálj néhány másodperc alatt, bárhol is vagy Magyarországon.</p>
+            <div class="about-name">Králik Zola</div>
+            <div class="about-role">Fejlesztő & Alapító · Vadász Apps · 2026</div>
+        </div>
+        <div class="about-cards">
+            <div class="about-card"><div class="about-card-icon">🆓</div><div class="about-card-title">100% Ingyenes</div><div class="about-card-text">Minden alkalmazásunk ingyenes és reklámmentesen használható. Mindig.</div></div>
+            <div class="about-card"><div class="about-card-icon">📱</div><div class="about-card-title">Telefonra optimalizálva</div><div class="about-card-text">Add hozzá a kezdőképernyőhöz – úgy működik mint egy natív app, letöltés nélkül.</div></div>
+            <div class="about-card"><div class="about-card-icon">🧭</div><div class="about-card-title">Natív navigáció</div><div class="about-card-text">Minden appból indíthatsz navigációt Apple Maps, Google Maps vagy Waze segítségével – egy koppintással.</div></div>
+        </div>
+    </div>
+</section>
+
+<section class="install-section" id="telepites">
+    <div class="install-inner">
+        <div class="section-label">📱 Telepítési útmutató</div>
+        <h2 class="section-title">Add a telefonodra!</h2>
+        <p class="section-sub">Nem kell semmit letölteni – a Vadász appok PWA technológiával készültek. Egyszerűen add hozzá a kezdőképernyőhöz és úgy működik mint egy natív app!</p>
+        <div class="install-grid">
+            <div class="install-card">
+                <div class="install-card-header"><div class="install-os-icon">🍎</div><div><div class="install-os-name">iPhone – Safari</div><div class="install-os-sub">Ajánlott böngésző iOS-en</div></div></div>
+                <ol class="install-steps">
+                    <li class="install-step"><div class="install-step-num">1</div><div class="install-step-txt">Nyisd meg az appot <b>Safari böngészőben</b></div></li>
+                    <li class="install-step"><div class="install-step-num">2</div><div class="install-step-txt">Koppints a képernyő alján a <b>🔗 Megosztás</b> ikonra</div></li>
+                    <li class="install-step"><div class="install-step-num">3</div><div class="install-step-txt">Görgess le és válaszd: <b>„Kezdőképernyőre adás"</b></div></li>
+                    <li class="install-step"><div class="install-step-num">4</div><div class="install-step-txt">Adj nevet az appnak, majd koppints a <b>Hozzáadás</b> gombra</div></li>
+                    <li class="install-step"><div class="install-step-num">5</div><div class="install-step-txt">Kész! 🎉 Az ikon megjelenik a kezdőképernyőn</div></li>
+                </ol>
+                <div class="install-note">⚠️ Fontos: csak Safari-ban működik, Chrome-ban nem jelenik meg a „Kezdőképernyőre adás" opció iOS-en!</div>
+            </div>
+            <div class="install-card">
+                <div class="install-card-header"><div class="install-os-icon">🤖</div><div><div class="install-os-name">Android – Chrome</div><div class="install-os-sub">Ajánlott böngésző Android-on</div></div></div>
+                <ol class="install-steps">
+                    <li class="install-step"><div class="install-step-num">1</div><div class="install-step-txt">Nyisd meg az appot <b>Chrome böngészőben</b></div></li>
+                    <li class="install-step"><div class="install-step-num">2</div><div class="install-step-txt">Koppints a jobb felső sarokban a <b>⋮ három pontra</b></div></li>
+                    <li class="install-step"><div class="install-step-num">3</div><div class="install-step-txt">Válaszd: <b>„Hozzáadás a kezdőképernyőhöz"</b></div></li>
+                    <li class="install-step"><div class="install-step-num">4</div><div class="install-step-txt">Koppints a <b>Hozzáadás</b> gombra a felugró ablakban</div></li>
+                    <li class="install-step"><div class="install-step-num">5</div><div class="install-step-txt">Kész! 🎉 Az ikon megjelenik a kezdőképernyőn</div></li>
+                </ol>
+                <div class="install-note">💡 Néha automatikusan felugrik egy „Alkalmazás telepítése" banner – arra is rá lehet koppintani!</div>
+            </div>
+            <div class="install-card">
+                <div class="install-card-header"><div class="install-os-icon">🦊</div><div><div class="install-os-name">Android – Firefox</div><div class="install-os-sub">Alternatív böngésző</div></div></div>
+                <ol class="install-steps">
+                    <li class="install-step"><div class="install-step-num">1</div><div class="install-step-txt">Nyisd meg az appot <b>Firefox böngészőben</b></div></li>
+                    <li class="install-step"><div class="install-step-num">2</div><div class="install-step-txt">Koppints a jobb alsó sarokban a <b>⋮ három pontra</b></div></li>
+                    <li class="install-step"><div class="install-step-num">3</div><div class="install-step-txt">Válaszd: <b>„Telepítés"</b> vagy <b>„Kezdőképernyőre adás"</b></div></li>
+                    <li class="install-step"><div class="install-step-num">4</div><div class="install-step-txt">Erősítsd meg a <b>Hozzáadás</b> gombbal</div></li>
+                    <li class="install-step"><div class="install-step-num">5</div><div class="install-step-txt">Kész! 🎉 Az ikon megjelenik a kezdőképernyőn</div></li>
+                </ol>
+                <div class="install-note">💡 Firefox-ban is teljes értékű PWA élmény, GPS és offline funkciókkal!</div>
+            </div>
+            <div class="install-card">
+                <div class="install-card-header"><div class="install-os-icon">💻</div><div><div class="install-os-name">PC / Mac – Chrome</div><div class="install-os-sub">Asztali telepítés</div></div></div>
+                <ol class="install-steps">
+                    <li class="install-step"><div class="install-step-num">1</div><div class="install-step-txt">Nyisd meg az appot <b>Chrome böngészőben</b></div></li>
+                    <li class="install-step"><div class="install-step-num">2</div><div class="install-step-txt">A címsáv jobb oldalán kattints a <b>⊕ telepítés ikonra</b></div></li>
+                    <li class="install-step"><div class="install-step-num">3</div><div class="install-step-txt">Kattints a <b>„Telepítés"</b> gombra</div></li>
+                    <li class="install-step"><div class="install-step-num">4</div><div class="install-step-txt">Az app megjelenik az <b>asztalodon és a Start menüben</b></div></li>
+                    <li class="install-step"><div class="install-step-num">5</div><div class="install-step-txt">Kész! 🎉 Önálló ablakban nyílik meg</div></li>
+                </ol>
+                <div class="install-note">💡 Ha nem látod a telepítés ikont, kattints a ⋮ menüre → „Alkalmazások" → „Az oldal telepítése"</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="contact-section" id="kapcsolat">
+    <div class="contact-inner">
+        <div class="contact-icon">✉️</div>
+        <h2 class="contact-title">Lépj kapcsolatba velünk</h2>
+        <p class="contact-sub">Bolt bejelentés, partnerség, hibajelentés? Írj nekünk bátran – minden üzenetre válaszolunk!</p>
+        <div class="contact-cards">
+            <a class="contact-card" href="mailto:vadaszapps@gmail.com">
+                <div class="contact-card-icon">📧</div>
+                <div class="contact-card-title">Email</div>
+                <div class="contact-card-sub">Írj nekünk!</div>
+            </a>
+            <a class="contact-card" href="https://ko-fi.com/vadaszapps" target="_blank">
+                <div class="contact-card-icon">☕</div>
+                <div class="contact-card-title">Vegyél egy dram-ot!</div>
+                <div class="contact-card-sub">ko-fi.com/vadaszapps</div>
+            </a>
+            <a class="contact-card" href="mailto:vadaszapps@gmail.com">
+                <div class="contact-card-icon">⭐</div>
+                <div class="contact-card-title">Légy Te az első szponzor!</div>
+                <div class="contact-card-sub">Írj nekünk!</div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="footer-logo">🛡️ Vadász Apps</div>
+    <div class="footer-links">
+        <a href="#apps">Alkalmazások</a>
+        <a href="#rolunk">Rólunk</a>
+        <a href="#telepites">Telepítés</a>
+        <a href="#kapcsolat">Kapcsolat</a>
+        <a href="https://zola-studio.web.app" target="_blank" style="color:rgba(255,215,0,0.6)">🎨 Zola Studio</a>
+    </div>
+    <div class="footer-copy">© 2026 Vadász Apps · Készítette: Králik Zola · Minden jog fenntartva.</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+var QR_APPS=[
+    {id:'qr-cigarhunter',url:'https://cigar-hunter.web.app'},
+    {id:'qr-szivar',url:'https://szivar-vadasz.web.app'},
+    {id:'qr-primal',url:'https://primal-vadasz.web.app'},
+    {id:'qr-whiskey',url:'https://whiskey-vadasz.web.app'},
+    {id:'qr-patika',url:'https://patika-vadasz.web.app'},
+    {id:'qr-pizza',url:'https://pizza-vadasz.web.app'},
+    {id:'qr-hangszer',url:'https://hangszerbolt-vadasz.web.app'},
+    {id:'qr-trafik',url:'https://trafik-vadasz.web.app'},
+    {id:'qr-kave',url:'https://kave-vadasz.web.app'},
+    {id:'qr-sor',url:'https://sor-vadasz.web.app'},
+    {id:'qr-streetfood',url:'https://street-food-vadasz.web.app'},
+    {id:'qr-bor',url:'https://bor-vadasz.web.app'},
+];
+QR_APPS.forEach(function(app){
+    var el=document.getElementById(app.id);
+    if(!el)return;
+    new QRCode(el,{text:app.url,width:72,height:72,colorDark:'#111111',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+    setTimeout(function(){el.querySelectorAll('img,canvas').forEach(function(c){c.style.pointerEvents='none'});},100);
+});
+</script>
+</body>
+</html>
+

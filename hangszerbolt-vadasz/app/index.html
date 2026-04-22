@@ -1,0 +1,508 @@
+<!-- © 2026 Hangszerbolt Vadász. Minden jog fenntartva. -->
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hangszerbolt Vadász</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#FFD700">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Hangszerbolt Vadász">
+    <link rel="apple-touch-icon" href="https://firebasestorage.googleapis.com/v0/b/hangszerbolt-vadasz.firebasestorage.app/o/logo.png?alt=media&token=e901f2e9-e922-4294-bff9-ae48b3849a03">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Georgia', serif; background: #0a0a0a; color: #fff; }
+        :root { --gold: #FFD700; --black: #0a0a0a; --darkgold: #B8860B; --navbar: 54px; --header: 64px; }
+
+        .page { display: none; flex-direction: column; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+        .page.active { display: flex; }
+
+        header { height: var(--header); padding: 0 15px; background: #000; border-bottom: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 50; overflow: hidden; }
+        header h1 { color: var(--gold); font-size: 1.2rem; font-family: Georgia, serif; }
+        .logo-text { font-size: 1.6rem; font-weight: bold; color: var(--gold); letter-spacing: 2px; line-height: 1.2; font-family: Georgia, serif; }
+        .logo-sub { font-size: 0.85rem; color: #aaa; font-family: Georgia, serif; }
+
+        .navbar { height: var(--navbar); display: flex; justify-content: space-around; align-items: center; background: #000; border-top: 2px solid var(--gold); position: fixed; bottom: 27px; width: 100%; z-index: 1000; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+        .navbar span { color: #aaa; font-size: 0.68rem; cursor: pointer; padding: 4px 6px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-family: Georgia, serif; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1px; }
+        .navbar span.active, .navbar span:hover { color: var(--gold); border-bottom: 2px solid var(--gold); }
+
+        #global-copyright { position: fixed; bottom: 0; left: 0; width: 100%; height: 27px; line-height: 27px; text-align: center; background: #000; color: var(--gold); font-size: 0.72rem; font-weight: bold; z-index: 1001; }
+
+        .hero { text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; flex: 1; padding: 20px 20px; padding-bottom: calc(var(--navbar) + 27px); overflow: hidden; background: #0a0a0a; }
+        .hero h2 { font-size: 1.8rem; color: var(--gold); margin: 15px 0; font-family: Georgia, serif; }
+        .hero p { color: #ccc; margin-bottom: 20px; max-width: 300px; line-height: 1.6; }
+        .hero-buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 300px; }
+        .instrument-logo { width: 240px; margin-top: 0; position: relative; z-index: 10; filter: drop-shadow(0 0 20px rgba(255,215,0,0.4)); }
+
+        button { background: #111; color: var(--gold); padding: 15px; border: 2px solid var(--gold); width: 100%; font-weight: bold; font-size: 1.1rem; border-radius: 8px; cursor: pointer; font-family: Georgia, serif; }
+        button:hover { background: #1a1a1a; }
+
+        #map-page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #map { position: absolute; top: 64px; left: 0; right: 0; bottom: 81px; width: 100%; background: #1a1a1a; }
+        #map-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: var(--gold); font-size: 1rem; z-index: 5; pointer-events: none; text-align:center; }
+        #map-legend { position: absolute; bottom: 96px; left: 10px; background: rgba(0,0,0,0.85); padding: 8px 12px; border-radius: 8px; font-size: 0.75rem; z-index: 10; display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--gold); }
+        #map-legend span { color: #fff; }
+        #search-bar { position: absolute; top: 74px; left: 50%; transform: translateX(-50%); z-index: 25; display: flex; gap: 6px; background: rgba(0,0,0,0.9); padding: 7px 10px; border-radius: 25px; border: 1px solid var(--gold); width: 90%; max-width: 380px; }
+        #search-bar input { flex: 1; background: transparent; border: none; color: #fff; font-size: 0.9rem; outline: none; font-family: Georgia, serif; padding: 2px 6px; }
+        #search-bar input::placeholder { color: #888; }
+        #search-bar button { background: var(--gold); color: #000; border: none; border-radius: 18px; padding: 5px 14px; font-size: 0.85rem; cursor: pointer; font-family: Georgia, serif; font-weight: bold; width: auto; }
+        #travel-mode-bar { position: absolute; top: 126px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; gap: 8px; background: rgba(0,0,0,0.85); padding: 8px 12px; border-radius: 25px; border: 1px solid var(--gold); }
+        .travel-btn { background: transparent; border: 1px solid #555; color: #aaa; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; width: auto; font-family: Georgia, serif; }
+        .travel-btn.active { background: var(--gold); color: #000; border-color: var(--gold); font-weight: bold; }
+        .iw-btn { display: inline-block; margin-top: 6px; background: var(--gold); color: #000; padding: 3px 10px; border-radius: 4px; font-size: .8rem; cursor: pointer; border: none; font-family: Georgia, serif; }
+
+        #indulas-btn { display: none; position: absolute; bottom: calc(54px + 27px + 16px); left: 50%; transform: translateX(-50%); z-index: 50; background: #22c55e; color: #fff; border: none; border-radius: 30px; padding: 14px 32px; font-size: 1.1rem; font-weight: bold; font-family: Georgia, serif; cursor: pointer; box-shadow: 0 4px 20px rgba(34,197,94,0.5); white-space: nowrap; width: auto; letter-spacing: 1px; }
+        #indulas-btn:hover { background: #16a34a; }
+
+        #nav-choice-panel { display: none; position: absolute; bottom: calc(54px + 27px); left: 0; right: 0; z-index: 50; background: rgba(10,10,10,0.98); border-top: 2px solid var(--gold); padding: 14px; flex-direction: column; gap: 10px; }
+        #nav-choice-panel.active { display: flex; }
+        #nav-choice-title { color: var(--gold); font-size: 0.9rem; text-align: center; margin-bottom: 4px; font-weight: bold; font-family: Georgia, serif; }
+        .nav-choice-btn { padding: 13px; border-radius: 10px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; font-family: Georgia, serif; }
+        #btn-apple-maps  { background: #1a73e8; color: #fff; }
+        #btn-google-maps { background: #34a853; color: #fff; }
+        #btn-waze        { background: #6c3fc5; color: #fff; }
+        #btn-nav-cancel  { background: #333; color: #aaa; font-size: 0.9rem; padding: 10px; border: 1px solid #555; }
+
+        #lista-page { display: none; flex-direction: column; }
+        #lista-page.active { display: flex; }
+        #lista-search-wrap { padding: 10px 12px 8px 12px; background: #0a0a0a; flex-shrink: 0; }
+        #lista-search-input { width: 100%; background: #111; border: 1.5px solid var(--gold); color: #fff; font-size: 0.95rem; padding: 10px 14px; border-radius: 22px; outline: none; font-family: Georgia, serif; }
+        #lista-search-input::placeholder { color: #666; }
+        #lista-body { display: flex; flex: 1; overflow: hidden; }
+        #cat-sidebar { width: 68px; background: #050505; border-right: 1.5px solid #222; display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; padding: 6px 0; scrollbar-width: none; }
+        #cat-sidebar::-webkit-scrollbar { display: none; }
+        .cat-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 10px 4px; cursor: pointer; border: none; border-left: 3px solid transparent; background: transparent; color: #666; font-size: 0.6rem; font-family: Georgia, serif; width: 100%; border-radius: 0; transition: all 0.15s; line-height: 1.2; text-align: center; }
+        .cat-btn .cat-ikon { font-size: 1.5rem; line-height: 1; }
+        .cat-btn:hover { color: var(--gold); background: #111; }
+        .cat-btn.active { color: var(--gold); background: #1a1200; border-left: 3px solid var(--gold); font-weight: bold; }
+        #kat-mind { border-bottom: 1px solid #222; margin-bottom: 4px; padding-bottom: 12px; }
+        #bolt-lista { flex: 1; overflow-y: auto; padding: 8px 10px; padding-bottom: calc(var(--navbar) + 35px); background: #0a0a0a; }
+        .bolt-card { background: #111; border: 1px solid #222; border-radius: 10px; padding: 11px 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; transition: border-color 0.2s; }
+        .bolt-card:active { border-color: var(--gold); background: #1a1400; }
+        .bolt-cat-icon { font-size: 1.6rem; flex-shrink: 0; width: 36px; text-align: center; }
+        .bolt-info { flex: 1; min-width: 0; }
+        .bolt-nev { color: var(--gold); font-size: 0.85rem; font-weight: bold; font-family: Georgia, serif; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bolt-cim { color: #aaa; font-size: 0.75rem; line-height: 1.4; }
+        .bolt-cat-badge { display: inline-block; margin-top: 4px; background: #222; border: 1px solid #333; border-radius: 10px; padding: 2px 7px; font-size: 0.65rem; color: #777; }
+        .bolt-route-btn { background: var(--gold); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(255,215,0,0.3); }
+        .bolt-route-btn:hover { background: #e6c200; }
+        .lista-empty { text-align: center; color: #555; padding: 40px 20px; font-size: 0.9rem; }
+
+        .content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: calc(var(--navbar) + 40px); background: #0a0a0a; }
+        .partner-section { margin-bottom: 25px; }
+        .partner-section h2 { color: var(--gold); font-size: 0.85rem; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 12px; font-family: Georgia, serif; }
+        .partner-card { background: #111; border: 1px solid #333; border-radius: 8px; padding: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; transition: border-color 0.2s; }
+        .partner-card:hover { border-color: var(--gold); }
+        .partner-icon { font-size: 2rem; flex-shrink: 0; }
+        .partner-info { flex: 1; }
+        .partner-info h3 { color: var(--gold); font-size: 0.95rem; margin: 0 0 3px; font-family: Georgia, serif; }
+        .partner-info p { font-size: 0.8rem; color: #aaa; margin: 2px 0; }
+        .partner-arrow { color: var(--gold); font-size: 1.2rem; flex-shrink: 0; }
+        .copyright-bar { text-align: center; padding: 15px; font-size: 0.72rem; color: #555; border-top: 1px solid #222; margin-top: 10px; line-height: 1.8; }
+    </style>
+</head>
+<body>
+
+<!-- KEZDŐLAP -->
+<div id="landing-page" class="page active">
+    <header>
+        <div style="text-align:center">
+            <div class="logo-text">HANGSZERBOLT VADÁSZ</div>
+            <div class="logo-sub">Hangszerbolt kereső</div>
+        </div>
+    </header>
+    <div class="hero">
+        <img src="https://firebasestorage.googleapis.com/v0/b/hangszerbolt-vadasz.firebasestorage.app/o/logo.png?alt=media&token=e901f2e9-e922-4294-bff9-ae48b3849a03" class="instrument-logo" alt="logo">
+        <h2>Üdvözöllek!</h2>
+        <p>Találd meg a legközelebbi hangszerboltot! 🎸</p>
+        <div class="hero-buttons">
+            <button onclick="showPage('map-page')">🎵 TÉRKÉP NÉZET</button>
+            <button onclick="showPage('lista-page')" style="background:transparent;border-color:#555;color:#aaa;">📋 BOLT LISTA</button>
+        </div>
+    </div>
+    <div class="navbar">
+        <span onclick="showPage('landing-page')" class="active">🏠<br>Kezdő</span>
+        <span onclick="showPage('map-page')">🗺️<br>Térkép</span>
+        <span onclick="showPage('lista-page')">📋<br>Lista</span>
+        <span onclick="showPage('partner-page')">🌐<br>Partnerek</span>
+    </div>
+</div>
+
+<!-- TÉRKÉP -->
+<div id="map-page" class="page">
+    <header><h1>🎵 Hangszerboltok</h1></header>
+    <div id="map"></div>
+    <div id="map-msg">🗺️ Térkép betöltése...</div>
+    <div id="search-bar">
+        <input type="text" id="city-search" placeholder="🔍 Keresés városra... (pl. Győr)" onkeydown="if(event.key==='Enter') searchCity()">
+        <button onclick="searchCity()">Keresés</button>
+    </div>
+    <div id="travel-mode-bar">
+        <button class="travel-btn active" id="btn-driving" onclick="setTravelMode('DRIVING')">🚗 Autó</button>
+        <button class="travel-btn" id="btn-walking" onclick="setTravelMode('WALKING')">🚶 Gyalog</button>
+        <button class="travel-btn" id="btn-transit" onclick="setTravelMode('TRANSIT')">🚌 Tömeg</button>
+    </div>
+    <div id="map-legend"><span>🎵 Hangszerbolt</span></div>
+    <button id="indulas-btn" onclick="navValasztoMegnyit()">🧭 INDULÁS!</button>
+    <div id="nav-choice-panel">
+        <div id="nav-choice-title">🧭 Válassz navigációs appot</div>
+        <button class="nav-choice-btn" id="btn-apple-maps"  onclick="navMegnyit('apple')">🗺️ Apple Maps</button>
+        <button class="nav-choice-btn" id="btn-google-maps" onclick="navMegnyit('google')">🌍 Google Maps</button>
+        <button class="nav-choice-btn" id="btn-waze"        onclick="navMegnyit('waze')">🚗 Waze</button>
+        <button class="nav-choice-btn" id="btn-nav-cancel"  onclick="navValasztoZar()">✕ Mégsem</button>
+    </div>
+    <div class="navbar">
+        <span onclick="showPage('landing-page')">🏠<br>Kezdő</span>
+        <span onclick="showPage('map-page')" class="active">🗺️<br>Térkép</span>
+        <span onclick="showPage('lista-page')">📋<br>Lista</span>
+        <span onclick="showPage('partner-page')">🌐<br>Partnerek</span>
+    </div>
+</div>
+
+<!-- LISTA -->
+<div id="lista-page" class="page">
+    <header><h1>📋 Boltlista</h1></header>
+    <div id="lista-search-wrap">
+        <input type="text" id="lista-search-input" placeholder="🔍 Keresés bolt vagy város neve alapján..." oninput="renderLista()">
+    </div>
+    <div id="lista-body">
+        <div id="cat-sidebar">
+            <button class="cat-btn active" onclick="setKat('mind')"      id="kat-mind">    <span class="cat-ikon">🎵</span>Összes</button>
+            <button class="cat-btn"        onclick="setKat('gitar')"     id="kat-gitar">   <span class="cat-ikon">🎸</span>Gitár</button>
+            <button class="cat-btn"        onclick="setKat('zongora')"   id="kat-zongora"> <span class="cat-ikon">🎹</span>Zongora</button>
+            <button class="cat-btn"        onclick="setKat('dob')"       id="kat-dob">     <span class="cat-ikon">🥁</span>Dob</button>
+            <button class="cat-btn"        onclick="setKat('fuvos')"     id="kat-fuvos">   <span class="cat-ikon">🎺</span>Fúvós</button>
+            <button class="cat-btn"        onclick="setKat('vonos')"     id="kat-vonos">   <span class="cat-ikon">🎻</span>Vonós</button>
+            <button class="cat-btn"        onclick="setKat('studio')"    id="kat-studio">  <span class="cat-ikon">🎙️</span>Stúdió</button>
+            <button class="cat-btn"        onclick="setKat('javitas')"   id="kat-javitas"> <span class="cat-ikon">🔧</span>Javítás</button>
+            <button class="cat-btn"        onclick="setKat('altalanos')" id="kat-altalanos"><span class="cat-ikon">🏪</span>Általános</button>
+        </div>
+        <div id="bolt-lista"></div>
+    </div>
+    <div class="navbar">
+        <span onclick="showPage('landing-page')">🏠<br>Kezdő</span>
+        <span onclick="showPage('map-page')">🗺️<br>Térkép</span>
+        <span onclick="showPage('lista-page')" class="active">📋<br>Lista</span>
+        <span onclick="showPage('partner-page')">🌐<br>Partnerek</span>
+    </div>
+</div>
+
+<!-- PARTNEREK -->
+<div id="partner-page" class="page">
+    <header><h1>🌐 Partnerek</h1></header>
+    <div class="content">
+        <div class="partner-section">
+            <h2>⭐ TÁMOGATÓK & SZPONZOROK</h2>
+            <a class="partner-card" href="mailto:vadaszapps@gmail.com" style="border-color:var(--gold)">
+                <div class="partner-icon">⭐</div>
+                <div class="partner-info"><h3>Légy Te az első szponzor!</h3><p>Prémium célközönség — zenészek, zeneboltok</p></div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="partner-section">
+            <h2>🐾 VADÁSZ ALKALMAZÁSOK</h2>
+            <a class="partner-card" href="https://vadasz-apps.web.app" target="_blank">
+                <div class="partner-icon">🛡️</div>
+                <div class="partner-info"><h3>Ismerd meg az összes Vadász appot!</h3><p>Trafik, Szivar, Whiskey, Bor, Sör és még több</p></div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="partner-section">
+            <h2>❤️ TÁMOGASD AZ APPOT</h2>
+            <a class="partner-card" href="https://ko-fi.com/vadaszapps" target="_blank" style="border-color:var(--gold)">
+                <div class="partner-icon">☕</div>
+                <div class="partner-info"><h3>Vegyél egy kávét a fejlesztőnek!</h3><p>Az app ingyenes, de a fejlesztés nem az 😄</p></div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="partner-section">
+            <h2>📱 KAPCSOLAT</h2>
+            <a class="partner-card" href="mailto:vadaszapps@gmail.com">
+                <div class="partner-icon">✉️</div>
+                <div class="partner-info"><h3>EMAIL</h3><p>Hangszerbolt bejelentés, partnerség</p></div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="copyright-bar">
+            © 2026 Hangszerbolt Vadász. Minden jog fenntartva.<br>
+            Készítette: Králik Zola | v1.0<br>
+            Az alkalmazás tartalma szerzői jogi védelem alatt áll.
+        </div>
+    </div>
+    <div class="navbar">
+        <span onclick="showPage('landing-page')">🏠<br>Kezdő</span>
+        <span onclick="showPage('map-page')">🗺️<br>Térkép</span>
+        <span onclick="showPage('lista-page')">📋<br>Lista</span>
+        <span onclick="showPage('partner-page')" class="active">🌐<br>Partnerek</span>
+    </div>
+</div>
+
+<div id="global-copyright">2026 Copyright ©</div>
+
+<script>
+var BOLTOK = [
+    {nev:"Hangszerarzenál Budapest", cim:"1083 Budapest, Práter utca 54", lat:47.4897, lng:19.0812, kat:"gitar"},
+    {nev:"Hangszer Pláza Budapest", cim:"1072 Budapest, Rákóczi út 30", lat:47.4991, lng:19.0627, kat:"gitar"},
+    {nev:"Hangszerarzenál Győr - HangszerBarlang", cim:"9023 Győr, Baross Gábor utca 44", lat:47.6793, lng:17.6401, kat:"gitar"},
+    {nev:"Hoffer Hangszer TAMA Márkabolt", cim:"9400 Sopron", lat:47.6812, lng:16.5901, kat:"gitar"},
+    {nev:"Polip Music Hangszerbolt", cim:"4400 Nyíregyháza", lat:47.9537, lng:21.7172, kat:"gitar"},
+    {nev:"Hangszertár Kft. Győr", cim:"9021 Győr, Kisfaludy u. 36", lat:47.6876, lng:17.6387, kat:"dob"},
+    {nev:"Fejes-Ker Kft. Debrecen", cim:"4027 Debrecen, Egyetem sgt 11/A", lat:47.5449, lng:21.6176, kat:"dob"},
+    {nev:"Hangszerbolt Music Centrum", cim:"6600 Szentes", lat:46.6552, lng:20.2582, kat:"dob"},
+    {nev:"Tajti Music Hangszeráruház", cim:"7621 Pécs, Rákóczi út 49", lat:46.0778, lng:18.2292, kat:"zongora"},
+    {nev:"Euromusic Hangszerüzlet", cim:"8200 Veszprém", lat:47.0979, lng:17.9087, kat:"zongora"},
+    {nev:"Zenecentrum Hangszerüzlet", cim:"5600 Békéscsaba", lat:46.6792, lng:21.0874, kat:"zongora"},
+    {nev:"Syncopa Hangszerbolt", cim:"8992 Bagod, Kossuth u. 7", lat:46.8312, lng:16.7234, kat:"zongora"},
+    {nev:"KCS Hangtechnika és Hangszerbolt", cim:"3300 Eger", lat:47.9025, lng:20.3772, kat:"fuvos"},
+    {nev:"Duó Hangszerüzlet", cim:"5000 Szolnok", lat:47.1782, lng:20.1897, kat:"fuvos"},
+    {nev:"Csermák Hangszerüzlet", cim:"6800 Hódmezővásárhely", lat:46.4183, lng:20.3294, kat:"fuvos"},
+    {nev:"Hegedűkészítő Adonyi Iván", cim:"8638 Balatonlelle", lat:46.7847, lng:17.6923, kat:"vonos"},
+    {nev:"Hegedűs József Hangszerbolt", cim:"6300 Kalocsa körzet", lat:46.5321, lng:18.9754, kat:"vonos"},
+    {nev:"Vereczkei Pál Hangszerüzlet", cim:"4900 Fehérgyarmat", lat:47.9938, lng:22.5221, kat:"vonos"},
+    {nev:"Demton Stúdió és Hangszerbolt", cim:"8800 Nagykanizsa, Arany János u. 12", lat:46.4591, lng:16.9912, kat:"studio"},
+    {nev:"Hangszerdiszkont.hu Győr", cim:"9024 Győr, Baross Gábor u.", lat:47.6748, lng:17.6412, kat:"studio"},
+    {nev:"Music Shop-Rón", cim:"9400 Sopron körzet", lat:47.6923, lng:16.6012, kat:"studio"},
+    {nev:"Riedl Hangszerüzlet és Javítóműhely", cim:"9400 Sopron", lat:47.6849, lng:16.5845, kat:"javitas"},
+    {nev:"Veiger-Tok Hangszerkészítés", cim:"8300 Tapolca körzet", lat:46.8804, lng:17.4403, kat:"javitas"},
+    {nev:"Nyakas Hangszerészet", cim:"8220 Balatonalmádi", lat:47.0253, lng:18.0172, kat:"javitas"},
+    {nev:"HangszerABC - Cordial Bt.", cim:"3200 Gyöngyös, Kossuth Lajos u. 38", lat:47.7847, lng:19.9301, kat:"altalanos"},
+    {nev:"Hangszerbolt Monor", cim:"2200 Monor", lat:47.3537, lng:19.4485, kat:"altalanos"},
+    {nev:"e-Zene Hangszerbolt", cim:"2750 Nagykőrös", lat:47.0364, lng:19.7803, kat:"altalanos"},
+    {nev:"Hangszer Miskolc", cim:"3530 Miskolc, Görgey Artúr utca 2", lat:48.1035, lng:20.7784, kat:"altalanos"},
+    {nev:"Music Sajó Hangszerbolt", cim:"3600 Ózd körzet", lat:48.2195, lng:20.2887, kat:"altalanos"},
+    {nev:"Hangszerbirodalom Kft.", cim:"7100 Szekszárd", lat:46.3476, lng:18.7062, kat:"altalanos"},
+    {nev:"Hangszermánia", cim:"6300 Kalocsa", lat:46.5264, lng:18.9845, kat:"altalanos"},
+    {nev:"Troyan Hangszer-Zeneműbolt", cim:"7200 Dombóvár", lat:46.3792, lng:18.1384, kat:"altalanos"},
+    {nev:"LANET-hangszer", cim:"6400 Kiskunhalas körzet", lat:46.4329, lng:19.4897, kat:"altalanos"},
+    {nev:"Duo Hangszerbolt", cim:"8360 Keszthely, Rákóczi u. 3", lat:46.7692, lng:17.2454, kat:"altalanos"},
+    {nev:"Zenepower Hangszerbolt", cim:"8230 Balatonfüred", lat:46.9588, lng:17.8942, kat:"altalanos"},
+    {nev:"Szent Anna Hangszeráruház", cim:"4024 Debrecen, Szent Anna u. 43", lat:47.5288, lng:21.6249, kat:"altalanos"},
+];
+
+var KAT_INFO = {
+    'gitar':    {ikon:'🎸', label:'Gitár szaküzlet'},
+    'dob':      {ikon:'🥁', label:'Dob szaküzlet'},
+    'zongora':  {ikon:'🎹', label:'Zongora / billentyűs'},
+    'fuvos':    {ikon:'🎺', label:'Fúvós hangszerek'},
+    'vonos':    {ikon:'🎻', label:'Vonós / hegedű'},
+    'studio':   {ikon:'🎙️', label:'Stúdió kellékek'},
+    'javitas':  {ikon:'🔧', label:'Hangszer javítás'},
+    'altalanos':{ikon:'🏪', label:'Általános hangszerbolt'},
+};
+
+var activeKat = 'mind';
+var navCelLat = null, navCelLng = null, navCelNev = null;
+
+window.navValasztoMegnyit = function() {
+    if (!navCelLat || !navCelLng) return;
+    document.getElementById('nav-choice-panel').classList.add('active');
+    document.getElementById('indulas-btn').style.display = 'none';
+};
+window.navValasztoZar = function() {
+    document.getElementById('nav-choice-panel').classList.remove('active');
+    document.getElementById('indulas-btn').style.display = 'block';
+};
+window.navMegnyit = function(tipus) {
+    if (!navCelLat || !navCelLng) return;
+    var lat = navCelLat, lng = navCelLng, url = '';
+    if (tipus === 'apple')       url = 'maps://maps.apple.com/?daddr=' + lat + ',' + lng + '&dirflg=d&t=m';
+    else if (tipus === 'google') { url = 'comgooglemaps://?daddr=' + lat + ',' + lng + '&directionsmode=driving'; setTimeout(function(){ window.open('https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng, '_blank'); }, 500); }
+    else if (tipus === 'waze')   { url = 'waze://?ll=' + lat + ',' + lng + '&navigate=yes'; setTimeout(function(){ window.open('https://waze.com/ul?ll=' + lat + ',' + lng + '&navigate=yes', '_blank'); }, 500); }
+    if (url) window.location.href = url;
+    document.getElementById('nav-choice-panel').classList.remove('active');
+};
+
+window.setKat = function(kat) {
+    activeKat = kat;
+    document.querySelectorAll('.cat-btn').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('kat-'+kat).classList.add('active');
+    renderLista();
+};
+
+window.renderLista = function() {
+    var q = (document.getElementById('lista-search-input').value||'').toLowerCase().trim();
+    var filtered = BOLTOK.filter(function(b){
+        var katOk = activeKat === 'mind' || b.kat === activeKat;
+        var searchOk = !q || b.nev.toLowerCase().indexOf(q) !== -1 || b.cim.toLowerCase().indexOf(q) !== -1;
+        return katOk && searchOk;
+    });
+    var el = document.getElementById('bolt-lista');
+    if (filtered.length === 0) { el.innerHTML = '<div class="lista-empty">😔 Nincs találat ebben a kategóriában.</div>'; return; }
+    el.innerHTML = filtered.map(function(b) {
+        var ki = KAT_INFO[b.kat] || {ikon:'🎵', label:b.kat};
+        var nevQ = b.nev.replace(/'/g,'');
+        return '<div class="bolt-card"><div class="bolt-cat-icon">' + ki.ikon + '</div><div class="bolt-info"><div class="bolt-nev">' + b.nev + '</div><div class="bolt-cim">📍 ' + b.cim + '</div><span class="bolt-cat-badge">' + ki.label + '</span></div><button class="bolt-route-btn" onclick="routeFromList(' + b.lat + ',' + b.lng + ',\'' + nevQ + '\')" title="Navigálás">🧭</button></div>';
+    }).join('');
+};
+
+window.routeFromList = function(lat, lng, nev) {
+    showPage('map-page');
+    setTimeout(function() { window.showRoute(lat, lng, nev||''); }, 400);
+};
+
+window.showPage = function(pageId) {
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+    document.getElementById(pageId).classList.add('active');
+    document.querySelectorAll('.navbar span').forEach(function(s){ s.classList.remove('active'); });
+    document.querySelectorAll('#'+pageId+' .navbar span').forEach(function(s){
+        if (s.getAttribute('onclick') && s.getAttribute('onclick').indexOf(pageId) !== -1) s.classList.add('active');
+    });
+    if (pageId === 'map-page') { fixMapSize(); setTimeout(window.loadMap, 80); }
+    else { document.getElementById('indulas-btn').style.display = 'none'; document.getElementById('nav-choice-panel').classList.remove('active'); }
+    if (pageId === 'lista-page') renderLista();
+};
+
+function fixMapSize() {
+    var mapEl = document.getElementById('map');
+    if (!mapEl) return;
+    mapEl.style.height = (window.innerHeight - 64 - 54 - 27) + 'px';
+    mapEl.style.top = '64px';
+    mapEl.style.bottom = (54 + 27) + 'px';
+}
+
+window.setTravelMode = function(mode) {
+    currentTravelMode = mode;
+    document.querySelectorAll('.travel-btn').forEach(function(b){ b.classList.remove('active'); });
+    var map = {'DRIVING':'btn-driving','WALKING':'btn-walking','TRANSIT':'btn-transit'};
+    document.getElementById(map[mode]).classList.add('active');
+};
+
+var gmap = null, markers = [], userLoc = {lat:47.4979, lng:19.0402};
+var dirService = null, dirRenderer = null, currentTravelMode = 'DRIVING';
+var mapBuilt = false, mapsApiReady = false;
+
+function initDirService() {
+    if (!dirService) {
+        dirService = new google.maps.DirectionsService();
+        dirRenderer = new google.maps.DirectionsRenderer({ map: gmap, suppressMarkers: true, polylineOptions: { strokeColor: '#FFD700', strokeWeight: 5 } });
+    }
+}
+
+window.showRoute = function(lat, lng, nev) {
+    navCelLat = lat; navCelLng = lng; navCelNev = nev || '';
+    var try_ = function() {
+        if (!gmap || typeof google === 'undefined') { setTimeout(try_, 400); return; }
+        initDirService();
+        dirService.route({ origin: userLoc, destination: {lat: lat, lng: lng}, travelMode: google.maps.TravelMode[currentTravelMode] },
+            function(result, status) {
+                if (status === 'OK') { dirRenderer.setDirections(result); document.getElementById('map-msg').style.display = 'none'; document.getElementById('indulas-btn').style.display = 'block'; }
+                else { gmap.setCenter({lat:lat,lng:lng}); gmap.setZoom(15); document.getElementById('indulas-btn').style.display = 'block'; }
+            });
+    };
+    if (!gmap) { setTimeout(try_, 600); } else { try_(); }
+};
+
+var varosok = {
+    'budapest':{lat:47.4979,lng:19.0402},'debrecen':{lat:47.5316,lng:21.6273},
+    'miskolc':{lat:48.1035,lng:20.7784},'pécs':{lat:46.0727,lng:18.2323},'pecs':{lat:46.0727,lng:18.2323},
+    'győr':{lat:47.6875,lng:17.6504},'gyor':{lat:47.6875,lng:17.6504},
+    'nyíregyháza':{lat:47.9554,lng:21.7167},'nyiregyhaza':{lat:47.9554,lng:21.7167},
+    'kecskemét':{lat:46.9063,lng:19.6900},'kecskemet':{lat:46.9063,lng:19.6900},
+    'székesfehérvár':{lat:47.1921,lng:18.4121},'szekesfehervar':{lat:47.1921,lng:18.4121},
+    'szombathely':{lat:47.2307,lng:16.6218},'szolnok':{lat:47.1625,lng:20.1800},
+    'sopron':{lat:47.6849,lng:16.5845},'eger':{lat:47.9025,lng:20.3772},
+    'zalaegerszeg':{lat:46.8417,lng:16.8416},'veszprém':{lat:47.0979,lng:17.9087},'veszprem':{lat:47.0979,lng:17.9087},
+    'békéscsaba':{lat:46.6792,lng:21.0874},'bekescsaba':{lat:46.6792,lng:21.0874},
+    'nagykanizsa':{lat:46.4591,lng:16.9912},'szekszárd':{lat:46.3476,lng:18.7062},'szekszard':{lat:46.3476,lng:18.7062},
+    'kalocsa':{lat:46.5264,lng:18.9845},'keszthely':{lat:46.7692,lng:17.2454},
+    'balatonfüred':{lat:46.9588,lng:17.8942},'balatonlelle':{lat:46.7847,lng:17.6923},
+    'tapolca':{lat:46.8804,lng:17.4403},'gyöngyös':{lat:47.7847,lng:19.9301},'gyongyos':{lat:47.7847,lng:19.9301},
+    'ózd':{lat:48.2195,lng:20.2887},'ozd':{lat:48.2195,lng:20.2887},
+    'monor':{lat:47.3537,lng:19.4485},'nagykőrös':{lat:47.0364,lng:19.7803},'nagykoros':{lat:47.0364,lng:19.7803},
+    'szentes':{lat:46.6552,lng:20.2582},'dombóvár':{lat:46.3792,lng:18.1384},'dombovar':{lat:46.3792,lng:18.1384},
+    'kiskunhalas':{lat:46.4329,lng:19.4897},'fehérgyarmat':{lat:47.9938,lng:22.5221},'fehergyarmat':{lat:47.9938,lng:22.5221},
+};
+
+window.searchCity = function() {
+    var query = document.getElementById('city-search').value.trim().toLowerCase();
+    if (!query || !gmap) return;
+    var loc = varosok[query];
+    if (!loc) { var keys = Object.keys(varosok); for (var i=0;i<keys.length;i++) { if (keys[i].indexOf(query)===0) { loc=varosok[keys[i]]; break; } } }
+    if (loc) {
+        gmap.setCenter(loc); gmap.setZoom(13);
+        markers.forEach(function(m){ var d=Math.sqrt(Math.pow(m.getPosition().lat()-loc.lat,2)+Math.pow(m.getPosition().lng()-loc.lng,2)); m.setIcon({path:google.maps.SymbolPath.CIRCLE,scale:d<0.15?14:11,fillColor:'#FFD700',fillOpacity:1,strokeColor:d<0.15?'#fff':'#000',strokeWeight:d<0.15?3:2}); });
+        document.getElementById('city-search').blur();
+    } else { alert('Város nem található: ' + query + '\nPróbáld pl: Budapest, Győr, Pécs...'); }
+};
+
+window.mapsReady = function() { mapsApiReady = true; if (document.getElementById('map-page').classList.contains('active')) window.loadMap(); };
+
+window.loadMap = function() {
+    if (!mapsApiReady || typeof google === 'undefined' || !google.maps) { setTimeout(window.loadMap, 200); return; }
+    if (gmap) { fixMapSize(); setTimeout(function(){ google.maps.event.trigger(gmap,'resize'); gmap.setCenter(userLoc); document.getElementById('map-msg').style.display='none'; }, 100); return; }
+    if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(function(pos){ userLoc={lat:pos.coords.latitude,lng:pos.coords.longitude}; buildMap(); }, function(){ buildMap(); }, {timeout:6000}); }
+    else { buildMap(); }
+};
+
+function buildMap() {
+    if (mapBuilt) return; mapBuilt = true;
+    fixMapSize();
+    document.getElementById('map-msg').style.display = 'none';
+    gmap = new google.maps.Map(document.getElementById('map'), {
+        center: userLoc, zoom: 7,
+        fullscreenControl:false, mapTypeControl:false, streetViewControl:false, zoomControl:true,
+        styles: [
+            {elementType:"geometry",stylers:[{color:"#1a1a1a"}]},
+            {elementType:"labels.text.stroke",stylers:[{color:"#1a1a1a"}]},
+            {elementType:"labels.text.fill",stylers:[{color:"#B8860B"}]},
+            {featureType:"road",elementType:"geometry",stylers:[{color:"#2a2a2a"}]},
+            {featureType:"road",elementType:"labels.text.fill",stylers:[{color:"#888"}]},
+            {featureType:"water",elementType:"geometry",stylers:[{color:"#0a0a1a"}]},
+            {featureType:"poi",stylers:[{visibility:"off"}]},
+            {featureType:"transit",stylers:[{visibility:"off"}]}
+        ]
+    });
+    new google.maps.Marker({ position: userLoc, map: gmap, icon:{path:google.maps.SymbolPath.FORWARD_CLOSED_ARROW,scale:6,fillColor:"#FFD700",fillOpacity:1,strokeColor:"#000",strokeWeight:2,rotation:0}, title:"Te vagy itt", zIndex:999 });
+    BOLTOK.forEach(function(bolt) {
+        var ki = KAT_INFO[bolt.kat] || {ikon:'🎵'};
+        var m = new google.maps.Marker({ position:{lat:bolt.lat,lng:bolt.lng}, map:gmap, title:bolt.nev, icon:{path:google.maps.SymbolPath.CIRCLE,scale:11,fillColor:'#FFD700',fillOpacity:1,strokeColor:'#000',strokeWeight:2}, zIndex:5 });
+        var div = document.createElement('div');
+        div.style.cssText = 'color:#222;max-width:220px;font-family:Georgia,serif;padding:4px';
+        div.innerHTML = '<b>' + ki.ikon + ' ' + bolt.nev + '</b><br><small>📍 ' + bolt.cim + '</small><br><small style="color:#666">' + (KAT_INFO[bolt.kat]||{label:''}).label + '</small>';
+        var btn = document.createElement('button'); btn.className='iw-btn'; btn.textContent='🧭 INDULÁS!';
+        (function(lat,lng,nv){ btn.onclick=function(){ window.showRoute(lat,lng,nv); }; })(bolt.lat,bolt.lng,bolt.nev);
+        div.appendChild(btn);
+        var iw = new google.maps.InfoWindow({content:div});
+        m.addListener('click',function(){ iw.open(gmap,m); });
+        markers.push(m);
+    });
+    loadNearbyShops();
+    google.maps.event.trigger(gmap,'resize');
+    gmap.setCenter(userLoc);
+    setTimeout(function(){ google.maps.event.trigger(gmap,'resize'); gmap.setCenter(userLoc); }, 500);
+}
+
+async function loadNearbyShops() {
+    try {
+        var seen = {}; markers.forEach(function(m){ seen[m.getPosition().lat()+','+m.getPosition().lng()]=true; });
+        var {Place} = await google.maps.importLibrary('places');
+        var r = await Place.searchByText({ textQuery:'hangszerbolt', fields:['id','displayName','location','formattedAddress'], locationRestriction:new google.maps.Circle({center:userLoc,radius:10000}).getBounds(), maxResultCount:10 });
+        if (r && r.places) r.places.forEach(function(place) {
+            if (!place.location) return;
+            var key = place.location.lat().toFixed(3)+','+place.location.lng().toFixed(3);
+            if (seen[key]) return; seen[key]=true;
+            var lat=place.location.lat(), lng=place.location.lng(), nev=place.displayName||'Hangszerbolt';
+            var m = new google.maps.Marker({ position:{lat:lat,lng:lng}, map:gmap, title:nev, icon:{path:google.maps.SymbolPath.CIRCLE,scale:11,fillColor:'#FFD700',fillOpacity:1,strokeColor:'#000',strokeWeight:2}, zIndex:5 });
+            var div = document.createElement('div'); div.style.cssText='color:#222;max-width:220px;font-family:Georgia,serif;padding:4px';
+            div.innerHTML = '<b>🎵 '+nev+'</b><br><small>📍 '+(place.formattedAddress||'')+'</small>';
+            var btn = document.createElement('button'); btn.className='iw-btn'; btn.textContent='🧭 INDULÁS!';
+            (function(la,ln,nv){ btn.onclick=function(){ window.showRoute(la,ln,nv); }; })(lat,lng,nev);
+            div.appendChild(btn);
+            var iw = new google.maps.InfoWindow({content:div});
+            m.addListener('click',function(){ iw.open(gmap,m); });
+            markers.push(m);
+        });
+    } catch(e){ console.log('Nearby hiba:',e.message); }
+}
+
+window.addEventListener('resize', function() { if (gmap) { fixMapSize(); google.maps.event.trigger(gmap,'resize'); gmap.setCenter(userLoc); } });
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqCZBsFCKSnHm_NXAS2lcb6X860e1xMYk&libraries=places&loading=async&callback=mapsReady"></script>
+<script>
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').catch(function(){}); }
+</script>
+</body>
+</html>

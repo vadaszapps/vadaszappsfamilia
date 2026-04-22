@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Whiskey boltok / bárok ──
+    match /whiskeybolts/{docId} {
+      // Mindenki olvashatja
+      allow read: if true;
+
+      // Írás: csak alapvető validációval (nincs auth, community app)
+      allow create: if
+        request.resource.data.nev is string &&
+        request.resource.data.nev.size() > 0 &&
+        request.resource.data.nev.size() < 200 &&
+        request.resource.data.cim is string &&
+        request.resource.data.cim.size() > 0 &&
+        request.resource.data.cim.size() < 300 &&
+        request.resource.data.megerositve == false &&
+        request.resource.data.jelolesek == 1;
+
+      // Módosítás / törlés tiltva (admin Firebase Console-ból)
+      allow update, delete: if false;
+    }
+
+    // ── Események / kóstolók ──
+    match /esemenyek/{docId} {
+      allow read: if true;
+      allow write: if false; // csak admin tölti fel
+    }
+
+    // ── Minden más tiltva ──
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

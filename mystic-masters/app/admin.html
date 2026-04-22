@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mystic Masters – Admin</title>
+<style>
+:root{--black:#0B0B0F;--gold:#D4AF37;--gold-dim:#9a7d20;--white:#F0EDE6;--gray:#8888aa;--card-bg:#13131A;--red:#c0392b;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--black);color:var(--white);font-family:'Georgia',serif;min-height:100vh;}
+#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:24px;padding:32px;}
+.admin-logo{font-size:48px;}
+.admin-title{font-size:22px;color:var(--gold);letter-spacing:3px;}
+.pw-input{background:var(--card-bg);border:1px solid #333;border-radius:10px;padding:12px 16px;color:var(--white);font-size:16px;font-family:'Georgia',serif;outline:none;width:100%;max-width:320px;text-align:center;letter-spacing:2px;}
+.pw-input:focus{border-color:var(--gold-dim);}
+.btn-gold{background:var(--gold);color:var(--black);border:none;padding:14px 40px;border-radius:30px;font-size:16px;font-family:'Georgia',serif;cursor:pointer;font-weight:bold;}
+.btn-gold:active{opacity:.8;}
+.err{color:var(--red);font-size:13px;font-style:italic;}
+
+#admin-screen{display:none;padding:24px;max-width:900px;margin:0 auto;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 0 24px;border-bottom:1px solid #1e1e1e;margin-bottom:24px;}
+.topbar-title{font-size:18px;color:var(--gold);letter-spacing:2px;}
+.btn-sm{background:none;border:1px solid var(--gold-dim);color:var(--gold);padding:8px 16px;border-radius:20px;font-size:13px;cursor:pointer;font-family:'Georgia',serif;}
+.btn-sm:active{background:#1a1505;}
+.btn-danger{border-color:var(--red);color:var(--red);}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:28px;}
+.stat-card{background:var(--card-bg);border:1px solid #2a2a1a;border-radius:14px;padding:18px;text-align:center;}
+.stat-num{font-size:32px;color:var(--gold);}
+.stat-label{font-size:12px;color:var(--gray);margin-top:6px;letter-spacing:1px;}
+
+.section-title{font-size:15px;color:var(--gold);letter-spacing:2px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #1e1e1e;}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:28px;}
+th{text-align:left;padding:10px 8px;color:var(--gold);font-weight:normal;letter-spacing:1px;border-bottom:1px solid #2a2a1a;}
+td{padding:10px 8px;border-bottom:1px solid #1a1a1a;color:var(--white);vertical-align:middle;}
+tr:hover td{background:#0d0d12;}
+.credit-input{background:#1a1a1a;border:1px solid #333;color:var(--white);padding:4px 8px;border-radius:6px;width:60px;font-size:13px;text-align:center;}
+.badge-earn{background:#1a1505;border:1px solid var(--gold-dim);color:var(--gold);padding:2px 8px;border-radius:10px;font-size:11px;}
+.loading{color:var(--gray);font-style:italic;padding:24px;text-align:center;}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid #222;border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:8px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="admin-logo">🔯</div>
+  <div class="admin-title">MYSTIC MASTERS ADMIN</div>
+  <input class="pw-input" type="password" id="pw-input" placeholder="Jelszó" onkeydown="if(event.key==='Enter')checkPw()"/>
+  <button class="btn-gold" onclick="checkPw()">✦ Belépés</button>
+  <div class="err" id="pw-err"></div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-screen">
+  <div class="topbar">
+    <div class="topbar-title">🔯 MYSTIC MASTERS ADMIN</div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-sm" onclick="loadUsers()">↻ Frissítés</button>
+      <button class="btn-sm btn-danger" onclick="logout()">Kilépés</button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="stat-users">–</div><div class="stat-label">Felhasználók</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-scans">–</div><div class="stat-label">Palm Scanek</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-readings">–</div><div class="stat-label">Numerológia</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-credits">–</div><div class="stat-label">Összes kredit</div></div>
+  </div>
+
+  <div class="section-title">✦ Felhasználók</div>
+  <div id="users-table"><div class="loading"><span class="spinner"></span>Töltés...</div></div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js';
+import { getFirestore, collection, getDocs, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js';
+
+const FB={apiKey:"AIzaSyB92tW-Un3imyCfWjIACr8syOFm1uLWQJ4",authDomain:"mystic-masters.firebaseapp.com",projectId:"mystic-masters",storageBucket:"mystic-masters.firebasestorage.app",messagingSenderId:"1062778009567",appId:"1:1062778009567:web:4b74c3b6471bef6521766a"};
+const fbApp=initializeApp(FB);
+const db=getFirestore(fbApp);
+
+const PASS='zola19';
+let usersData=[];
+
+window.checkPw=function(){
+  const val=document.getElementById('pw-input').value;
+  if(val===PASS){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('admin-screen').style.display='block';
+    loadUsers();
+  } else {
+    document.getElementById('pw-err').textContent='Hibás jelszó!';
+    document.getElementById('pw-input').value='';
+  }
+};
+
+window.logout=function(){
+  document.getElementById('admin-screen').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('pw-input').value='';
+};
+
+window.loadUsers=async function(){
+  document.getElementById('users-table').innerHTML='<div class="loading"><span class="spinner"></span>Töltés...</div>';
+  try{
+    const snap=await getDocs(collection(db,'users'));
+    usersData=[];
+    snap.forEach(d=>usersData.push({id:d.id,...d.data()}));
+    renderStats();
+    renderTable();
+  }catch(e){
+    document.getElementById('users-table').innerHTML='<div class="loading" style="color:#c0392b;">Hiba: '+e.message+'</div>';
+  }
+};
+
+function renderStats(){
+  document.getElementById('stat-users').textContent=usersData.length;
+  document.getElementById('stat-scans').textContent=usersData.reduce((a,u)=>a+(u.palmScans||0),0);
+  document.getElementById('stat-readings').textContent=usersData.reduce((a,u)=>a+(u.numReadings||0),0);
+  document.getElementById('stat-credits').textContent=usersData.reduce((a,u)=>a+(u.credits||0),0);
+}
+
+function renderTable(){
+  if(!usersData.length){document.getElementById('users-table').innerHTML='<div class="loading">Nincs felhasználó.</div>';return;}
+  const rows=usersData.map((u,i)=>`
+    <tr>
+      <td><span style="color:var(--gray);font-size:11px;">${u.id.slice(0,10)}...</span></td>
+      <td>${u.name||'–'}</td>
+      <td style="font-size:12px;color:var(--gray);">${u.dob||'–'}</td>
+      <td>${u.place||'–'}</td>
+      <td>${u.palmScans||0}</td>
+      <td>${u.numReadings||0}</td>
+      <td>
+        <input class="credit-input" type="number" value="${u.credits||0}" id="cr-${i}" min="0"/>
+        <button class="btn-sm" style="margin-left:6px;" onclick="saveCredits('${u.id}',${i})">✦</button>
+      </td>
+    </tr>`).join('');
+  document.getElementById('users-table').innerHTML=`
+    <table>
+      <thead><tr>
+        <th>UID</th><th>Név</th><th>Születés</th><th>Hely</th><th>🔮 Scanek</th><th>🔢 Readings</th><th>✦ Kreditek</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+window.saveCredits=async function(uid,idx){
+  const val=parseInt(document.getElementById(`cr-${idx}`).value)||0;
+  try{
+    await updateDoc(doc(db,'users',uid),{credits:val});
+    usersData[idx].credits=val;
+    renderStats();
+    showMsg('Kredit frissítve: '+val+' ✦');
+  }catch(e){showMsg('Hiba: '+e.message,true);}
+};
+
+function showMsg(msg,err=false){
+  const el=document.createElement('div');
+  el.style.cssText=`position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:${err?'#c0392b':'#D4AF37'};color:${err?'#fff':'#000'};padding:10px 20px;border-radius:20px;font-size:13px;font-weight:bold;z-index:999;`;
+  el.textContent=msg; document.body.appendChild(el);
+  setTimeout(()=>el.remove(),2500);
+}
+</script>
+</body>
+</html>

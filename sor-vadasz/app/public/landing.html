@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sör Vadász – Craft sör & sörfőzde kereső</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --dark:#1A0C00;
+  --amber:#CEB04E;
+  --amber2:#B8982E;
+  --amber3:#7A4A00;
+  --mid:#F0DC90;
+  --cream:#FDF5DC;
+  --text:#2A1400;
+  --muted:#5A3A00;
+  --green:#22c55e;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 5%;height:70px;background:rgba(26,12,0,0.97);border-bottom:1px solid rgba(206,176,78,0.3);}
+.nav-logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--amber);letter-spacing:2px;}
+.nav-logo span{color:rgba(206,176,78,0.55);font-size:.72rem;display:block;letter-spacing:3px;font-family:'Lato',sans-serif;font-weight:300;text-transform:uppercase;}
+.nav-cta{background:var(--amber);color:var(--dark);font-weight:700;font-size:.9rem;border:none;padding:10px 22px;border-radius:50px;cursor:pointer;text-decoration:none;transition:transform .15s,opacity .15s;font-family:'Lato',sans-serif;}
+.nav-cta:hover{opacity:.88;transform:translateY(-1px);}
+
+/* HERO */
+.hero{min-height:100vh;background:var(--dark);display:grid;place-items:center;padding:120px 5% 80px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 100%,rgba(206,176,78,0.09) 0%,transparent 70%);pointer-events:none;}
+.hero-grain{position:absolute;inset:0;opacity:.04;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");pointer-events:none;}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;max-width:1100px;width:100%;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(206,176,78,0.12);border:1px solid rgba(206,176,78,0.3);color:var(--amber);font-size:.72rem;font-weight:700;letter-spacing:2px;padding:6px 14px;border-radius:50px;margin-bottom:24px;text-transform:uppercase;}
+.hero-badge::before{content:'';width:6px;height:6px;background:var(--amber);border-radius:50%;animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:.5}}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.6rem,5vw,4rem);font-weight:900;line-height:1.1;color:#fff;margin-bottom:20px;}
+.hero h1 em{color:var(--amber);font-style:italic;}
+.hero-sub{color:rgba(255,255,255,0.6);font-size:1rem;line-height:1.75;margin-bottom:36px;max-width:440px;}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;}
+.btn-primary{background:var(--amber);color:var(--dark);font-weight:700;font-size:1rem;padding:14px 32px;border-radius:50px;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:transform .15s,box-shadow .15s;font-family:'Lato',sans-serif;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(206,176,78,0.3);}
+.btn-outline{background:transparent;color:rgba(255,255,255,0.7);font-weight:400;font-size:1rem;padding:13px 28px;border-radius:50px;border:1px solid rgba(255,255,255,0.2);cursor:pointer;text-decoration:none;transition:border-color .15s,color .15s;font-family:'Lato',sans-serif;}
+.btn-outline:hover{border-color:var(--amber);color:var(--amber);}
+
+/* PHONE */
+.hero-phone{display:flex;justify-content:center;align-items:center;}
+.phone-frame{width:255px;height:510px;background:#0A0600;border-radius:38px;border:5px solid rgba(206,176,78,0.25);position:relative;box-shadow:0 40px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(206,176,78,0.1);overflow:hidden;animation:float 4s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.phone-notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:75px;height:20px;background:#0A0600;border-radius:0 0 12px 12px;z-index:10;}
+.phone-screen{position:absolute;inset:0;background:var(--amber2);display:flex;flex-direction:column;}
+.phone-header{background:var(--dark);border-bottom:2px solid var(--amber);padding:36px 12px 10px;display:flex;align-items:center;justify-content:center;}
+.phone-header-title{color:var(--amber);font-family:'Playfair Display',serif;font-size:.9rem;font-weight:700;letter-spacing:1px;}
+.phone-map{flex:1;background:#DEB84A;position:relative;overflow:hidden;}
+.phone-road{position:absolute;background:rgba(255,255,255,0.5);}
+.phone-road.h{left:0;right:0;height:3px;}
+.phone-road.v{top:0;bottom:0;width:3px;}
+.map-marker{position:absolute;font-size:16px;transform:translate(-50%,-50%);}
+.phone-card{position:absolute;bottom:8px;left:8px;right:8px;background:var(--dark);border:1px solid var(--amber);border-radius:10px;padding:8px 10px;}
+.phone-card-title{color:var(--amber);font-size:.65rem;font-weight:700;font-family:'Playfair Display',serif;}
+.phone-card-sub{color:rgba(206,176,78,0.6);font-size:.58rem;margin-top:2px;}
+.phone-indulas{display:block;margin-top:6px;background:var(--green);color:#fff;font-size:.6rem;font-weight:700;padding:5px;border-radius:6px;text-align:center;}
+.phone-navbar{height:44px;background:var(--dark);border-top:2px solid rgba(206,176,78,0.4);display:flex;justify-content:space-around;align-items:center;padding:0 4px;}
+.phone-nav-item{display:flex;flex-direction:column;align-items:center;gap:1px;}
+.phone-nav-icon{font-size:11px;}
+.phone-nav-label{font-size:7px;color:rgba(206,176,78,0.45);}
+.phone-nav-item.active .phone-nav-label{color:var(--amber);}
+
+/* STATS */
+.stats{background:var(--dark);border-top:1px solid rgba(206,176,78,0.15);padding:50px 5%;}
+.stats-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);}
+.stat-item{text-align:center;padding:20px;border-right:1px solid rgba(206,176,78,0.12);}
+.stat-item:last-child{border-right:none;}
+.stat-num{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:900;color:var(--amber);line-height:1;}
+.stat-label{color:rgba(206,176,78,0.5);font-size:.78rem;margin-top:6px;letter-spacing:.5px;}
+
+/* FEATURES */
+.features{padding:100px 5%;background:var(--cream);}
+.section-label{color:var(--amber3);font-size:.72rem;letter-spacing:3px;font-weight:700;text-transform:uppercase;margin-bottom:14px;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,3.5vw,2.8rem);font-weight:900;color:var(--text);line-height:1.2;margin-bottom:60px;}
+.section-title em{color:var(--amber3);font-style:italic;}
+.features-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.feature-card{background:#fff;border:1px solid rgba(122,74,0,0.12);border-radius:16px;padding:30px 26px;transition:transform .2s,box-shadow .2s,border-color .2s;}
+.feature-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(122,74,0,0.1);border-color:rgba(122,74,0,0.28);}
+.feature-icon{width:50px;height:50px;border-radius:13px;background:rgba(206,176,78,0.15);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:18px;}
+.feature-card h3{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:9px;}
+.feature-card p{color:var(--muted);font-size:.87rem;line-height:1.65;}
+
+/* STYLES */
+.styles-section{padding:80px 5%;background:var(--dark);}
+.styles-section .section-label{color:rgba(206,176,78,0.6);}
+.styles-section .section-title{color:#fff;}
+.styles-section .section-title em{color:var(--amber);}
+.styles-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(7,1fr);gap:12px;}
+.style-card{background:rgba(206,176,78,0.07);border:1px solid rgba(206,176,78,0.15);border-radius:12px;padding:18px 8px;text-align:center;cursor:pointer;transition:all .2s;}
+.style-card:hover{background:rgba(206,176,78,0.15);border-color:rgba(206,176,78,0.4);transform:translateY(-3px);}
+.style-emoji{font-size:1.8rem;margin-bottom:8px;}
+.style-name{color:var(--amber);font-size:.72rem;font-weight:700;margin-bottom:3px;}
+.style-desc{color:rgba(206,176,78,0.45);font-size:.62rem;}
+
+/* HOW */
+.how{padding:100px 5%;background:var(--amber2);}
+.how .section-label{color:rgba(26,12,0,0.6);}
+.how .section-title{color:var(--dark);}
+.how .section-title em{color:var(--dark);text-decoration:underline;text-decoration-color:rgba(26,12,0,0.3);}
+.steps{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.step{text-align:center;padding:24px 16px;}
+.step-num{width:54px;height:54px;border-radius:50%;border:2px solid rgba(26,12,0,0.3);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--dark);margin:0 auto 18px;}
+.step h4{color:var(--dark);font-size:.95rem;font-weight:700;margin-bottom:8px;}
+.step p{color:rgba(26,12,0,0.6);font-size:.82rem;line-height:1.6;}
+
+/* EVENTS */
+.events-section{padding:100px 5%;background:var(--cream);}
+.event-types{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.event-type-card{border-radius:14px;padding:28px 20px;text-align:center;}
+.event-type-card.fesztival{background:#2a1400;border:1px solid #7A4A00;}
+.event-type-card.kostolo{background:#1a2a00;border:1px solid #2d5500;}
+.event-type-card.akcios{background:#2a0a00;border:1px solid #5a2000;}
+.event-type-card.private{background:#1a0a2a;border:1px solid #4a2080;}
+.event-icon{font-size:2rem;margin-bottom:12px;}
+.event-type-card h4{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:6px;}
+.event-type-card.fesztival h4{color:var(--amber);}
+.event-type-card.kostolo h4{color:#8de840;}
+.event-type-card.akcios h4{color:#ff8040;}
+.event-type-card.private h4{color:#b080ff;}
+.event-type-card p{font-size:.8rem;color:rgba(255,255,255,0.45);line-height:1.5;}
+
+/* COMMUNITY */
+.community{padding:100px 5%;background:var(--dark);}
+.community-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.community h2{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3vw,2.5rem);font-weight:900;color:#fff;line-height:1.2;margin-bottom:20px;}
+.community h2 em{color:var(--amber);font-style:italic;}
+.community p{color:rgba(255,255,255,0.5);font-size:.92rem;line-height:1.75;margin-bottom:18px;}
+.submit-card{background:rgba(206,176,78,0.07);border:1px solid rgba(206,176,78,0.2);border-radius:18px;padding:28px;}
+.submit-card h3{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--amber);margin-bottom:18px;}
+.form-row{display:flex;flex-direction:column;gap:10px;}
+.form-input{background:rgba(26,12,0,0.6);border:1px solid rgba(206,176,78,0.2);border-radius:8px;padding:11px 14px;font-size:.87rem;color:#fff;font-family:'Lato',sans-serif;outline:none;transition:border-color .15s;}
+.form-input:focus{border-color:rgba(206,176,78,0.5);}
+.form-input::placeholder{color:rgba(206,176,78,0.3);}
+.form-submit{background:var(--amber);color:var(--dark);font-weight:700;font-size:.9rem;padding:12px;border:none;border-radius:8px;cursor:pointer;font-family:'Lato',sans-serif;transition:opacity .15s;}
+.form-submit:hover{opacity:.88;}
+.form-note{font-size:.7rem;color:rgba(206,176,78,0.4);text-align:center;margin-top:4px;}
+
+/* CTA */
+.cta-section{padding:120px 5%;background:var(--amber2);text-align:center;position:relative;overflow:hidden;}
+.cta-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 50% 0%,rgba(26,12,0,0.1) 0%,transparent 70%);}
+.cta-section h2{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,4vw,3.5rem);font-weight:900;color:var(--dark);line-height:1.15;margin-bottom:18px;position:relative;}
+.cta-section h2 em{font-style:italic;}
+.cta-section p{color:rgba(26,12,0,0.6);font-size:1rem;margin-bottom:40px;position:relative;}
+.cta-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;}
+.store-btn{background:var(--dark);border:1px solid rgba(206,176,78,0.3);color:var(--amber);padding:12px 28px;border-radius:12px;font-size:.9rem;font-weight:500;text-decoration:none;display:flex;align-items:center;gap:10px;transition:background .15s,border-color .15s;font-family:'Lato',sans-serif;}
+.store-btn:hover{border-color:var(--amber);}
+.store-btn-icon{font-size:1.3rem;}
+.store-btn-text small{display:block;font-size:.62rem;opacity:.6;}
+
+/* FOOTER */
+footer{background:#0A0600;padding:60px 5% 30px;}
+.footer-inner{max-width:1100px;margin:0 auto;}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr;gap:60px;margin-bottom:50px;}
+.footer-brand .logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--amber);margin-bottom:12px;letter-spacing:2px;}
+.footer-brand p{color:rgba(206,176,78,0.35);font-size:.82rem;line-height:1.65;max-width:280px;}
+.footer-col h4{color:rgba(206,176,78,0.5);font-size:.7rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;}
+.footer-col a{display:block;color:rgba(206,176,78,0.35);font-size:.84rem;text-decoration:none;margin-bottom:10px;transition:color .15s;}
+.footer-col a:hover{color:var(--amber);}
+.footer-bottom{border-top:1px solid rgba(206,176,78,0.08);padding-top:24px;display:flex;justify-content:space-between;align-items:center;}
+.footer-bottom p{color:rgba(206,176,78,0.2);font-size:.76rem;}
+.footer-vadasz{color:rgba(206,176,78,0.3);font-size:.76rem;}
+.footer-vadasz a{color:rgba(206,176,78,0.4);text-decoration:none;}
+.footer-vadasz a:hover{color:var(--amber);}
+
+/* ANIMATION */
+.fade-up{opacity:0;transform:translateY(22px);transition:opacity .65s,transform .65s;}
+.fade-up.visible{opacity:1;transform:none;}
+
+/* RESPONSIVE */
+@media(max-width:960px){
+  .hero-grid{grid-template-columns:1fr;text-align:center;}
+  .hero-phone{display:none;}
+  .hero-sub,.hero-badge{margin-left:auto;margin-right:auto;}
+  .hero-btns{justify-content:center;}
+  .stats-inner{grid-template-columns:repeat(2,1fr);}
+  .stat-item{border-right:none;border-bottom:1px solid rgba(206,176,78,0.1);}
+  .stat-item:nth-child(2n){border-bottom:1px solid rgba(206,176,78,0.1);}
+  .features-grid{grid-template-columns:1fr 1fr;}
+  .styles-grid{grid-template-columns:repeat(4,1fr);}
+  .steps{grid-template-columns:repeat(2,1fr);}
+  .event-types{grid-template-columns:repeat(2,1fr);}
+  .community-inner{grid-template-columns:1fr;gap:40px;}
+  .footer-top{grid-template-columns:1fr 1fr;gap:40px;}
+  .footer-brand{grid-column:1/-1;}
+}
+@media(max-width:600px){
+  .features-grid,.steps,.footer-top{grid-template-columns:1fr;}
+  .styles-grid{grid-template-columns:repeat(3,1fr);}
+  .event-types{grid-template-columns:1fr 1fr;}
+  .footer-bottom{flex-direction:column;gap:10px;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">🍺 SÖR VADÁSZ<span>Craft sör & sörfőzde kereső</span></div>
+  <a href="https://sor-vadasz.web.app" class="nav-cta">Nyisd meg az appot →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grain"></div>
+  <div class="hero-grid">
+    <div>
+      <div class="hero-badge">18+ · Ingyenes alkalmazás</div>
+      <h1>Vadássz rá a <em>tökéletes craft sörre</em> a közeledben!</h1>
+      <p class="hero-sub">GPS alapú sörfőzde és craft söröző kereső. Lager, IPA, Stout, Barna sör — minden stílus, minden bolt, minden fesztivál egy helyen.</p>
+      <div class="hero-btns">
+        <a href="https://sor-vadasz.web.app" class="btn-primary">🍺 Keresés indítása</a>
+        <a href="#features" class="btn-outline">Hogyan működik?</a>
+      </div>
+    </div>
+    <div class="hero-phone">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-header"><div class="phone-header-title">🍺 Sörfőzdék & craft sörözők</div></div>
+          <div class="phone-map">
+            <div class="phone-road h" style="top:40%"></div>
+            <div class="phone-road h" style="top:68%"></div>
+            <div class="phone-road v" style="left:28%"></div>
+            <div class="phone-road v" style="left:62%"></div>
+            <div class="map-marker" style="top:35%;left:22%">🍺</div>
+            <div class="map-marker" style="top:25%;left:58%">🏭</div>
+            <div class="map-marker" style="top:58%;left:65%">🍺</div>
+            <div class="map-marker" style="top:72%;left:30%">🏪</div>
+            <div class="map-marker" style="top:42%;left:44%;font-size:20px">📍</div>
+            <div class="phone-card">
+              <div class="phone-card-title">🏭 Miskolci Sörfőzde</div>
+              <div class="phone-card-sub">IPA · Craft · 1.2 km</div>
+              <div class="phone-indulas">🧭 INDULÁS!</div>
+            </div>
+          </div>
+          <div class="phone-navbar">
+            <div class="phone-nav-item"><div class="phone-nav-icon">🏠</div><div class="phone-nav-label">Kezdő</div></div>
+            <div class="phone-nav-item active"><div class="phone-nav-icon">📍</div><div class="phone-nav-label" style="color:var(--amber)">Térkép</div></div>
+            <div class="phone-nav-item"><div class="phone-nav-icon">📜</div><div class="phone-nav-label">Lista</div></div>
+            <div class="phone-nav-item"><div class="phone-nav-icon">➕</div><div class="phone-nav-label">Új</div></div>
+            <div class="phone-nav-item"><div class="phone-nav-icon">📅</div><div class="phone-nav-label">Fesztivál</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="stats-inner">
+    <div class="stat-item fade-up"><div class="stat-num">7</div><div class="stat-label">Sör stílus kategória</div></div>
+    <div class="stat-item fade-up"><div class="stat-num">3</div><div class="stat-label">Natív navigáció (Apple, Google, Waze)</div></div>
+    <div class="stat-item fade-up"><div class="stat-num">🎯</div><div class="stat-label">Meglepj engem! véletlen ajánló</div></div>
+    <div class="stat-item fade-up"><div class="stat-num">0 Ft</div><div class="stat-label">Teljesen ingyenes</div></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label">Miért éppen ez?</div>
+    <div class="section-title">Minden amit egy <em>igazi sör vadász</em> megkíván</div>
+    <div class="features-grid">
+      <div class="feature-card fade-up"><div class="feature-icon">📍</div><h3>GPS alapú keresés</h3><p>Az app a valódi tartózkodási helyed alapján mutatja a legközelebbi sörfőzdéket, craft bárokat és sör szaküzleteket.</p></div>
+      <div class="feature-card fade-up"><div class="feature-icon">🗺️</div><h3>Térkép + lista nézet</h3><p>Térképen vizuálisan, listán stílus szerint szűrve. Megerősített helyek arany, közösségi jelölések kék ponttal jelölve.</p></div>
+      <div class="feature-card fade-up"><div class="feature-icon">🎯</div><h3>Meglepj engem!</h3><p>Nem tudod mit igyál? Egy kattintás és az app véletlenszerűen ajánl egy sört a környékbeli boltokból — kinyomja a kalandvágyat.</p></div>
+      <div class="feature-card fade-up"><div class="feature-icon">📅</div><h3>Sörfesztiválok</h3><p>Fesztiválok, kóstolók, akciós napok és zártkörű események — mind egy helyen. Te is beküldhet egy eseményt!</p></div>
+      <div class="feature-card fade-up"><div class="feature-icon">🔍</div><h3>QR & vonalkód olvasó</h3><p>Lefotózod a sör vonalkódját és az app azonnal kigoogolódja — leírás, recenziók, YouTube videók pillanatok alatt.</p></div>
+      <div class="feature-card fade-up"><div class="feature-icon">➕</div><h3>Te is hozzáadhatsz</h3><p>Ismersz egy ismeretlen sörfőzdét? Add hozzá te is! GPS-sel vagy cím alapján beküldheted az adatbázisba.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- BEER STYLES -->
+<section class="styles-section">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label">Stílusok</div>
+    <div class="section-title">Minden sör stílusra van <em>szűrő</em></div>
+  </div>
+  <div class="styles-grid">
+    <div class="style-card fade-up"><div class="style-emoji">🌾</div><div class="style-name">Lager / Búza</div><div class="style-desc">Könnyed, friss</div></div>
+    <div class="style-card fade-up"><div class="style-emoji">🍋</div><div class="style-name">IPA / Pale Ale</div><div class="style-desc">Komlós, aromás</div></div>
+    <div class="style-card fade-up"><div class="style-emoji">⚫</div><div class="style-name">Stout / Porter</div><div class="style-desc">Sötét, krémes</div></div>
+    <div class="style-card fade-up"><div class="style-emoji">🍂</div><div class="style-name">Barna sör</div><div class="style-desc">Karamellás, mély</div></div>
+    <div class="style-card fade-up"><div class="style-emoji">🏭</div><div class="style-name">Craft</div><div class="style-desc">Kézműves</div></div>
+    <div class="style-card fade-up"><div class="style-emoji">🍺</div><div class="style-name">Sörfőzde</div><div class="style-desc">Direkt a forrásnál</div></div>
+    <div class="style-card fade-up"><div class="style-emoji">🎲</div><div class="style-name">Meglepetés</div><div class="style-desc">Véletlenszerű</div></div>
+  </div>
+</section>
+
+<!-- HOW -->
+<section class="how">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label">Lépések</div>
+    <div class="section-title">Négy lépés a <em>tökéletes sörig</em></div>
+    <div class="steps">
+      <div class="step fade-up"><div class="step-num">1</div><h4>Nyisd meg az appot</h4><p>Böngészőből, azonnal. Vagy telepítsd PWA-ként a kezdőképernyőre.</p></div>
+      <div class="step fade-up"><div class="step-num">2</div><h4>Igazold a korodat</h4><p>Az app 18+ tartalmú. Egyszer kell megerősítened, utána automatikus.</p></div>
+      <div class="step fade-up"><div class="step-num">3</div><h4>Szűrj stílusra</h4><p>IPA, Stout, Craft, Lager — válaszd ki ami vonz, vagy engedd meg hogy meglepjen.</p></div>
+      <div class="step fade-up"><div class="step-num">4</div><h4>Indulj el!</h4><p>Apple Maps, Google Maps vagy Waze — egy kattintás és már úton is vagy.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- EVENTS -->
+<section class="events-section">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label">Események</div>
+    <div class="section-title">Sörfesztiválok és <em>közösségi események</em></div>
+    <div class="event-types">
+      <div class="event-type-card fesztival fade-up"><div class="event-icon">🎉</div><h4>Fesztiválok</h4><p>Nagyobb sörfesztiválok, craft beer napok, szabadtéri rendezvények.</p></div>
+      <div class="event-type-card kostolo fade-up"><div class="event-icon">🍺</div><h4>Kóstolók</h4><p>Irányított sör kóstolók, főzdei nyílt napok, sommelier eseméyek.</p></div>
+      <div class="event-type-card akcios fade-up"><div class="event-icon">💰</div><h4>Akciók</h4><p>Happy hour, heti ajánlatok, craft sör akciós napok a boltokban.</p></div>
+      <div class="event-type-card private fade-up"><div class="event-icon">🔒</div><h4>Zártkörű</h4><p>Tagok és meghívottak számára szóló exkluzív sör események.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMUNITY -->
+<section class="community">
+  <div class="community-inner">
+    <div class="fade-up">
+      <div class="section-label" style="color:rgba(206,176,78,0.55)">Közösség</div>
+      <h2>Te is ismersz egy <em>rejtett sörfőzdét?</em></h2>
+      <p>Ha tudsz egy helyi sörfőzdéről, craft bárról vagy sör szaküzletről amit mások még nem ismernek — add hozzá te is! A közösség bővíti az adatbázist.</p>
+      <p>Eseményt is beküldhet mindenki: fesztivált, kóstolót, nyílt napot — ellenőrzés után megjelenik az app esemény naptárában.</p>
+    </div>
+    <div class="submit-card fade-up">
+      <h3>🏭 Ajánlj egy sörhelyet</h3>
+      <div class="form-row">
+        <input class="form-input" type="text" placeholder="Bolt / főzde neve" id="s-nev">
+        <input class="form-input" type="text" placeholder="Város, utca, házszám">
+        <select class="form-input" style="background:rgba(26,12,0,0.6);color:rgba(206,176,78,0.7)">
+          <option value="">Típus...</option>
+          <option>🏪 Sör szaküzlet</option>
+          <option>🍺 Söröző / Craft bár</option>
+          <option>🏭 Sörfőzde</option>
+        </select>
+        <input class="form-input" type="text" placeholder="Megjegyzés (pl. csak hétvégén nyitva)">
+        <button class="form-submit" id="s-btn" onclick="sorBekuldes()">Beküldés →</button>
+        <div class="form-note">Ellenőrzés után kerül fel az appba · Admin jóváhagyás szükséges</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Készen állsz a <em>sörvadászatra?</em></h2>
+  <p>Ingyenes. Telepítés nélkül. Azonnal indul. 18+</p>
+  <div class="cta-btns">
+    <a href="https://sor-vadasz.web.app" class="store-btn"><span class="store-btn-icon">🌐</span><div class="store-btn-text"><small>Nyisd meg</small>sor-vadasz.web.app</div></a>
+    <a href="https://sor-vadasz.web.app" class="store-btn"><span class="store-btn-icon">📱</span><div class="store-btn-text"><small>Telepítsd PWA-ként</small>iOS & Android</div></a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo">🍺 Sör Vadász</div>
+        <p>GPS alapú craft sörfőzde és söröző kereső. Sör stílus szűrőkkel, QR szkennelővel, fesztivál naptárral. A Vadász Apps ökoszisztéma tagja.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Az app</h4>
+        <a href="https://sor-vadasz.web.app">Térkép nézet</a>
+        <a href="https://sor-vadasz.web.app">Bolt & Főzde lista</a>
+        <a href="https://sor-vadasz.web.app">Sörfesztiválok</a>
+        <a href="https://sor-vadasz.web.app">QR Szkennelő</a>
+        <a href="https://sor-vadasz.web.app">Új hely beküldése</a>
+      </div>
+      <div class="footer-col">
+        <h4>Linkek</h4>
+        <a href="https://vadasz-apps.web.app" target="_blank">🛡️ Vadász Apps portál</a>
+        <a href="https://ko-fi.com/vadaszapps" target="_blank">☕ Ko-fi támogatás</a>
+        <a href="mailto:vadaszapps@gmail.com">✉️ Kapcsolat / Partnerség</a>
+        <a href="https://patika-vadasz.web.app" target="_blank">Patika Vadász</a>
+        <a href="https://szivar-vadasz.web.app" target="_blank">Szivar Vadász</a>
+        <a href="https://pizza-vadasz.web.app" target="_blank">Pizza Vadász</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Sör Vadász. Minden jog fenntartva. Készítette: Králik Zola | v1.0 · Az alkalmazás tartalma szerzői jogi védelem alatt áll. · Kizárólag 18 éven felüliek számára.</p>
+      <div class="footer-vadasz">Egy <a href="https://vadasz-apps.web.app">Vadász Apps</a> alkalmazás 🛡️</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+function sorBekuldes(){
+  var nev=document.getElementById('s-nev').value.trim();
+  if(!nev){document.getElementById('s-nev').focus();document.getElementById('s-nev').style.borderColor='rgba(206,176,78,0.6)';return;}
+  document.querySelectorAll('.form-input').forEach(function(i){i.value='';i.style.borderColor='';});
+  var btn=document.getElementById('s-btn');
+  btn.textContent='✅ Köszönjük a beküldést!';btn.style.background='#22c55e';btn.style.color='#fff';
+  setTimeout(function(){btn.textContent='Beküldés →';btn.style.background='';btn.style.color='';},3000);
+}
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.1});
+document.querySelectorAll('.fade-up').forEach(function(el){obs.observe(el);});
+</script>
+</body>
+</html>

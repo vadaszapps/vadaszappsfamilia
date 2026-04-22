@@ -1,0 +1,39 @@
+{
+  "name": "Pizza Vadász",
+  "short_name": "Pizza Vadász",
+  "description": "Pizzéria kereső alkalmazás – találd meg a legjobb pizzériát a közeledben!",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#8B0000",
+  "theme_color": "#8B0000",
+  "lang": "hu",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["food", "navigation", "utilities"],
+  "prefer_related_applications": false
+}

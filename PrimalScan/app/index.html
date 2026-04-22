@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="PrimalScan">
+    <title>PrimalScan</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon" href="/icon-152.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black:#000; --dark:#0a0a0a; --panel:#111; --border:#222;
+            --muted:#444; --dim:#666; --white:#f0f0f0;
+            --green:#00ff88; --yellow:#ffcc00; --red:#ff3333; --blue:#4488ff;
+            --orange:#ff8800;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        html,body{width:100%;height:100%;background:var(--black);color:var(--white);font-family:'IBM Plex Sans',sans-serif;overflow:hidden}
+
+        /* ── PAGES ── */
+        .page{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.3s ease}
+        .page.active{opacity:1;pointer-events:all}
+
+        /* ── BOTTOM NAV ── */
+        .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:64px;background:var(--panel);border-top:1px solid var(--border);display:flex;z-index:100}
+        .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:none;border:none;cursor:pointer;color:var(--dim);transition:color 0.2s;-webkit-tap-highlight-color:transparent}
+        .nav-btn.active{color:var(--green)}
+        .nav-btn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+        .nav-label{font-family:'IBM Plex Mono',monospace;font-size:0.55rem;letter-spacing:2px;text-transform:uppercase}
+
+        /* ── HOME ── */
+        #page-home{justify-content:space-between;align-items:center;padding:60px 24px calc(64px + 32px)}
+        .brand{text-align:center;width:100%}
+        .brand-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:4px;color:var(--dim);text-transform:uppercase;margin-bottom:8px}
+        .brand-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(4rem,20vw,6rem);letter-spacing:6px;line-height:0.9;background:linear-gradient(180deg,#fff 0%,#888 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .brand-sub{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;margin-top:6px}
+        .scan-zone{width:100%;display:flex;flex-direction:column;align-items:center}
+        .scan-btn-wrap{position:relative;width:200px;height:200px;cursor:pointer}
+        .scan-btn-wrap::before{content:'';position:absolute;inset:-3px;border-radius:50%;background:conic-gradient(from 0deg,transparent 0%,var(--green) 20%,transparent 40%);animation:rotateBorder 3s linear infinite}
+        .scan-btn-wrap::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--black)}
+        @keyframes rotateBorder{to{transform:rotate(360deg)}}
+        .scan-btn-inner{position:absolute;inset:4px;border-radius:50%;background:var(--panel);border:1px solid var(--border);z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:background 0.2s}
+        .scan-btn-wrap:active .scan-btn-inner{background:#1a1a1a}
+        .scan-icon{font-size:3rem;line-height:1}
+        .scan-label{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:3px;color:var(--green)}
+        .bracket{position:absolute;width:20px;height:20px;border-color:var(--green);border-style:solid;opacity:0.6;z-index:2}
+        .bracket-tl{top:8px;left:8px;border-width:2px 0 0 2px}
+        .bracket-tr{top:8px;right:8px;border-width:2px 2px 0 0}
+        .bracket-bl{bottom:8px;left:8px;border-width:0 0 2px 2px}
+        .bracket-br{bottom:8px;right:8px;border-width:0 2px 2px 0}
+        .scan-tagline{margin-top:28px;text-align:center}
+        .scan-tagline-main{font-family:'IBM Plex Mono',monospace;font-size:0.85rem;color:var(--white);letter-spacing:1px}
+        .scan-tagline-sub{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--dim);margin-top:4px;letter-spacing:1px}
+        .home-footer{width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+        .footer-line{flex:1;height:1px;background:var(--border)}
+        .footer-text{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:var(--muted);letter-spacing:2px;white-space:nowrap}
+
+        /* ── FLOW PAGES (kategória, cél, érzékenység) ── */
+        .flow-page{justify-content:flex-start;padding:60px 24px calc(64px + 24px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+        .flow-header{margin-bottom:32px}
+        .flow-step-indicator{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--dim);margin-bottom:10px}
+        .flow-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:3px;line-height:1;color:var(--white)}
+        .flow-sub{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--muted);margin-top:8px;letter-spacing:1px}
+        .flow-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
+        .flow-grid.single-col{grid-template-columns:1fr}
+        .flow-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:22px 12px;border:1px solid var(--border);background:var(--panel);cursor:pointer;transition:all 0.18s;-webkit-tap-highlight-color:transparent;position:relative;overflow:hidden;min-height:110px}
+        .flow-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity 0.18s}
+        .flow-card.cat-food::before{background:var(--yellow)}
+        .flow-card.cat-drink::before{background:var(--blue)}
+        .flow-card.cat-cosm::before{background:var(--green)}
+        .flow-card.goal-card::before{background:var(--green)}
+        .flow-card:active::before,.flow-card.selected::before{opacity:0.1}
+        .flow-card.selected{border-color:var(--green)}
+        .flow-card-icon{font-size:2rem;position:relative;z-index:1}
+        .flow-card-label{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--white);position:relative;z-index:1;text-align:center}
+        .flow-card-sub{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:var(--dim);letter-spacing:1px;position:relative;z-index:1;text-align:center}
+        .flow-card.selected .flow-card-label{color:var(--green)}
+        .flow-next-btn{margin-top:24px;width:100%;padding:18px;background:transparent;border:1px solid var(--green);color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:4px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+        .flow-next-btn::before{content:'';position:absolute;inset:0;background:var(--green);transform:translateX(-100%);transition:transform 0.3s ease}
+        .flow-next-btn:active::before{transform:translateX(0)}
+        .flow-next-btn span{position:relative;z-index:1}
+        .flow-next-btn:active{color:var(--black)}
+        .flow-next-btn:disabled{border-color:var(--border);color:var(--muted);cursor:default}
+        .flow-next-btn:disabled::before{display:none}
+        .flow-skip-btn{margin-top:10px;width:100%;padding:12px;background:transparent;border:1px solid var(--border);color:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer}
+        .flow-back-btn{background:none;border:none;color:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer;padding:0;margin-bottom:16px;display:flex;align-items:center;gap:6px}
+
+        /* ── SENSITIVITY TOGGLES ── */
+        .sens-grid{display:flex;flex-direction:column;gap:10px;width:100%}
+        .sens-item{display:flex;align-items:center;justify-content:space-between;padding:16px;border:1px solid var(--border);background:var(--panel);cursor:pointer;transition:border-color 0.18s}
+        .sens-item.selected{border-color:var(--red)}
+        .sens-item-left{display:flex;align-items:center;gap:12px}
+        .sens-icon{font-size:1.4rem}
+        .sens-label{font-family:'IBM Plex Sans',sans-serif;font-size:0.9rem;color:var(--white)}
+        .sens-sub{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:var(--dim);margin-top:2px;letter-spacing:1px}
+        .sens-toggle{width:44px;height:24px;border-radius:12px;background:var(--border);border:none;cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0}
+        .sens-toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:all 0.2s}
+        .sens-item.selected .sens-toggle{background:var(--red)}
+        .sens-item.selected .sens-toggle::after{background:#fff;transform:translateX(20px)}
+
+        /* ── SCANNING OVERLAY ── */
+        #page-scan{align-items:center;justify-content:center;gap:32px;padding:24px}
+        .scan-header{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:4px}
+        .preview-wrap{position:relative;width:min(280px,80vw);height:min(280px,80vw);border:1px solid var(--border)}
+        .preview-img{width:100%;height:100%;object-fit:cover;opacity:0.6}
+        .scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);animation:scanLine 1.5s ease-in-out infinite;box-shadow:0 0 10px var(--green)}
+        @keyframes scanLine{0%{top:0%;opacity:1}90%{top:100%;opacity:1}100%{top:100%;opacity:0}}
+        .scan-status{text-align:center}
+        .scan-status-line{font-family:'IBM Plex Mono',monospace;font-size:0.8rem;color:var(--green);letter-spacing:1px;animation:blink 1s step-end infinite}
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+        .scan-steps{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+        .scan-step{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:1px;display:flex;align-items:center;gap:8px}
+        .scan-step.active{color:var(--dim)}
+        .scan-step.done{color:var(--green)}
+        .step-dot{width:6px;height:6px;border-radius:50%;background:var(--border);flex-shrink:0}
+        .scan-step.active .step-dot{background:var(--green);animation:pulse 0.8s ease-in-out infinite}
+        .scan-step.done .step-dot{background:var(--green)}
+        @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
+
+        /* ── RESULT PAGE ── */
+        #page-result{justify-content:flex-start;padding:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+        .result-inner{width:100%;min-height:100%;display:flex;flex-direction:column;padding:40px 24px calc(64px + 32px);gap:24px}
+        .verdict-block{width:100%;border:1px solid var(--border);padding:24px;position:relative;overflow:hidden}
+        .verdict-block::before{content:'';position:absolute;inset:0;opacity:0.08}
+        .verdict-block.green{border-color:var(--green)}.verdict-block.green::before{background:var(--green)}
+        .verdict-block.yellow{border-color:var(--yellow)}.verdict-block.yellow::before{background:var(--yellow)}
+        .verdict-block.red{border-color:var(--red)}.verdict-block.red::before{background:var(--red)}
+        .verdict-label{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:4px;color:var(--dim);margin-bottom:8px}
+        .verdict-rating{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;letter-spacing:4px;line-height:1;display:flex;align-items:center;gap:12px}
+        .verdict-block.green .verdict-rating{color:var(--green)}
+        .verdict-block.yellow .verdict-rating{color:var(--yellow)}
+        .verdict-block.red .verdict-rating{color:var(--red)}
+        .verdict-icon{font-size:2rem}
+        .verdict-summary{margin-top:12px;font-size:0.9rem;color:#aaa;line-height:1.6;font-weight:300}
+        .block-label{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:4px;color:var(--dim);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+        .block-label::after{content:'';flex:1;height:1px;background:var(--border)}
+        .risk-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.85rem;color:#bbb;line-height:1.5}
+        .risk-bullet{color:var(--red);font-family:'IBM Plex Mono',monospace;font-size:0.7rem;margin-top:3px;flex-shrink:0}
+        .risk-item.positive .risk-bullet{color:var(--green)}
+        .risk-item.warning .risk-bullet{color:var(--yellow)}
+        .score-bar-wrap{position:relative;height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:8px}
+        .score-bar-fill{position:absolute;left:0;top:0;bottom:0;border-radius:2px;transition:width 1s cubic-bezier(0.25,0.46,0.45,0.94)}
+        .scan-again-btn{width:100%;padding:18px;background:transparent;border:1px solid var(--border);color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:4px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+        .scan-again-btn::before{content:'';position:absolute;inset:0;background:var(--green);transform:translateX(-100%);transition:transform 0.3s ease}
+        .scan-again-btn:active::before{transform:translateX(0)}
+        .scan-again-btn span{position:relative;z-index:1}
+        .scan-again-btn:active{color:var(--black)}
+        .error-block{width:100%;border:1px solid var(--red);padding:20px;background:rgba(255,51,51,0.05)}
+        .error-title{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--red);letter-spacing:2px}
+        .error-msg{font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:var(--dim);margin-top:8px;line-height:1.6}
+        .result-thumb{width:64px;height:64px;object-fit:cover;border:1px solid var(--border);opacity:0.5}
+        .result-meta{display:flex;align-items:center;justify-content:space-between;width:100%}
+        .result-meta-text{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:var(--dim);letter-spacing:1px}
+        .off-block{width:100%;border:1px solid var(--blue);padding:20px;position:relative;overflow:hidden}
+        .off-block::before{content:'';position:absolute;inset:0;background:var(--blue);opacity:0.05}
+        .off-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;color:var(--blue);margin-bottom:12px}
+        .off-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.8rem}
+        .off-row-label{color:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:1px}
+        .off-row-value{color:var(--white);font-weight:600}
+        .nutri-grade{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:#000;font-weight:700}
+        .nutri-a{background:#038141}.nutri-b{background:#85bb2f}.nutri-c{background:#fecb02;color:#000}.nutri-d{background:#ee8100}.nutri-e{background:#e63e11}
+        .nova-badge{font-family:'IBM Plex Mono',monospace;font-size:0.75rem;padding:4px 10px;border-radius:4px;font-weight:600}
+        .nova-1{background:#038141;color:#fff}.nova-2{background:#85bb2f;color:#000}.nova-3{background:#ee8100;color:#fff}.nova-4{background:#e63e11;color:#fff}
+
+        /* ── SCORE BREAKDOWN (piros/sárga/zöld blokkok) ── */
+        .flag-block{width:100%;border:1px solid var(--border);padding:16px;position:relative;overflow:hidden}
+        .flag-block.red-block{border-color:rgba(255,51,51,0.4);background:rgba(255,51,51,0.04)}
+        .flag-block.yellow-block{border-color:rgba(255,204,0,0.4);background:rgba(255,204,0,0.04)}
+        .flag-block.green-block{border-color:rgba(0,255,136,0.4);background:rgba(0,255,136,0.04)}
+        .flag-block-title{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:3px;margin-bottom:10px;font-weight:600}
+        .flag-block.red-block .flag-block-title{color:var(--red)}
+        .flag-block.yellow-block .flag-block-title{color:var(--yellow)}
+        .flag-block.green-block .flag-block-title{color:var(--green)}
+        .flag-list{display:flex;flex-direction:column;gap:6px}
+        .flag-item{display:flex;align-items:center;justify-content:space-between;font-size:0.82rem;padding:6px 0;border-bottom:1px solid var(--border)}
+        .flag-item:last-child{border-bottom:none}
+        .flag-name{color:#ccc;flex:1}
+        .flag-penalty{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;font-weight:600}
+        .flag-block.red-block .flag-penalty{color:var(--red)}
+        .flag-block.yellow-block .flag-penalty{color:var(--yellow)}
+        .flag-block.green-block .flag-penalty{color:var(--green)}
+
+        /* ── BS DETEKTOR ── */
+        .bs-block{width:100%;border:1px solid var(--orange);padding:20px;background:rgba(255,136,0,0.05);position:relative}
+        .bs-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+        .bs-icon{font-size:1.4rem}
+        .bs-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;color:var(--orange)}
+        .bs-badge{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--orange);background:rgba(255,136,0,0.15);border:1px solid rgba(255,136,0,0.3);padding:3px 8px;border-radius:3px;margin-left:auto}
+        .bs-text{font-size:0.85rem;color:#bbb;line-height:1.6}
+
+        /* ── ALTERNATÍVA BLOKK ── */
+        .alt-block{width:100%;border:1px solid var(--border);padding:20px;background:var(--panel)}
+        .alt-title{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:4px;color:var(--dim);margin-bottom:8px}
+        .alt-text{font-size:0.88rem;color:#ccc;line-height:1.6}
+
+        /* ── MEGOSZTÁS GOMB ── */
+        .share-btn{width:100%;padding:18px;background:transparent;border:1px solid var(--green);color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:4px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:10px}
+        .share-btn::before{content:'';position:absolute;inset:0;background:var(--green);transform:translateX(-100%);transition:transform 0.3s ease}
+        .share-btn:active::before{transform:translateX(0)}
+        .share-btn span{position:relative;z-index:1}
+        .share-btn:active{color:var(--black)}
+        .share-icon{position:relative;z-index:1;font-size:1.1rem}
+
+        /* ── CONTEXT PILL (kategória/cél kontextus az eredményen) ── */
+        .context-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+        .context-pill{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;letter-spacing:2px;color:var(--dim);background:var(--panel);border:1px solid var(--border);padding:4px 10px;border-radius:3px}
+        .context-pill.cat-pill{border-color:var(--blue);color:var(--blue)}
+        .context-pill.goal-pill{border-color:var(--yellow);color:var(--yellow)}
+        .context-pill.sens-pill{border-color:var(--red);color:var(--red)}
+
+        /* ── PARTNEREK ── */
+        #page-partnerek{flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch}
+        .part-header{padding:56px 24px 16px;border-bottom:1px solid var(--border)}
+        .part-header h1{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:4px;color:var(--white)}
+        .part-content{padding:24px 24px calc(64px + 24px);display:flex;flex-direction:column;gap:24px}
+        .partner-section h2{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px}
+        .partner-card{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--border);background:var(--panel);text-decoration:none;color:var(--white);transition:border-color 0.2s;-webkit-tap-highlight-color:transparent}
+        .partner-card:active{background:#1a1a1a}
+        .partner-icon{font-size:1.6rem;flex-shrink:0;width:40px;text-align:center}
+        .partner-info{flex:1}
+        .partner-info h3{font-size:0.9rem;font-weight:600;margin-bottom:2px}
+        .partner-info p{font-size:0.75rem;color:var(--dim);font-family:'IBM Plex Mono',monospace}
+        .partner-arrow{color:var(--muted);font-size:1.2rem;flex-shrink:0}
+        .copyright-bar{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:var(--muted);text-align:center;line-height:1.8;letter-spacing:1px;padding-top:8px}
+
+        /* ── KREDIT BADGE (jobb felső) ── */
+        #credit-badge{position:fixed;top:12px;right:12px;z-index:2000;background:var(--panel);border:1px solid var(--green);border-radius:20px;padding:5px 12px;font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--green);font-weight:bold;display:none}
+
+        /* ── PROFIL FAB (bal felső) ── */
+        #profile-fab{position:fixed;top:12px;left:12px;z-index:2000;width:40px;height:40px;border-radius:50%;background:var(--panel);border:1px solid var(--green);color:var(--green);font-size:1.1rem;cursor:pointer;display:none;align-items:center;justify-content:center;padding:0}
+        #profile-fab.visible{display:flex}
+
+        /* ── PROFIL OVERLAY ── */
+        #profile-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9000;display:none}
+        #profile-overlay.active{display:block}
+
+        /* ── PROFIL PANEL ── */
+        #profile-panel{position:fixed;top:0;left:-320px;width:300px;height:100%;background:var(--dark);z-index:9001;transition:left 0.28s ease;display:flex;border-right:1px solid var(--border)}
+        #profile-panel.open{left:0}
+        #prof-icon-bar{width:56px;background:var(--black);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding-top:14px;gap:4px;flex-shrink:0}
+        .prof-icon-btn{width:44px;height:44px;border-radius:10px;background:transparent;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:background 0.15s,color 0.15s;padding:0;gap:2px}
+        .prof-icon-btn span{font-size:0.48rem;color:var(--muted);line-height:1}
+        .prof-icon-btn.active{background:var(--panel);color:var(--green)}
+        .prof-icon-btn.active span{color:var(--green)}
+        #prof-icon-close{margin-top:auto;margin-bottom:14px;width:44px;height:44px;border-radius:10px;background:transparent;border:none;color:var(--muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+        #prof-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+        .prof-section{display:none;padding:16px 14px}
+        .prof-section.active{display:block}
+        .prof-section-title{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--dim);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+        .prof-avatar{width:52px;height:52px;border-radius:50%;background:var(--panel);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:10px}
+        .prof-name{color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;margin-bottom:2px}
+        .prof-email{color:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:0.65rem;margin-bottom:14px}
+        .prof-credit-badge{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--green);border-radius:20px;padding:5px 12px;font-family:'IBM Plex Mono',monospace;font-size:0.8rem;color:var(--green);font-weight:bold;margin-bottom:16px}
+        .prof-logout-btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:10px;width:100%;font-size:0.85rem;cursor:pointer;font-family:'IBM Plex Mono',monospace}
+        /* ── PREF BEÁLLÍTÁSOK ── */
+        .pref-goal-btn{width:100%;background:var(--panel);border:1px solid var(--border);color:var(--dim);padding:10px 14px;text-align:left;font-family:'IBM Plex Sans',sans-serif;font-size:0.85rem;cursor:pointer;transition:all 0.18s;border-radius:4px}
+        .pref-goal-btn.active{border-color:var(--green);color:var(--green);background:rgba(0,255,136,0.06)}
+        .pref-sens-row{display:flex;align-items:center;justify-content:space-between;padding:12px;border:1px solid var(--border);background:var(--panel);cursor:pointer;transition:border-color 0.18s;border-radius:4px}
+        .pref-sens-row.active{border-color:var(--red)}
+        .pref-toggle{width:40px;height:22px;border-radius:11px;background:var(--border);position:relative;transition:background 0.2s;flex-shrink:0}
+        .pref-toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--muted);transition:all 0.2s}
+        .pref-sens-row.active .pref-toggle{background:var(--red)}
+        .pref-sens-row.active .pref-toggle::after{background:#fff;transform:translateX(18px)}
+        .pref-save-btn{width:100%;padding:13px;background:var(--green);color:var(--black);border:none;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:3px;cursor:pointer;transition:opacity 0.2s;margin-top:4px}
+        .pref-save-btn:active{opacity:0.8}
+        .kredit-big{text-align:center;padding:16px 0 20px}
+        .kredit-big-num{color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:4rem;line-height:1;letter-spacing:4px}
+        .kredit-big-lbl{color:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:0.7rem;margin-top:4px;letter-spacing:2px}
+        .kredit-kofi-btn{background:#FF5E5B;color:#fff;border:none;border-radius:8px;padding:13px;width:100%;font-size:0.9rem;font-weight:bold;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;font-family:'IBM Plex Sans',sans-serif}
+        .kredit-check-btn{background:transparent;border:1px solid var(--green);color:var(--green);border-radius:8px;padding:11px;width:100%;font-size:0.8rem;font-weight:bold;cursor:pointer;font-family:'IBM Plex Mono',monospace}
+
+        /* ── LOGIN OVERLAY ── */
+        #login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:8500;display:none;align-items:center;justify-content:center;padding:20px}
+        #login-overlay.active{display:flex}
+        #login-box{background:var(--panel);border:1px solid var(--green);border-radius:16px;padding:32px 24px;max-width:320px;width:100%;text-align:center}
+        #login-box h2{color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:4px;margin-bottom:8px}
+        #login-box p{color:#aaa;font-size:0.85rem;line-height:1.6;margin-bottom:24px;font-family:'IBM Plex Mono',monospace}
+        .login-btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px;border-radius:8px;font-size:0.95rem;font-weight:bold;cursor:pointer;border:none;background:#fff;color:#222;margin-bottom:12px}
+        .login-btn-cancel{background:transparent;color:var(--dim);font-size:0.8rem;border:1px solid var(--border);border-radius:8px;padding:10px;width:100%;cursor:pointer;font-family:'IBM Plex Mono',monospace}
+
+        /* ── KO-FI PAYWALL ── */
+        #kofi-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:8200;display:none;align-items:center;justify-content:center;padding:20px}
+        #kofi-overlay.active{display:flex}
+        #kofi-box{background:var(--panel);border:1px solid var(--green);border-radius:16px;padding:28px 22px;max-width:340px;width:100%;text-align:center}
+        #kofi-box .kofi-icon{font-size:3rem;margin-bottom:10px;display:block}
+        #kofi-box h2{color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;margin-bottom:10px}
+        #kofi-box p{color:#aaa;font-size:0.82rem;line-height:1.6;margin-bottom:6px;font-family:'IBM Plex Mono',monospace}
+        .kofi-highlight{color:var(--green);font-size:0.95rem;font-weight:bold;margin:14px 0;font-family:'IBM Plex Mono',monospace}
+        .kofi-btn{background:#FF5E5B;color:#fff;border:none;border-radius:8px;padding:14px;width:100%;font-size:0.95rem;font-weight:bold;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px}
+        .kofi-check-btn{background:transparent;border:1px solid var(--green);color:var(--green);border-radius:8px;padding:12px;width:100%;font-size:0.85rem;font-weight:bold;cursor:pointer;margin-bottom:8px;font-family:'IBM Plex Mono',monospace}
+        .kofi-cancel-btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:10px;width:100%;font-size:0.8rem;cursor:pointer;font-family:'IBM Plex Mono',monospace}
+
+        #file-input{display:none}
+    </style>
+</head>
+<body>
+
+<!-- KREDIT BADGE -->
+<div id="credit-badge">⚡ 0 kredit</div>
+
+<!-- PROFIL FAB -->
+<button id="profile-fab" onclick="window.openProfile()">👤</button>
+
+<!-- PROFIL OVERLAY -->
+<div id="profile-overlay" onclick="window.closeProfile()"></div>
+
+<!-- PROFIL PANEL -->
+<div id="profile-panel">
+    <div id="prof-icon-bar">
+        <button class="prof-icon-btn active" id="pib-account" onclick="window.switchProfTab('account')">👤<span>Fiók</span></button>
+        <button class="prof-icon-btn" id="pib-settings" onclick="window.switchProfTab('settings')">⚙️<span>Beáll.</span></button>
+        <button class="prof-icon-btn" id="pib-credits" onclick="window.switchProfTab('credits')">⚡<span>Kredit</span></button>
+        <button id="prof-icon-close" onclick="window.closeProfile()">✕</button>
+    </div>
+    <div id="prof-content">
+        <!-- FIÓK -->
+        <div class="prof-section active" id="prof-tab-account">
+            <div class="prof-section-title">FIÓKOM</div>
+            <div class="prof-avatar">👤</div>
+            <div class="prof-name" id="pa-name">—</div>
+            <div class="prof-email" id="pa-email"></div>
+            <div class="prof-credit-badge" id="pa-credits">⚡ 0 kredit</div>
+            <button class="prof-logout-btn" onclick="window.profLogout()">Kijelentkezés</button>
+        </div>
+        <!-- BEÁLLÍTÁSOK -->
+        <div class="prof-section" id="prof-tab-settings">
+            <div class="prof-section-title">ALAPBEÁLLÍTÁSOK</div>
+            <p style="font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:var(--dim);line-height:1.6;margin-bottom:16px">
+                Ezeket nem kell minden szkenneléskor újra beállítani.
+            </p>
+
+            <!-- Alapértelmezett cél -->
+            <div style="margin-bottom:18px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--dim);margin-bottom:10px">ALAPÉRTELMEZETT CÉL</div>
+                <div style="display:flex;flex-direction:column;gap:6px" id="pref-goal-list">
+                    <button class="pref-goal-btn" id="pg-healthy"   onclick="window.selectPrefGoal('healthy')">🟢 Egészségesebb választás</button>
+                    <button class="pref-goal-btn" id="pg-weightloss" onclick="window.selectPrefGoal('weightloss')">🔥 Fogyás</button>
+                    <button class="pref-goal-btn" id="pg-muscle"    onclick="window.selectPrefGoal('muscle')">💪 Izomépítés</button>
+                    <button class="pref-goal-btn" id="pg-child"     onclick="window.selectPrefGoal('child')">👶 Gyereknek</button>
+                    <button class="pref-goal-btn" id="pg-honest"    onclick="window.selectPrefGoal('honest')">⚠️ Csak az igazat</button>
+                </div>
+            </div>
+
+            <!-- Érzékenységek -->
+            <div style="margin-bottom:18px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--dim);margin-bottom:10px">ÉRZÉKENYSÉGEIM</div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                    <div class="pref-sens-row" id="prs-sugar" onclick="window.togglePrefSens('sugar')">
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <span style="font-size:1.1rem">🍬</span>
+                            <div>
+                                <div style="font-size:0.85rem;color:var(--white)">Cukor / édesítők</div>
+                                <div style="font-size:0.6rem;color:var(--dim);font-family:'IBM Plex Mono',monospace">SZACHARÓZ, FRUKTÓZ, SZIRUP</div>
+                            </div>
+                        </div>
+                        <div class="pref-toggle" id="pt-sugar"></div>
+                    </div>
+                    <div class="pref-sens-row" id="prs-additives" onclick="window.togglePrefSens('additives')">
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <span style="font-size:1.1rem">⚗️</span>
+                            <div>
+                                <div style="font-size:0.85rem;color:var(--white)">Adalékanyagok</div>
+                                <div style="font-size:0.6rem;color:var(--dim);font-family:'IBM Plex Mono',monospace">E-SZÁMOK, TARTÓSÍTÓK</div>
+                            </div>
+                        </div>
+                        <div class="pref-toggle" id="pt-additives"></div>
+                    </div>
+                    <div class="pref-sens-row" id="prs-lactose" onclick="window.togglePrefSens('lactose')">
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <span style="font-size:1.1rem">🥛</span>
+                            <div>
+                                <div style="font-size:0.85rem;color:var(--white)">Tej / laktóz</div>
+                                <div style="font-size:0.6rem;color:var(--dim);font-family:'IBM Plex Mono',monospace">TEJFEHÉRJE, LAKTÓZ, KAZEIN</div>
+                            </div>
+                        </div>
+                        <div class="pref-toggle" id="pt-lactose"></div>
+                    </div>
+                    <div class="pref-sens-row" id="prs-gluten" onclick="window.togglePrefSens('gluten')">
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <span style="font-size:1.1rem">🌾</span>
+                            <div>
+                                <div style="font-size:0.85rem;color:var(--white)">Glutén</div>
+                                <div style="font-size:0.6rem;color:var(--dim);font-family:'IBM Plex Mono',monospace">BÚZA, ROZS, ÁRPA</div>
+                            </div>
+                        </div>
+                        <div class="pref-toggle" id="pt-gluten"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="pref-save-btn" id="pref-save-btn" onclick="window.savePrefs()">💾 MENTÉS</button>
+            <div id="pref-save-status" style="text-align:center;margin-top:8px;font-size:0.72rem;color:var(--green);min-height:18px;font-family:'IBM Plex Mono',monospace"></div>
+        </div>
+        <!-- KREDIT -->
+        <div class="prof-section" id="prof-tab-credits">
+            <div class="prof-section-title">KREDITEM</div>
+            <div class="kredit-big">
+                <div class="kredit-big-num" id="pk-num">0</div>
+                <div class="kredit-big-lbl">LEOLVASÁS MARADT</div>
+            </div>
+            <p style="color:var(--dim);font-size:0.78rem;line-height:1.6;margin-bottom:16px;font-family:'IBM Plex Mono',monospace;text-align:center">
+                1 kávé = 40 leolvasás.<br>Befizetés után nyomd meg az "Ellenőrzés" gombot.
+            </p>
+            <button class="kredit-kofi-btn" onclick="window.openKofi()">
+                <img src="https://storage.ko-fi.com/cdn/cup-border.png" style="width:20px;height:20px" alt="">
+                Fizetek a Ko-fi-n
+            </button>
+            <button class="kredit-check-btn" onclick="window.checkKofiCreditPanel()">✓ Már fizettem — Ellenőrzés</button>
+            <div id="pk-status" style="text-align:center;margin-top:10px;font-size:0.78rem;color:var(--green);min-height:20px;font-family:'IBM Plex Mono',monospace"></div>
+        </div>
+    </div>
+</div>
+
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay">
+    <div id="login-box">
+        <div style="font-size:2rem;margin-bottom:10px">🔐</div>
+        <h2>BELÉPÉS</h2>
+        <p>Az elemzéshez bejelentkezés szükséges.<br>Az első <strong style="color:var(--green)">3 leolvasás ingyenes!</strong></p>
+        <button class="login-btn-google" onclick="window.loginWithGoogle()">
+            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            Folytatás Google-lal
+        </button>
+        <button class="login-btn-cancel" onclick="document.getElementById('login-overlay').classList.remove('active')">Mégsem</button>
+    </div>
+</div>
+
+<!-- KO-FI PAYWALL -->
+<div id="kofi-overlay">
+    <div id="kofi-box">
+        <span class="kofi-icon">☕</span>
+        <h2>KIFOGYTÁL!</h2>
+        <div id="kofi-paywall-text" style="font-family:'IBM Plex Sans',sans-serif;font-size:0.88rem;color:#bbb;line-height:1.7;margin-bottom:12px;text-align:left">
+            Eddig csak az alapot láttad — de ez csak a jéghegy csúcsa.
+        </div>
+        <div id="kofi-teaser-list" style="margin-bottom:16px;display:flex;flex-direction:column;gap:6px">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:var(--green);display:flex;align-items:center;gap:8px"><span>▶</span><span>BS Detektor — marketing hazugságok leleplezése</span></div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:var(--green);display:flex;align-items:center;gap:8px"><span>▶</span><span>Személyre szabott verdikt a te céljaid alapján</span></div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:var(--green);display:flex;align-items:center;gap:8px"><span>▶</span><span>Alternatíva ajánló — mit vegyél helyette</span></div>
+        </div>
+        <p class="kofi-highlight">Vegyél egy kávét a fejlesztőnek<br>és kapsz érte <strong>40 leolvasást!</strong></p>
+        <p style="font-size:0.72rem;color:var(--muted);margin-bottom:16px;font-family:'IBM Plex Mono',monospace">Befizetés után kattints az "Ellenőrzés" gombra.</p>
+        <button class="kofi-btn" onclick="window.openKofi()">
+            <img src="https://storage.ko-fi.com/cdn/cup-border.png" style="width:20px;height:20px" alt="">
+            Fizetek a Ko-fi-n
+        </button>
+        <button class="kofi-check-btn" onclick="window.checkKofiCredit()">✓ Már fizettem — Ellenőrzés</button>
+        <button class="kofi-cancel-btn" onclick="document.getElementById('kofi-overlay').classList.remove('active')">Mégsem</button>
+    </div>
+</div>
+
+<!-- ══ HOME ══ -->
+<div class="page active" id="page-home">
+    <div class="brand">
+        <div class="brand-eyebrow">Élelmiszer elemző AI</div>
+        <div class="brand-name">PRIMAL<br>SCAN</div>
+        <div class="brand-sub">v3.0 · Gemini + OpenFoodFacts</div>
+    </div>
+    <div class="scan-zone">
+        <div class="scan-btn-wrap" id="scan-btn">
+            <div class="scan-btn-inner">
+                <div class="scan-icon">📸</div>
+                <div class="scan-label">SCAN</div>
+            </div>
+            <div class="bracket bracket-tl"></div>
+            <div class="bracket bracket-tr"></div>
+            <div class="bracket bracket-bl"></div>
+            <div class="bracket bracket-br"></div>
+        </div>
+        <div class="scan-tagline">
+            <div class="scan-tagline-main">Olvasd be, és megmondjuk: megéri-e.</div>
+            <div class="scan-tagline-sub">Összetevők · Adalékok · Egészség</div>
+        </div>
+    </div>
+    <div class="home-footer">
+        <div class="footer-line"></div>
+        <div class="footer-text">GEMINI VISION + OPENFOODFACTS</div>
+        <div class="footer-line"></div>
+    </div>
+</div>
+
+<!-- ══ KATEGÓRIA VÁLASZTÓ ══ -->
+<div class="page flow-page" id="page-category">
+    <button class="flow-back-btn" onclick="window.navTo('home')">← VISSZA</button>
+    <div class="flow-header">
+        <div class="flow-step-indicator">1 / 3 · BEÁLLÍTÁS</div>
+        <div class="flow-title">MIT SZERETNÉL<br>ELLENŐRIZNI?</div>
+        <div class="flow-sub">A kategória pontosítja az elemzést</div>
+    </div>
+    <div class="flow-grid">
+        <div class="flow-card cat-food" id="cat-food" onclick="selectCategory('food')">
+            <div class="flow-card-icon">🍔</div>
+            <div class="flow-card-label">ÉLELMISZER</div>
+            <div class="flow-card-sub">Ennivaló, snack,<br>konzerv, pékáru</div>
+        </div>
+        <div class="flow-card cat-drink" id="cat-drink" onclick="selectCategory('drink')">
+            <div class="flow-card-icon">🥤</div>
+            <div class="flow-card-label">ITAL</div>
+            <div class="flow-card-sub">Üdítő, juice,<br>sportital, tea</div>
+        </div>
+        <div class="flow-card cat-cosm" id="cat-cosm" onclick="selectCategory('cosmetic')">
+            <div class="flow-card-icon">🧴</div>
+            <div class="flow-card-label">KOZMETIKUM</div>
+            <div class="flow-card-sub">Krém, sampon,<br>dezodor, smink</div>
+        </div>
+    </div>
+    <button class="flow-next-btn" id="cat-next-btn" onclick="goToGoal()" disabled><span>TOVÁBB →</span></button>
+</div>
+
+<!-- ══ CÉL KIVÁLASZTÁS ══ -->
+<div class="page flow-page" id="page-goal">
+    <button class="flow-back-btn" onclick="window.navTo('category')">← VISSZA</button>
+    <div class="flow-header">
+        <div class="flow-step-indicator">2 / 3 · BEÁLLÍTÁS</div>
+        <div class="flow-title">MI A CÉLOD<br>EZZEL?</div>
+        <div class="flow-sub">Az AI a te szempontod alapján értékel</div>
+    </div>
+    <div class="flow-grid single-col" id="goal-grid">
+        <div class="flow-card goal-card" id="goal-healthy" onclick="selectGoal('healthy')">
+            <div class="flow-card-icon">🟢</div>
+            <div class="flow-card-label">EGÉSZSÉGESEBB VÁLASZTÁS</div>
+        </div>
+        <div class="flow-card goal-card" id="goal-weightloss" onclick="selectGoal('weightloss')">
+            <div class="flow-card-icon">🔥</div>
+            <div class="flow-card-label">FOGYÁS</div>
+        </div>
+        <div class="flow-card goal-card" id="goal-muscle" onclick="selectGoal('muscle')">
+            <div class="flow-card-icon">💪</div>
+            <div class="flow-card-label">IZOMÉPÍTÉS</div>
+        </div>
+        <div class="flow-card goal-card" id="goal-child" onclick="selectGoal('child')">
+            <div class="flow-card-icon">👶</div>
+            <div class="flow-card-label">GYEREKNEK LESZ</div>
+        </div>
+        <div class="flow-card goal-card" id="goal-honest" onclick="selectGoal('honest')">
+            <div class="flow-card-icon">⚠️</div>
+            <div class="flow-card-label">CSAK MONDD MEG AZ IGAZAT</div>
+        </div>
+    </div>
+    <button class="flow-next-btn" id="goal-next-btn" onclick="goToSensitivity()" disabled><span>TOVÁBB →</span></button>
+</div>
+
+<!-- ══ ÉRZÉKENYSÉG ══ -->
+<div class="page flow-page" id="page-sensitivity">
+    <button class="flow-back-btn" onclick="window.navTo('goal')">← VISSZA</button>
+    <div class="flow-header">
+        <div class="flow-step-indicator">3 / 3 · BEÁLLÍTÁS</div>
+        <div class="flow-title">VAN, AMIT<br>KERÜLNI SZERETNÉL?</div>
+        <div class="flow-sub">Opcionális — extra figyelmeztetést kapsz</div>
+    </div>
+    <div class="sens-grid">
+        <div class="sens-item" id="sens-sugar" onclick="toggleSensitivity('sugar')">
+            <div class="sens-item-left">
+                <div class="sens-icon">⛔</div>
+                <div>
+                    <div class="sens-label">Cukor / hozzáadott cukor</div>
+                    <div class="sens-sub">SZACHARÓZ, FRUKTÓZ, SZIRUP</div>
+                </div>
+            </div>
+            <button class="sens-toggle"></button>
+        </div>
+        <div class="sens-item" id="sens-additives" onclick="toggleSensitivity('additives')">
+            <div class="sens-item-left">
+                <div class="sens-icon">⛔</div>
+                <div>
+                    <div class="sens-label">Adalékanyagok / E-számok</div>
+                    <div class="sens-sub">TARTÓSÍTÓK, SZÍNEZÉKEK, ÍZFOKOZÓK</div>
+                </div>
+            </div>
+            <button class="sens-toggle"></button>
+        </div>
+        <div class="sens-item" id="sens-lactose" onclick="toggleSensitivity('lactose')">
+            <div class="sens-item-left">
+                <div class="sens-icon">⛔</div>
+                <div>
+                    <div class="sens-label">Tej / laktóz</div>
+                    <div class="sens-sub">TEJFEHÉRJE, LAKTÓZ, KAZEIN</div>
+                </div>
+            </div>
+            <button class="sens-toggle"></button>
+        </div>
+        <div class="sens-item" id="sens-gluten" onclick="toggleSensitivity('gluten')">
+            <div class="sens-item-left">
+                <div class="sens-icon">⛔</div>
+                <div>
+                    <div class="sens-label">Glutén</div>
+                    <div class="sens-sub">BÚZA, ROZS, ÁRPA, ZABSZENNYEZÉS</div>
+                </div>
+            </div>
+            <button class="sens-toggle"></button>
+        </div>
+    </div>
+    <button class="flow-next-btn" style="margin-top:24px" onclick="startScan()"><span>FOTÓZÁS →</span></button>
+    <button class="flow-skip-btn" onclick="startScan()">Nem érdekes, nézzük →</button>
+</div>
+
+<!-- ══ SCANNING ══ -->
+<div class="page" id="page-scan">
+    <div class="scan-header">ELEMZÉS</div>
+    <div class="preview-wrap">
+        <img class="preview-img" id="preview-img" src="" alt="">
+        <div class="scan-line"></div>
+        <div class="bracket bracket-tl"></div>
+        <div class="bracket bracket-tr"></div>
+        <div class="bracket bracket-bl"></div>
+        <div class="bracket bracket-br"></div>
+    </div>
+    <div class="scan-status">
+        <div class="scan-status-line" id="status-line">INICIALIZÁLÁS_</div>
+        <div class="scan-steps">
+            <div class="scan-step" id="step-1"><div class="step-dot"></div><span>Elemzem az összetevőket...</span></div>
+            <div class="scan-step" id="step-2"><div class="step-dot"></div><span>Kiszúrom a trükkös részeket...</span></div>
+            <div class="scan-step" id="step-3"><div class="step-dot"></div><span>OpenFoodFacts lekérdezés...</span></div>
+            <div class="scan-step" id="step-4"><div class="step-dot"></div><span>Számolom a Príma Score-t...</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- ══ RESULT ══ -->
+<div class="page" id="page-result">
+    <div class="result-inner" id="result-inner"></div>
+</div>
+
+<!-- ══ PARTNEREK ══ -->
+<div class="page" id="page-partnerek">
+    <div class="part-header"><h1>🌐 Partnerek</h1></div>
+    <div class="part-content">
+        <div class="partner-section">
+            <h2>⭐ Támogatók & Szponzorok</h2>
+            <a class="partner-card" data-em="1" href="#" style="border-color:var(--yellow)">
+                <div class="partner-icon">⭐</div>
+                <div class="partner-info"><h3>Légy Te az első szponzor!</h3><p>Prémium célközönség — egészségtudatos vásárlók</p></div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="partner-section">
+            <h2>🐾 Vadász Alkalmazások</h2>
+            <a class="partner-card" href="https://vadasz-apps.web.app" target="_blank">
+                <div class="partner-icon">🛡️</div>
+                <div class="partner-info"><h3>Ismerd meg az összes Vadász appot!</h3><p>Trafik, Szivar, Bor, Patika és még több</p></div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="partner-section">
+            <h2>❤️ Támogasd az Appot</h2>
+            <a class="partner-card" href="https://ko-fi.com/vadaszapps" target="_blank" style="border-color:var(--green)">
+                <div class="partner-icon">☕</div>
+                <div class="partner-info"><h3>Vegyél egy kávét a fejlesztőnek!</h3><p>Az app ingyenes, de a fejlesztés nem az 😄</p></div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="partner-section">
+            <h2>📱 Kapcsolat</h2>
+            <a class="partner-card" data-em="1" href="#">
+                <div class="partner-icon">✉️</div>
+                <div class="partner-info"><h3>Írj nekünk!</h3><p>Bejelentés, partnerség, hibajelentés</p></div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="copyright-bar">
+            © 2026 PrimalScan · Vadász Apps. Minden jog fenntartva.<br>
+            Készítette: Králik Zola | v3.0<br>
+            Az alkalmazás tartalma szerzői jogi védelem alatt áll.
+        </div>
+    </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+    <button class="nav-btn active" id="nav-scan" onclick="navTo('home')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span class="nav-label">Szkennelés</span>
+    </button>
+    <button class="nav-btn" id="nav-partnerek" onclick="navTo('partnerek')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 9 0 0 1 0 18M12 3a4.5 9 0 0 0 0 18M3 12h18"/></svg>
+        <span class="nav-label">Partnerek</span>
+    </button>
+</nav>
+
+<input type="file" id="file-input" accept="image/*" capture="environment">
+
+<script type="module">
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
+// ── FIREBASE CONFIG ──────────────────────────────────────
+const firebaseConfig = {
+    apiKey:            "AIzaSyCUNL2R-urY-n2ybFdLEhU1b_ffZrEHT9M",
+    authDomain:        "primalscan-73c5c.firebaseapp.com",
+    projectId:         "primalscan-73c5c",
+    storageBucket:     "primalscan-73c5c.firebasestorage.app",
+    messagingSenderId: "292070285530",
+    appId:             "1:292070285530:web:88da27a365fcdc864b45e3"
+};
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+// ── KONSTANSOK ────────────────────────────────────────────
+const GEMINI_API_KEY      = 'AIzaSyBKb1MIFo8nTZbfS7URsfWZwBnTMtx_S6M';
+const GEMINI_URL          = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + GEMINI_API_KEY;
+const FREE_SCANS          = 3;
+const CREDITS_PER_PAYMENT = 40;
+
+// ── STATE ─────────────────────────────────────────────────
+let currentUser    = null;
+let userCredits    = 0;
+let lastPreviewUrl = '';
+let userPrefs      = { defaultGoal: null, sensitivities: [] };  // mentett preferenciák
+
+// ── FLOW STATE (kategória, cél, érzékenységek) ────────────
+window.flowState = {
+    category:      null,   // 'food' | 'drink' | 'cosmetic'
+    goal:          null,   // 'healthy' | 'weightloss' | 'muscle' | 'child' | 'honest'
+    sensitivities: []      // ['sugar','additives','lactose','gluten']
+};
+
+// ── SCORING ENGINE ────────────────────────────────────────
+const RED_LIST = {
+    food: {
+        'aspartame': 25, 'aspartam': 25, 'e951': 25,
+        'glucose-fructose syrup': 20, 'glukóz-fruktóz szirup': 20, 'magas fruktóztartalmú kukoricaszirup': 20,
+        'hydrogenated oil': 25, 'hidrogénezett olaj': 25, 'részlegesen hidrogénezett': 25,
+        'monosodium glutamate': 15, 'nátrium-glutamát': 15, 'e621': 15,
+        'sodium nitrite': 20, 'nátrium-nitrit': 20, 'e250': 20,
+        'tartrazine': 20, 'tartrazin': 20, 'e102': 20,
+        'bha': 20, 'bht': 20, 'e320': 20, 'e321': 20,
+        'acesulfame': 20, 'aceszulfám': 20, 'e950': 20,
+        'saccharin': 18, 'szacharin': 18, 'e954': 18,
+    },
+    drink: {
+        'glucose-fructose syrup': 25, 'glukóz-fruktóz szirup': 25,
+        'aspartame': 25, 'aspartam': 25, 'e951': 25,
+        'acesulfame': 22, 'aceszulfám': 22, 'e950': 22,
+        'sodium benzoate': 20, 'nátrium-benzoát': 20, 'e211': 20,
+        'tartrazine': 20, 'tartrazin': 20, 'e102': 20,
+        'saccharin': 20, 'szacharin': 20, 'e954': 20,
+    },
+    cosmetic: {
+        'parfum': 20, 'fragrance': 20, 'illatanyag': 20,
+        'paraben': 25, 'methylparaben': 25, 'propylparaben': 25, 'butylparaben': 25,
+        'sls': 20, 'sodium lauryl sulfate': 20, 'nátrium-lauril-szulfát': 20,
+        'peg': 15,
+        'formaldehyde': 25, 'formaldehid': 25,
+        'triclosan': 22, 'triklozán': 22,
+        'oxybenzone': 20,
+    }
+};
+
+const YELLOW_LIST = {
+    food: {
+        'sugar': 10, 'cukor': 10, 'szacharóz': 8,
+        'flavour': 8, 'aroma': 8, 'természetes aroma': 5,
+        'modified starch': 8, 'módosított keményítő': 8,
+        'emulsifier': 6, 'emulgeálószer': 6,
+        'dextrose': 8, 'dextróz': 8,
+        'maltodextrin': 10, 'maltodextrin': 10,
+        'palm oil': 12, 'pálmaolaj': 12,
+    },
+    drink: {
+        'sugar': 15, 'cukor': 15,
+        'caffeine': 8, 'koffein': 8,
+        'citric acid': 6, 'citromsav': 6, 'e330': 6,
+        'flavour': 8, 'aroma': 8,
+        'dextrose': 10, 'dextróz': 10,
+    },
+    cosmetic: {
+        'alcohol': 10, 'alkohol': 10, 'ethanol': 10,
+        'silicone': 8, 'dimethicone': 8, 'szilikon': 8,
+        'synthetic fragrance': 12,
+        'mineral oil': 10, 'ásványolaj': 10,
+    }
+};
+
+const GREEN_LIST = {
+    food: {
+        'oats': 5, 'zab': 5, 'zabpehely': 5,
+        'almond': 5, 'mandula': 5,
+        'olive oil': 5, 'olívaolaj': 5,
+        'egg': 5, 'tojás': 5,
+        'honey': 4, 'méz': 4,
+        'walnut': 5, 'dió': 5,
+        'quinoa': 5,
+        'chia': 5,
+        'oat fiber': 5, 'zabrost': 5,
+        'whole grain': 5, 'teljes kiőrlésű': 5,
+    },
+    drink: {
+        'mineral water': 5, 'ásványvíz': 5,
+        'green tea': 5, 'zöld tea': 5,
+        'natural juice': 5, 'természetes gyümölcslé': 5,
+        'ginger': 4, 'gyömbér': 4,
+        'lemon juice': 3, 'citromlé': 3,
+    },
+    cosmetic: {
+        'aloe vera': 5, 'aloé vera': 5,
+        'shea butter': 5, 'sheavaj': 5,
+        'jojoba oil': 5, 'jojoba olaj': 5,
+        'argan oil': 5, 'argánolaj': 5,
+        'vitamin e': 4, 'e-vitamin': 4, 'tocopherol': 4,
+        'chamomile': 4, 'kamilla': 4,
+        'green tea extract': 5,
+    }
+};
+
+const SENSITIVITY_KEYWORDS = {
+    sugar:      ['sugar','cukor','szacharóz','fructose','fruktóz','glucose','glükóz','dextrose','dextróz','maltose','maltóz','syrup','szirup','honey','méz'],
+    additives:  ['e1','e2','e3','e4','e5','e6','e9','aspartam','tartrazin','benzoate','szorbát','nitrit','nitrat','glutamát'],
+    lactose:    ['milk','tej','lactose','laktóz','whey','tejsavó','casein','kazein','cream','tejszín','butter','vaj','cheese','sajt'],
+    gluten:     ['wheat','búza','gluten','glutén','rye','rozs','barley','árpa','malt','maláta','oat','zab','flour','liszt']
+};
+
+function normalize(text) {
+    return text.toLowerCase()
+        .replace(/[áâàä]/g,'a').replace(/[éêèë]/g,'e')
+        .replace(/[íîìï]/g,'i').replace(/[óôòö]/g,'o')
+        .replace(/[úûùü]/g,'u').replace(/[ő]/g,'o').replace(/[ű]/g,'u')
+        .replace(/[ç]/g,'c').replace(/[ñ]/g,'n')
+        .trim();
+}
+
+function matchesSensitivity(normalized, sensitivities) {
+    for (const sens of sensitivities) {
+        const keywords = SENSITIVITY_KEYWORDS[sens] || [];
+        for (const kw of keywords) {
+            if (normalized.includes(normalize(kw))) return sens;
+        }
+    }
+    return null;
+}
+
+function evaluateProduct(ingredientText, category, sensitivities) {
+    if (!ingredientText || !category) return null;
+    const cat = RED_LIST[category] ? category : 'food';
+
+    // Split ingredients by common delimiters
+    const raw = ingredientText.split(/[,;()\[\]\/\n]/).map(s => s.trim()).filter(Boolean);
+
+    let score = 100;
+    const redFlags    = [];
+    const yellowFlags = [];
+    const greenFlags  = [];
+    const sensHits    = [];
+    const unknown     = [];
+
+    raw.forEach((ingredient, index) => {
+        const norm = normalize(ingredient);
+        // Position weight: first 3 = 1.5x, middle = 1x, last third = 0.6x
+        const posWeight = index < 3 ? 1.5 : (index < raw.length * 0.66 ? 1.0 : 0.6);
+
+        let matched = false;
+
+        // RED
+        for (const [key, basePenalty] of Object.entries(RED_LIST[cat])) {
+            if (norm.includes(normalize(key))) {
+                const penalty = Math.round(basePenalty * posWeight);
+                score -= penalty;
+                redFlags.push({ name: ingredient, penalty });
+                matched = true;
+                break;
+            }
+        }
+
+        if (!matched) {
+            // YELLOW
+            for (const [key, basePenalty] of Object.entries(YELLOW_LIST[cat])) {
+                if (norm.includes(normalize(key))) {
+                    const penalty = Math.round(basePenalty * posWeight);
+                    score -= penalty;
+                    yellowFlags.push({ name: ingredient, penalty });
+                    matched = true;
+                    break;
+                }
+            }
+        }
+
+        if (!matched) {
+            // GREEN
+            for (const [key, bonus] of Object.entries(GREEN_LIST[cat])) {
+                if (norm.includes(normalize(key))) {
+                    score += bonus;
+                    greenFlags.push({ name: ingredient, bonus });
+                    matched = true;
+                    break;
+                }
+            }
+        }
+
+        if (!matched) unknown.push(ingredient);
+
+        // Sensitivity check (independent)
+        const sensHit = matchesSensitivity(norm, sensitivities);
+        if (sensHit && !matched) {
+            score -= 15;
+            sensHits.push({ name: ingredient, sens: sensHit });
+        }
+    });
+
+    score = Math.max(0, Math.min(100, score));
+    return { score, redFlags, yellowFlags, greenFlags, sensHits, unknown };
+}
+
+function getRating(score) {
+    if (score >= 80) return 'green';
+    if (score >= 55) return 'yellow';
+    return 'red';
+}
+
+// ── PROMPT BUILDER ────────────────────────────────────────
+// Fő kép-elemző prompt — kategória szerint eltérő stílus
+function buildPrompt(category, goal, sensitivities) {
+    const sensNames = { sugar:'cukor/édesítők', additives:'adalékanyagok/E-számok', lactose:'tej/laktóz', gluten:'glutén' };
+    const sensStr   = sensitivities.length ? sensitivities.map(s => sensNames[s]).join(', ') : 'nincs';
+
+    const goalExtras = {
+        child:      'GYEREKNEK: Legyél EXTRA szigorú! Adalékanyagok, mesterséges édesítők, magas cukor automatikusan piros.',
+        weightloss: 'FOGYÁS: Fókusz kalóriasűrűségre, cukorra, zsírra, feldolgozottságra.',
+        muscle:     'IZOMÉPÍTÉS: Fehérjetartalom, BCAA, aminosav-profil, mesterséges adalékok.',
+        honest:     'Legyél kíméletlenül őszinte. Ne szépíts semmit.',
+        healthy:    ''
+    };
+    const goalExtra = goalExtras[goal] || '';
+
+    // Kategória-specifikus fő prompt (prompt 4/5/6)
+    let catPrompt = '';
+    if (category === 'cosmetic') {
+        catPrompt = `Ez egy kozmetikai termék INCI összetevőlistája.
+Feladat:
+- Emeld ki a potenciálisan irritáló anyagokat (max 3)
+- Jelöld a vitatott összetevőket (paraben, SLS, PEG, parfum)
+- Írd le, érzékeny bőrre ajánlott-e
+Ne sorold fel az összes összetevőt. Csak a fontosakat.`;
+    } else if (category === 'drink') {
+        catPrompt = `Ez egy ital összetevőlistája.
+Feladat:
+- Ellenőrizd a cukrot és édesítőszereket
+- Mondd meg, rendszeres fogyasztásra oké-e
+Legyél szigorú.`;
+    } else {
+        catPrompt = `Ez egy élelmiszer összetevőlistája.
+Feladat:
+- Emeld ki a feldolgozott vagy problémás összetevőket
+- Mondd meg, mennyire feldolgozott a termék
+Ne magyarázz alap dolgokat. Csak a lényeg.`;
+    }
+
+    return `Te egy nyers, őszinte termékszűrő vagy. Elemezd a képen látható terméket.
+
+${catPrompt}
+${goalExtra ? '\n' + goalExtra : ''}
+Kerülendők: ${sensStr}
+
+Nézd meg az összetevők listáját, tápértékeket, vonalkódot, termék nevét.
+
+Válaszolj KIZÁRÓLAG érvényes JSON formátumban:
+{
+  "product_name": "termék neve vagy Ismeretlen termék",
+  "barcode": "vonalkód vagy null",
+  "rating": "green" VAGY "yellow" VAGY "red",
+  "verdict": "FOGYASZD" VAGY "ÓVATOSAN" VAGY "KERÜLD",
+  "score": 0-100,
+  "summary": "Max 2 rövid mondat. Konkrét ítélet.",
+  "ingredients_text": "összetevők vesszővel elválasztva",
+  "risks": [
+    {"type": "positive" VAGY "warning" VAGY "negative", "text": "rövid, konkrét megállapítás"}
+  ]
+}
+
+Értékelési útmutató:
+- green (70-100): Tiszta, természetes, minimális feldolgozás
+- yellow (40-69): Néhány feldolgozott összetevő
+- red (0-39): Erősen feldolgozott, káros adalékanyagok
+
+Max 5 megállapítást adj. Ha kerülendőt tartalmaz, jelezd kiemelten!
+CSAK a JSON objektumot add vissza, semmi mást.`;
+}
+
+// ── POFON MONDAT (prompt 2) ───────────────────────────────
+function buildPofonPrompt(score) {
+    return `Adj egy rövid, erős mondatot egy termékről.
+
+Pontszám: ${score}/100
+
+Szabályok:
+- max 8 szó
+- legyen kicsit provokatív
+- ne legyen udvarias
+- magyarul
+
+Példák stílusra:
+- "Ez nem napi cucc."
+- "Több a marketing, mint az érték."
+- "Ezt nyugodtan hagyd a polcon."
+- "Jobb dolgot is találhatsz a polcon."
+- "A pontszám mindent elárul."
+
+Csak 1 mondatot adj. Semmi mást.`;
+}
+
+// ── VERDIKT SZÖVEG (prompt 1) ─────────────────────────────
+function buildVerdiktPrompt(score, redFlags, yellowFlags, greenFlags) {
+    const red    = redFlags.length    ? redFlags.map(f=>f.name).join(', ')    : 'nincs';
+    const yellow = yellowFlags.length ? yellowFlags.map(f=>f.name).join(', ') : 'nincs';
+    const green  = greenFlags.length  ? greenFlags.map(f=>f.name).join(', ')  : 'nincs';
+    return `Te egy nyers, őszinte termékszűrő vagy.
+
+Pontszám: ${score}/100
+🔴 problémás: ${red}
+🟡 közepes: ${yellow}
+🟢 jó: ${green}
+
+Feladat:
+- Adj 1 mondatos VERDIKTET (nagyon egyszerűen)
+- Írj max 3 rövid pontot a lényeges problémákról
+- Írj max 2 pozitívumot ha van
+- Mondd meg: napi használatra ajánlott-e (igen/nem/alkalmanként)
+
+Stílus: rövid, emberi, nem marketinges, nem magyarázkodó.
+NE írj hosszú szöveget.
+Válaszolj magyarul, plain szövegként (nem JSON, nem markdown lista).`;
+}
+
+// ── BS DETEKTOR PROMPT (prompt 3) ─────────────────────────
+function buildBSPrompt(ingredients, score) {
+    return `Vizsgáld meg, hogy ez a termék inkább marketingre épül-e, mint valós értékre.
+
+Összetevők: ${ingredients}
+Pontszám: ${score}/100
+
+Feladat:
+- Mondd meg: van-e marketing bullshit (igen/nem)
+- Ha igen, 1 mondatban magyarázd el miért
+- Legyen kicsit ironikus, de nem túlzó
+
+Max 2 mondat. Ha nincs BS, csak annyit írj: "nincs".`;
+}
+
+// ── ALTERNATÍVA PROMPT (prompt 9) ─────────────────────────
+function buildAlternativaPrompt(ingredients, category) {
+    const catStr = { food:'élelmiszer', drink:'ital', cosmetic:'kozmetikum' }[category] || 'termék';
+    return `Ez a ${catStr} nem ideális.
+
+Összetevők: ${ingredients}
+
+Javasolj egy jobb alternatívát általánosan (nem konkrét márkát).
+Feladat:
+- Írd le, milyen összetevőket keressen helyette
+- Legyen rövid és praktikus
+
+Max 2 mondat. Magyarul.`;
+}
+
+// ── EGY MONDATOS MAGYARÁZAT (prompt 10) ───────────────────
+function buildEgyMondat(score) {
+    return `Magyarázd el 1 mondatban, mi a gond ezzel a termékkel.
+Pontszám: ${score}/100
+Legyen egyszerű, hétköznapi. Magyarul. Csak 1 mondat.`;
+}
+
+// ── PAYWALL SZÖVEG (prompt 7) ─────────────────────────────
+function buildPaywallPrompt() {
+    return `Írj egy rövid szöveget, ami ráveszi a felhasználót a kredit vásárlásra.
+
+Kontextus:
+- már megnézett 3 terméket
+- látja, hogy működik az app
+
+Feladat:
+- hangsúlyozd, hogy eddig csak az alapot látta
+- mutasd meg, mit nyer (jobb döntések, több részlet)
+- ne legyen agresszív
+
+Max 3 mondat. Magyarul.`;
+}
+
+// ── TEASER SZÖVEG (prompt 8) ──────────────────────────────
+function buildTeaserPrompt() {
+    return `Adj 3 rövid pontot arról, mit nem lát a felhasználó az ingyenes verzióban.
+
+Legyen kíváncsiságkeltő.
+
+Példa stílus:
+- "rejtett összetevők teljes elemzése"
+- "valódi kockázati szint"
+- "személyre szabott figyelmeztetések"
+
+Adj pontosan 3 rövid pontot. Magyarul. Csak a 3 pontot, semmi mást.`;
+}
+
+// ── GEMINI SZÖVEGES HÍVÁS (kép nélkül) ───────────────────
+async function callGeminiText(prompt, maxTokens = 300) {
+    try {
+        const resp = await fetch(GEMINI_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { temperature: 0.7, maxOutputTokens: maxTokens }
+            })
+        });
+        if (!resp.ok) return null;
+        const data = await resp.json();
+        return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+    } catch(e) { console.warn('Gemini text hívás hiba:', e); return null; }
+}
+
+// ── AUTH STATE ────────────────────────────────────────────
+onAuthStateChanged(auth, async (user) => {
+    currentUser = user;
+    if (user) {
+        await ensureUserDoc(user);
+        await refreshCredits();
+    } else {
+        userCredits = 0;
+    }
+    updateUI();
+});
+
+async function ensureUserDoc(user) {
+    const ref  = doc(db, 'users', user.uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+        await setDoc(ref, {
+            email:       user.email || '',
+            displayName: user.displayName || '',
+            credits:     FREE_SCANS,
+            totalScans:  0,
+            createdAt:   new Date().toISOString(),
+            prefs:       { defaultGoal: null, sensitivities: [] }
+        });
+        userCredits = FREE_SCANS;
+    } else {
+        const data = snap.data();
+        userCredits = data.credits ?? 0;
+        // Preferenciák betöltése
+        if (data.prefs) {
+            userPrefs.defaultGoal    = data.prefs.defaultGoal    || null;
+            userPrefs.sensitivities  = data.prefs.sensitivities  || [];
+        }
+    }
+}
+
+async function refreshCredits() {
+    if (!currentUser) { userCredits = 0; return; }
+    const snap = await getDoc(doc(db, 'users', currentUser.uid));
+    if (snap.exists()) {
+        userCredits = snap.data().credits ?? 0;
+        if (snap.data().prefs) {
+            userPrefs.defaultGoal   = snap.data().prefs.defaultGoal   || null;
+            userPrefs.sensitivities = snap.data().prefs.sensitivities  || [];
+        }
+    }
+}
+
+function updateUI() {
+    const badge = document.getElementById('credit-badge');
+    const fab   = document.getElementById('profile-fab');
+    if (currentUser) {
+        badge.textContent = '⚡ ' + userCredits;
+        badge.style.display = 'block';
+        fab.classList.add('visible');
+        const paName  = document.getElementById('pa-name');
+        const paEmail = document.getElementById('pa-email');
+        const paCred  = document.getElementById('pa-credits');
+        const pkNum   = document.getElementById('pk-num');
+        if (paName)  paName.textContent  = currentUser.displayName || currentUser.email || 'Vadász';
+        if (paEmail) paEmail.textContent = currentUser.email || '';
+        if (paCred)  paCred.textContent  = '⚡ ' + userCredits + ' kredit';
+        if (pkNum)   pkNum.textContent   = userCredits;
+    } else {
+        badge.style.display = 'none';
+        fab.classList.remove('visible');
+    }
+}
+
+// ── GOOGLE LOGIN ──────────────────────────────────────────
+window.loginWithGoogle = async function() {
+    try {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+        document.getElementById('login-overlay').classList.remove('active');
+    } catch(e) {
+        alert('Google bejelentkezés sikertelen: ' + e.message);
+    }
+};
+
+// ── PROFIL PANEL ──────────────────────────────────────────
+window.openProfile = function() {
+    document.getElementById('profile-panel').classList.add('open');
+    document.getElementById('profile-overlay').classList.add('active');
+    window.switchProfTab('account');
+};
+window.closeProfile = function() {
+    document.getElementById('profile-panel').classList.remove('open');
+    document.getElementById('profile-overlay').classList.remove('active');
+};
+window.switchProfTab = function(tab) {
+    ['account','settings','credits'].forEach(t => {
+        document.getElementById('pib-' + t)?.classList.toggle('active', t === tab);
+    });
+    document.querySelectorAll('.prof-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('prof-tab-' + tab)?.classList.add('active');
+    if (tab === 'account') {
+        document.getElementById('pa-name').textContent  = currentUser?.displayName || currentUser?.email || '—';
+        document.getElementById('pa-email').textContent = currentUser?.email || '';
+        document.getElementById('pa-credits').textContent = '⚡ ' + userCredits + ' kredit';
+    }
+    if (tab === 'credits') document.getElementById('pk-num').textContent = userCredits;
+    if (tab === 'settings') renderPrefUI();
+};
+
+// ── PREFERENCIA UI RENDERELÉS ─────────────────────────────
+function renderPrefUI() {
+    // Cél gombok
+    ['healthy','weightloss','muscle','child','honest'].forEach(g => {
+        const btn = document.getElementById('pg-' + g);
+        if (btn) btn.classList.toggle('active', userPrefs.defaultGoal === g);
+    });
+    // Érzékenység togglek
+    ['sugar','additives','lactose','gluten'].forEach(s => {
+        const row = document.getElementById('prs-' + s);
+        if (row) row.classList.toggle('active', userPrefs.sensitivities.includes(s));
+    });
+    document.getElementById('pref-save-status').textContent = '';
+}
+
+// ── CÉL KIVÁLASZTÁS (preferencia) ────────────────────────
+window.selectPrefGoal = function(goal) {
+    // Ha ugyanazt nyomja meg → töröl (nincs alapértelmezett)
+    userPrefs.defaultGoal = userPrefs.defaultGoal === goal ? null : goal;
+    renderPrefUI();
+};
+
+// ── ÉRZÉKENYSÉG TOGGLE (preferencia) ─────────────────────
+window.togglePrefSens = function(sens) {
+    const arr = userPrefs.sensitivities;
+    userPrefs.sensitivities = arr.includes(sens) ? arr.filter(s => s !== sens) : [...arr, sens];
+    renderPrefUI();
+};
+
+// ── PREFERENCIÁK MENTÉSE FIRESTORE-BA ────────────────────
+window.savePrefs = async function() {
+    if (!currentUser) return;
+    const btn    = document.getElementById('pref-save-btn');
+    const status = document.getElementById('pref-save-status');
+    btn.disabled = true;
+    btn.textContent = 'MENTÉS...';
+    try {
+        await updateDoc(doc(db, 'users', currentUser.uid), {
+            prefs: {
+                defaultGoal:   userPrefs.defaultGoal,
+                sensitivities: userPrefs.sensitivities
+            }
+        });
+        status.textContent = '✓ Mentve!';
+        status.style.color = 'var(--green)';
+    } catch(e) {
+        status.textContent = '⚠ Hiba: ' + e.message;
+        status.style.color = 'var(--red)';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 MENTÉS';
+        setTimeout(() => { status.textContent = ''; }, 3000);
+    }
+};
+window.profLogout = function() {
+    if (confirm('Kijelentkezel?')) {
+        signOut(auth).then(() => { window.closeProfile(); updateUI(); });
+    }
+};
+
+// ── KO-FI ─────────────────────────────────────────────────
+window.openKofi = function() { window.open('https://ko-fi.com/vadaszapps', '_blank'); };
+
+// Paywall overlay megnyitásakor AI szöveg betöltése
+async function loadPaywallText() {
+    const paywallEl = document.getElementById('kofi-paywall-text');
+    const teaserEl  = document.getElementById('kofi-teaser-list');
+    if (!paywallEl) return;
+
+    // Aszinkron, nem blokkolja az overlay megjelenését
+    try {
+        const [paywallText, teaserText] = await Promise.all([
+            callGeminiText(buildPaywallPrompt(), 200),
+            callGeminiText(buildTeaserPrompt(), 150)
+        ]);
+        if (paywallText) paywallEl.textContent = paywallText;
+        if (teaserText && teaserEl) {
+            const lines = teaserText.split('\n').map(l => l.replace(/^[-•*▶\d.]+\s*/,'').trim()).filter(Boolean).slice(0,3);
+            if (lines.length) {
+                teaserEl.innerHTML = lines.map(l =>
+                    `<div style="font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:var(--green);display:flex;align-items:center;gap:8px"><span>▶</span><span>${l}</span></div>`
+                ).join('');
+            }
+        }
+    } catch(e) { /* fallback szöveg marad */ }
+}
+
+// Kofi overlay megnyitásakor betöltjük a szöveget
+const _origKofiShow = window.checkKofiCredit;
+
+async function pollCredits(prevCredits, statusElId, onSuccess) {
+    let attempts = 0;
+    const statusEl = document.getElementById(statusElId);
+    const poll = async () => {
+        attempts++;
+        await refreshCredits();
+        updateUI();
+        if (document.getElementById('pk-num')) document.getElementById('pk-num').textContent = userCredits;
+        if (userCredits > prevCredits) {
+            if (statusEl) statusEl.textContent = '✅ ' + userCredits + ' kredit jóváírva!';
+            if (onSuccess) onSuccess();
+            return;
+        }
+        if (attempts < 6) {
+            if (statusEl) statusEl.textContent = '⏳ Várakozás... (' + attempts + '/6)';
+            setTimeout(poll, 5000);
+        } else {
+            if (statusEl) statusEl.textContent = '⏳ Még nem érkezett. Próbáld 1 perc múlva!';
+        }
+    };
+    if (statusEl) statusEl.textContent = '⏳ Ellenőrzés...';
+    setTimeout(poll, 3000);
+}
+
+window.checkKofiCredit = function() {
+    const prev = userCredits;
+    document.getElementById('kofi-overlay').classList.remove('active');
+    pollCredits(prev, null, null);
+};
+window.checkKofiCreditPanel = function() {
+    const prev = userCredits;
+    pollCredits(prev, 'pk-status', null);
+};
+
+// ── KREDIT LEVONÁS ────────────────────────────────────────
+async function deductCredit() {
+    if (!currentUser) return;
+    try {
+        await updateDoc(doc(db, 'users', currentUser.uid), {
+            credits:    increment(-1),
+            totalScans: increment(1)
+        });
+        userCredits = Math.max(0, userCredits - 1);
+        updateUI();
+    } catch(e) { console.error('Kredit levonás hiba:', e); }
+}
+
+// ── NAVIGATION ────────────────────────────────────────────
+window.navTo = function(page) {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    if (page === 'home') {
+        document.getElementById('nav-scan').classList.add('active');
+        document.getElementById('page-home').classList.add('active');
+    } else if (page === 'category') {
+        document.getElementById('nav-scan').classList.add('active');
+        document.getElementById('page-category').classList.add('active');
+    } else if (page === 'goal') {
+        document.getElementById('nav-scan').classList.add('active');
+        document.getElementById('page-goal').classList.add('active');
+    } else if (page === 'sensitivity') {
+        document.getElementById('nav-scan').classList.add('active');
+        document.getElementById('page-sensitivity').classList.add('active');
+    } else {
+        document.getElementById('nav-' + page)?.classList.add('active');
+        document.getElementById('page-' + page)?.classList.add('active');
+    }
+};
+
+// ── EMAIL OBFUSCATION ─────────────────────────────────────
+document.querySelectorAll('[data-em]').forEach(el => {
+    el.href = 'mailto:' + 'vadaszapps' + '@' + 'gmail.com';
+});
+
+// ── FLOW: KATEGÓRIA ───────────────────────────────────────
+window.selectCategory = function(cat) {
+    window.flowState.category = cat;
+    document.querySelectorAll('.flow-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('cat-' + cat)?.classList.add('selected');
+    document.getElementById('cat-next-btn').disabled = false;
+};
+
+window.goToGoal = function() {
+    if (!window.flowState.category) return;
+    // Ha van mentett alapértelmezett cél → goal lépés kihagyása
+    if (userPrefs.defaultGoal) {
+        window.flowState.goal = userPrefs.defaultGoal;
+        // Ha érzékenység is mentve van → egyből szkennelés
+        if (userPrefs.sensitivities.length > 0) {
+            window.startScan();
+        } else {
+            window.navTo('sensitivity');
+        }
+    } else {
+        window.navTo('goal');
+    }
+};
+
+// ── FLOW: CÉL ─────────────────────────────────────────────
+window.selectGoal = function(goal) {
+    window.flowState.goal = goal;
+    document.querySelectorAll('#goal-grid .flow-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('goal-' + goal)?.classList.add('selected');
+    document.getElementById('goal-next-btn').disabled = false;
+};
+
+window.goToSensitivity = function() {
+    if (!window.flowState.goal) return;
+    // Ha van mentett érzékenység → sens lépés kihagyása
+    if (userPrefs.sensitivities.length > 0) {
+        window.flowState.sensitivities = [...userPrefs.sensitivities];
+        window.startScan();
+    } else {
+        window.navTo('sensitivity');
+    }
+};
+
+// ── FLOW: ÉRZÉKENYSÉG ─────────────────────────────────────
+window.toggleSensitivity = function(sens) {
+    const el  = document.getElementById('sens-' + sens);
+    const arr = window.flowState.sensitivities;
+    if (arr.includes(sens)) {
+        window.flowState.sensitivities = arr.filter(s => s !== sens);
+        el.classList.remove('selected');
+    } else {
+        window.flowState.sensitivities.push(sens);
+        el.classList.add('selected');
+    }
+};
+
+// ── SCAN INDÍTÁS (flow végén) ─────────────────────────────
+window.startScan = function() {
+    if (!currentUser) {
+        document.getElementById('login-overlay').classList.add('active');
+        return;
+    }
+    if (userCredits <= 0) {
+        document.getElementById('kofi-overlay').classList.add('active');
+        loadPaywallText();
+        refreshCredits().then(() => {
+            updateUI();
+            if (userCredits > 0) document.getElementById('kofi-overlay').classList.remove('active');
+        });
+        return;
+    }
+    document.getElementById('file-input').click();
+    refreshCredits().then(updateUI);
+};
+
+// ── HOME SCAN GOMB → flow indítás ────────────────────────
+document.getElementById('scan-btn').addEventListener('click', () => {
+    if (!currentUser) {
+        document.getElementById('login-overlay').classList.add('active');
+        return;
+    }
+    if (userCredits <= 0) {
+        document.getElementById('kofi-overlay').classList.add('active');
+        loadPaywallText();
+        refreshCredits().then(() => {
+            updateUI();
+            if (userCredits > 0) document.getElementById('kofi-overlay').classList.remove('active');
+        });
+        return;
+    }
+    // Reset flow state — mentett preferenciák betöltése
+    window.flowState = {
+        category:      null,
+        goal:          userPrefs.defaultGoal,
+        sensitivities: [...userPrefs.sensitivities]
+    };
+    document.querySelectorAll('.flow-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.sens-item').forEach(c => c.classList.remove('selected'));
+    document.getElementById('cat-next-btn').disabled  = true;
+    document.getElementById('goal-next-btn').disabled = true;
+
+    // Ha van mentett goal → goal lépés kimarad, egyből kategória után sens/scan
+    // Ha van mindkettő mentve → csak kategória marad
+    window.navTo('category');
+});
+
+document.getElementById('file-input').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    e.target.value = '';
+    const url = URL.createObjectURL(file);
+    lastPreviewUrl = url;
+    document.getElementById('preview-img').src = url;
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('nav-scan').classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-scan').classList.add('active');
+    await runAnalysis(file, url);
+});
+
+// ── STEP INDICATOR ────────────────────────────────────────
+function setStep(n) {
+    const labels = ['ELEMZEM_AZ_ÖSSZETEVŐKET_', 'KISZÚROM_A_TRÜKKÖS_RÉSZEKET_', 'OPENFOODFACTS_LEKÉRDEZÉS_', 'SZÁMOLOM_A_PRÍMA_SCORE-T_'];
+    ['step-1','step-2','step-3','step-4'].forEach((id, i) => {
+        const el = document.getElementById(id);
+        el.className = 'scan-step';
+        if (i < n - 1) el.classList.add('done');
+        else if (i === n - 1) el.classList.add('active');
+    });
+    if (n <= 4) document.getElementById('status-line').textContent = labels[n - 1];
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── KÉP → BASE64 ─────────────────────────────────────────
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            const MAX = 800;
+            let w = img.width, h = img.height;
+            if (w > MAX || h > MAX) {
+                if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+                else { w = Math.round(w * MAX / h); h = MAX; }
+            }
+            const c = document.createElement('canvas');
+            c.width = w; c.height = h;
+            c.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(c.toDataURL('image/jpeg', 0.85).split(',')[1]);
+        };
+        img.onerror = reject;
+        img.src = URL.createObjectURL(file);
+    });
+}
+
+// ── OPENFOODFACTS ─────────────────────────────────────────
+async function fetchOpenFoodFacts(barcode) {
+    try {
+        const resp = await fetch(
+            `https://world.openfoodfacts.org/api/v2/product/${barcode}.json`,
+            { signal: AbortSignal.timeout(8000) }
+        );
+        if (!resp.ok) return null;
+        const data = await resp.json();
+        if (data.status !== 1 || !data.product) return null;
+        const p = data.product;
+        return {
+            name:       p.product_name || p.product_name_en || null,
+            brands:     p.brands || null,
+            nutriscore: p.nutriscore_grade || p.nutrition_grades || null,
+            nova:       p.nova_group || null,
+            allergens:  p.allergens_tags ? p.allergens_tags.map(a => a.replace('en:','')) : null,
+            additives:  p.additives_tags ? p.additives_tags.map(a => a.replace('en:','')) : null,
+            nutriments: p.nutriments ? {
+                energy_kcal:   p.nutriments['energy-kcal_100g'] || null,
+                fat:           p.nutriments.fat_100g || null,
+                saturated_fat: p.nutriments['saturated-fat_100g'] || null,
+                sugars:        p.nutriments.sugars_100g || null,
+                salt:          p.nutriments.salt_100g || null,
+                fiber:         p.nutriments.fiber_100g || null,
+                proteins:      p.nutriments.proteins_100g || null
+            } : null
+        };
+    } catch (e) { console.warn('OFF hiba:', e); return null; }
+}
+
+// ── FŐELEMZÉS ─────────────────────────────────────────────
+async function runAnalysis(file, previewUrl) {
+    setStep(1);
+    try {
+        const base64 = await fileToBase64(file);
+        const { category, goal, sensitivities } = window.flowState;
+        const cat = category || 'food';
+        const prompt = buildPrompt(cat, goal || 'honest', sensitivities);
+
+        // 1. KÉP ELEMZÉS — Gemini Vision
+        const resp = await fetch(GEMINI_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [
+                        { inline_data: { mime_type: 'image/jpeg', data: base64 } },
+                        { text: prompt }
+                    ]
+                }],
+                generationConfig: { temperature: 0.3, maxOutputTokens: 2048 }
+            })
+        });
+
+        setStep(2); await delay(300);
+
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            const msg = err?.error?.message || 'Ismeretlen hiba';
+            if (resp.status === 429) throw new Error('Gemini API kvóta kimerítve. Próbáld újra egy perc múlva.');
+            if (resp.status === 403) throw new Error('Érvénytelen API kulcs.');
+            throw new Error(`Gemini API ${resp.status}: ${msg}`);
+        }
+
+        const data      = await resp.json();
+        const candidate = data?.candidates?.[0];
+        if (candidate?.finishReason === 'MAX_TOKENS') throw new Error('A válasz túl hosszú. Próbáld újra!');
+
+        const text = candidate?.content?.parts?.[0]?.text || '';
+        let visionResult;
+        try {
+            let cleaned = text.replace(/```json?/gi,'').replace(/```/g,'').trim();
+            if (!cleaned.startsWith('{')) {
+                const match = cleaned.match(/\{[\s\S]*\}/);
+                if (match) cleaned = match[0];
+            }
+            visionResult = JSON.parse(cleaned);
+        } catch (parseErr) {
+            throw new Error('JSON parse hiba. Próbáld újra!');
+        }
+
+        // 2. LOKÁLIS SCORING ENGINE
+        if (visionResult.ingredients_text && cat) {
+            const engineResult = evaluateProduct(visionResult.ingredients_text, cat, sensitivities);
+            if (engineResult) {
+                const blendedScore = Math.round((visionResult.score || 50) * 0.6 + engineResult.score * 0.4);
+                visionResult.score        = Math.max(0, Math.min(100, blendedScore));
+                visionResult.engineResult = engineResult;
+                visionResult.rating       = getRating(visionResult.score);
+                visionResult.verdict      = visionResult.score >= 70 ? 'FOGYASZD' : visionResult.score >= 45 ? 'ÓVATOSAN' : 'KERÜLD';
+            }
+        }
+
+        await deductCredit();
+        setStep(3);
+
+        // 3. PÁRHUZAMOS SZÖVEGES HÍVÁSOK
+        const score       = Math.max(0, Math.min(100, visionResult.score || 0));
+        const eng         = visionResult.engineResult;
+        const ingredients = visionResult.ingredients_text || '';
+
+        const [offData, pofonMondat, verdiktSzoveg, bsText, altText, egyMondat] = await Promise.all([
+            visionResult.barcode ? fetchOpenFoodFacts(visionResult.barcode) : Promise.resolve(null),
+            callGeminiText(buildPofonPrompt(score), 80),
+            eng ? callGeminiText(buildVerdiktPrompt(score, eng.redFlags, eng.yellowFlags, eng.greenFlags), 400) : Promise.resolve(null),
+            ingredients ? callGeminiText(buildBSPrompt(ingredients, score), 150) : Promise.resolve(null),
+            (score < 70 && ingredients) ? callGeminiText(buildAlternativaPrompt(ingredients, cat), 150) : Promise.resolve(null),
+            callGeminiText(buildEgyMondat(score), 80)
+        ]);
+
+        // BS detektor: ha "nincs" választ kapott, null-ra állítjuk
+        const bsFinal = (bsText && bsText.toLowerCase().trim() !== 'nincs') ? bsText : null;
+
+        visionResult.pofonMondat    = pofonMondat || null;
+        visionResult.verdiktSzoveg  = verdiktSzoveg || null;
+        visionResult.bs_detector    = bsFinal;
+        visionResult.alternative_tip = altText || null;
+        visionResult.egyMondat      = egyMondat || null;
+
+        setStep(4); await delay(200);
+        showResult(visionResult, offData, previewUrl);
+
+    } catch (err) {
+        console.error('Elemzési hiba:', err);
+        showError(err.message, previewUrl);
+    }
+}
+
+// ── EREDMÉNY RENDERELÉS ───────────────────────────────────
+function showResult(r, off, previewUrl) {
+    const rating      = (r.rating || 'red').toLowerCase();
+    const verdict     = r.verdict || (rating === 'green' ? 'FOGYASZD' : rating === 'yellow' ? 'ÓVATOSAN' : 'KERÜLD');
+    const productName = (off && off.name) || r.product_name || 'Ismeretlen termék';
+    const summary     = r.summary || 'Elemzés kész.';
+    const risks       = r.risks || [];
+    const score       = Math.max(0, Math.min(100, r.score || 0));
+    const icon        = rating === 'green' ? '🟢' : rating === 'yellow' ? '🟡' : '🔴';
+    const barColor    = rating === 'green' ? 'var(--green)' : rating === 'yellow' ? 'var(--yellow)' : 'var(--red)';
+
+    // Context pills
+    const { category, goal, sensitivities } = window.flowState;
+    const catLabel  = { food:'🍔 Élelmiszer', drink:'🥤 Ital', cosmetic:'🧴 Kozmetikum' };
+    const goalLabel = { healthy:'🟢 Egészségesebb', weightloss:'🔥 Fogyás', muscle:'💪 Izomépítés', child:'👶 Gyereknek', honest:'⚠️ Őszinte mód' };
+    let pillsHTML = '';
+    if (category)                       pillsHTML += `<span class="context-pill cat-pill">${catLabel[category]||category}</span>`;
+    if (goal)                           pillsHTML += `<span class="context-pill goal-pill">${goalLabel[goal]||goal}</span>`;
+    if (sensitivities && sensitivities.length) {
+        const sn = { sugar:'Cukor', additives:'Adalékok', lactose:'Laktóz', gluten:'Glutén' };
+        sensitivities.forEach(s => { pillsHTML += `<span class="context-pill sens-pill">⛔ ${sn[s]||s}</span>`; });
+    }
+
+    // Pofon mondat blokk
+    const pofonHTML = r.pofonMondat ? `
+        <div style="border-left:3px solid ${barColor};padding:12px 16px;background:rgba(0,0,0,0.3);font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:2px;color:${barColor}">
+            ${r.pofonMondat}
+        </div>` : '';
+
+    // Verdikt szöveg blokk
+    const verdiktSzovegHTML = r.verdiktSzoveg ? `
+        <div style="border:1px solid var(--border);padding:16px;background:var(--panel)">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.58rem;letter-spacing:3px;color:var(--dim);margin-bottom:10px">AI VERDIKT</div>
+            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.85rem;color:#ccc;line-height:1.7;white-space:pre-line">${r.verdiktSzoveg}</div>
+        </div>` : '';
+
+    // Risks HTML
+    const risksHTML = risks.map(risk => `
+        <div class="risk-item ${risk.type === 'positive' ? 'positive' : risk.type === 'warning' ? 'warning' : ''}">
+            <span class="risk-bullet">${risk.type === 'positive' ? '▲' : risk.type === 'warning' ? '◆' : '▼'}</span>
+            <span>${risk.text}</span>
+        </div>`).join('');
+
+    // Scoring engine breakdown
+    let engineHTML = '';
+    if (r.engineResult) {
+        const eng = r.engineResult;
+        if (eng.redFlags.length) {
+            engineHTML += `<div class="flag-block red-block">
+                <div class="flag-block-title">🔴 KERÜLD, HA LEHET</div>
+                <div class="flag-list">${eng.redFlags.map(f =>
+                    `<div class="flag-item"><span class="flag-name">${f.name}</span><span class="flag-penalty">−${f.penalty} pt</span></div>`
+                ).join('')}</div></div>`;
+        }
+        if (eng.yellowFlags.length) {
+            engineHTML += `<div class="flag-block yellow-block">
+                <div class="flag-block-title">🟡 NEM IDEÁLIS, DE BELEFÉR</div>
+                <div class="flag-list">${eng.yellowFlags.map(f =>
+                    `<div class="flag-item"><span class="flag-name">${f.name}</span><span class="flag-penalty">−${f.penalty} pt</span></div>`
+                ).join('')}</div></div>`;
+        }
+        if (eng.greenFlags.length) {
+            engineHTML += `<div class="flag-block green-block">
+                <div class="flag-block-title">🟢 AMI RENDBEN VAN BENNE</div>
+                <div class="flag-list">${eng.greenFlags.map(f =>
+                    `<div class="flag-item"><span class="flag-name">${f.name}</span><span class="flag-penalty">+${f.bonus} pt</span></div>`
+                ).join('')}</div></div>`;
+        }
+        if (eng.sensHits.length) {
+            const sn = { sugar:'Cukor', additives:'Adalék', lactose:'Laktóz', gluten:'Glutén' };
+            engineHTML += `<div class="flag-block red-block">
+                <div class="flag-block-title">⚠️ KERÜLENDŐD TARTALMAZ</div>
+                <div class="flag-list">${eng.sensHits.map(f =>
+                    `<div class="flag-item"><span class="flag-name">${f.name}</span><span class="flag-penalty" style="color:var(--red)">${sn[f.sens]||f.sens}</span></div>`
+                ).join('')}</div></div>`;
+        }
+    }
+
+    // BS Detektor
+    const bsHTML = r.bs_detector ? `
+        <div class="bs-block">
+            <div class="bs-header">
+                <span class="bs-icon">🚨</span>
+                <span class="bs-title">MARKETING BS DETEKTOR</span>
+                <span class="bs-badge">ÁTVERÉS ÉSZLELVE</span>
+            </div>
+            <div class="bs-text">${r.bs_detector}</div>
+        </div>` : '';
+
+    // Alternatíva
+    const altHTML = r.alternative_tip ? `
+        <div class="alt-block">
+            <div class="alt-title">💡 MIT VEGYÉL HELYETTE?</div>
+            <div class="alt-text">${r.alternative_tip}</div>
+        </div>` : '';
+
+    // OpenFoodFacts blokk
+    let offHTML = '';
+    if (off) {
+        let rows = '';
+        if (off.brands) rows += `<div class="off-row"><span class="off-row-label">MÁRKA</span><span class="off-row-value">${off.brands}</span></div>`;
+        if (off.nutriscore) {
+            const g = off.nutriscore.toLowerCase();
+            rows += `<div class="off-row"><span class="off-row-label">NUTRI-SCORE</span><span class="nutri-grade nutri-${g}">${g.toUpperCase()}</span></div>`;
+        }
+        if (off.nova) rows += `<div class="off-row"><span class="off-row-label">NOVA CSOPORT</span><span class="nova-badge nova-${off.nova}">${off.nova} / 4</span></div>`;
+        if (off.nutriments) {
+            const n = off.nutriments;
+            if (n.energy_kcal != null) rows += `<div class="off-row"><span class="off-row-label">ENERGIA</span><span class="off-row-value">${n.energy_kcal} kcal/100g</span></div>`;
+            if (n.sugars      != null) rows += `<div class="off-row"><span class="off-row-label">CUKOR</span><span class="off-row-value">${n.sugars}g/100g</span></div>`;
+            if (n.fat         != null) rows += `<div class="off-row"><span class="off-row-label">ZSÍR</span><span class="off-row-value">${n.fat}g/100g</span></div>`;
+            if (n.saturated_fat != null) rows += `<div class="off-row"><span class="off-row-label">TELÍTETT ZSÍR</span><span class="off-row-value">${n.saturated_fat}g/100g</span></div>`;
+            if (n.salt        != null) rows += `<div class="off-row"><span class="off-row-label">SÓ</span><span class="off-row-value">${n.salt}g/100g</span></div>`;
+            if (n.fiber       != null) rows += `<div class="off-row"><span class="off-row-label">ROST</span><span class="off-row-value">${n.fiber}g/100g</span></div>`;
+            if (n.proteins    != null) rows += `<div class="off-row"><span class="off-row-label">FEHÉRJE</span><span class="off-row-value">${n.proteins}g/100g</span></div>`;
+        }
+        if (off.additives && off.additives.length > 0)
+            rows += `<div class="off-row"><span class="off-row-label">ADALÉKANYAGOK</span><span class="off-row-value" style="font-size:0.7rem;max-width:60%;text-align:right">${off.additives.join(', ')}</span></div>`;
+        if (off.allergens && off.allergens.length > 0)
+            rows += `<div class="off-row"><span class="off-row-label">ALLERGÉNEK</span><span class="off-row-value" style="color:var(--yellow)">${off.allergens.join(', ')}</span></div>`;
+        offHTML = `<div class="off-block"><div class="off-title">📦 OPENFOODFACTS ADATOK</div>${rows}</div>`;
+    }
+
+    const barcodeInfo = r.barcode
+        ? `<div style="font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:var(--dim)">EAN: ${r.barcode}${off ? ' ✓' : ' (nincs az OFF adatbázisban)'}</div>`
+        : '';
+
+    // Megosztás szöveg — egy mondatos magyarázattal (prompt 10)
+    const shareBase  = r.egyMondat || `Ez a termék ${score} pontot kapott a Príma Scan szerint`;
+    const shareText  = `${shareBase} ${score < 50 ? '😬' : score < 70 ? '😅' : '✅'} — ${verdict}`;
+
+    document.getElementById('result-inner').innerHTML = `
+        <div class="result-meta">
+            <div class="result-meta-text">ELEMZÉS KÉSZ · ${new Date().toLocaleTimeString('hu-HU')}</div>
+            <img class="result-thumb" src="${previewUrl}" alt="">
+        </div>
+        ${pillsHTML ? `<div class="context-pills">${pillsHTML}</div>` : ''}
+        <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:2px;color:var(--white)">${productName}</div>
+            ${barcodeInfo}
+        </div>
+        ${pofonHTML}
+        <div class="verdict-block ${rating}">
+            <div class="verdict-label">PRÍMA SCORE · AI ÉRTÉKELÉS</div>
+            <div class="verdict-rating"><span class="verdict-icon">${icon}</span><span>${verdict}</span></div>
+            <div class="verdict-summary">${summary}</div>
+        </div>
+        <div>
+            <div class="block-label">EGÉSZSÉG PONTSZÁM</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--dim)">0 · KÁROS</span>
+                <span style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:${barColor}">${score}</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--dim)">TISZTA · 100</span>
+            </div>
+            <div class="score-bar-wrap">
+                <div class="score-bar-fill" id="score-fill" style="width:0%;background:${barColor}"></div>
+            </div>
+        </div>
+        ${verdiktSzovegHTML}
+        ${engineHTML}
+        ${offHTML}
+        ${risks.length ? `<div><div class="block-label">AI MEGÁLLAPÍTÁSOK</div>${risksHTML}</div>` : ''}
+        ${bsHTML}
+        ${altHTML}
+        <button class="share-btn" onclick="window.shareResult('${encodeURIComponent(shareText)}')">
+            <span class="share-icon">📤</span>
+            <span>MEGOSZTOM</span>
+        </button>
+        <div style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:0.55rem;color:var(--muted);letter-spacing:1px">
+            ${off ? 'ADAT: Gemini 2.5 Flash + OpenFoodFacts + Príma Engine' : 'ADAT: Gemini 2.5 Flash + Príma Engine'}
+        </div>
+        <button class="scan-again-btn" onclick="resetToHome()"><span>↺ ÚJ SZKENNELÉS</span></button>`;
+
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-result').classList.add('active');
+    setTimeout(() => { const f = document.getElementById('score-fill'); if (f) f.style.width = score + '%'; }, 200);
+}
+
+// ── MEGOSZTÁS ─────────────────────────────────────────────
+window.shareResult = function(encodedText) {
+    const text = decodeURIComponent(encodedText);
+    if (navigator.share) {
+        navigator.share({
+            title: 'PrimalScan Elemzés',
+            text:  text + '\n\nhttps://primalscan.vadasz-apps.web.app',
+        }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(text + '\n\nhttps://primalscan.vadasz-apps.web.app')
+            .then(() => alert('Másolva a vágólapra! 📋'))
+            .catch(() => alert(text));
+    }
+};
+
+function showError(msg, previewUrl) {
+    document.getElementById('result-inner').innerHTML = `
+        <div class="result-meta">
+            <div class="result-meta-text">SZKENNELÉS SIKERTELEN</div>
+            <img class="result-thumb" src="${previewUrl}" alt="">
+        </div>
+        <div class="error-block">
+            <div class="error-title">HIBA</div>
+            <div class="error-msg">${msg}</div>
+        </div>
+        <button class="scan-again-btn" onclick="resetToHome()"><span>↺ PRÓBÁLD ÚJRA</span></button>`;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-result').classList.add('active');
+}
+
+window.resetToHome = function() {
+    document.getElementById('result-inner').innerHTML = '';
+    window.flowState = { category: null, goal: null, sensitivities: [] };
+    window.navTo('home');
+};
+
+</script>
+</body>
+</html>

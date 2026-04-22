@@ -1,0 +1,709 @@
+<!-- © 2026 Patika Vadász. Minden jog fenntartva. -->
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Patika Vadász</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0D3B2E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Patika Vadász">
+    <link rel="apple-touch-icon" href="https://patika-vadasz.web.app/logo.png">
+    <link rel="icon" type="image/png" href="https://patika-vadasz.web.app/logo.png">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Georgia', serif; background: #EDEDE3; color: #1a1a1a; }
+        :root { --gold: #FFD700; --hbg: #0D3B2E; --pbg: #EDEDE3; --mbg: #E3F3E9; --navbar: 54px; --header: 64px; }
+
+        .page { display: none; flex-direction: column; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+        .page.active { display: flex; }
+
+        header { height: var(--header); padding: 0 15px; background: var(--hbg); border-bottom: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 50; overflow: hidden; }
+        header h1 { color: var(--gold); font-size: 1.2rem; font-family: Georgia, serif; }
+        .logo-text { font-size: 1.6rem; font-weight: bold; color: var(--gold); letter-spacing: 2px; line-height: 1.2; font-family: Georgia, serif; }
+        .logo-sub { font-size: 0.85rem; color: #acd4c0; font-family: Georgia, serif; }
+
+        .navbar { height: var(--navbar); display: flex; justify-content: space-around; align-items: center; background: var(--hbg); border-top: 2px solid var(--gold); position: fixed; bottom: 27px; width: 100%; z-index: 1000; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+        .navbar span { color: #acd4c0; font-size: 0.68rem; cursor: pointer; padding: 4px 6px; font-family: Georgia, serif; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1px; -webkit-tap-highlight-color: transparent; }
+        .navbar span.active, .navbar span:hover { color: var(--gold); border-bottom: 2px solid var(--gold); }
+
+        #global-copyright { position: fixed; bottom: 0; left: 0; width: 100%; height: 27px; line-height: 27px; text-align: center; background: var(--hbg); color: var(--gold); font-size: 0.72rem; font-weight: bold; z-index: 1001; }
+
+        /* KEZDŐLAP */
+        .hero { text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; flex: 1; padding: 20px; padding-bottom: calc(var(--navbar) + 27px); overflow: hidden; background: var(--pbg); }
+        .hero h2 { font-size: 1.8rem; color: #0D3B2E; margin: 15px 0; font-family: Georgia, serif; }
+        .hero p { color: #445; margin-bottom: 20px; max-width: 300px; line-height: 1.6; }
+        .hero-buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 300px; }
+        .patika-logo-wrap { width: 220px; height: 220px; border: 3px solid #0D3B2E; border-radius: 18px; background: #0D3B2E; display: flex; flex-direction: column; align-items: center; justify-content: center; filter: drop-shadow(0 0 20px rgba(13,59,46,0.35)); margin-bottom: 5px; }
+        .patika-logo-wrap .logo-icon { font-size: 4.5rem; line-height: 1; }
+        .patika-logo-wrap .logo-title { color: var(--gold); font-size: 1rem; font-weight: bold; letter-spacing: 1px; margin-top: 8px; font-family: Georgia, serif; }
+        .patika-logo-wrap .logo-sub2 { color: #acd4c0; font-size: 0.7rem; margin-top: 3px; font-family: Georgia, serif; }
+
+        button { background: #0D3B2E; color: var(--gold); padding: 15px; border: 2px solid #0D3B2E; width: 100%; font-weight: bold; font-size: 1.1rem; border-radius: 8px; cursor: pointer; font-family: Georgia, serif; }
+        button:hover { background: #1a5c42; }
+
+        /* TÉRKÉP */
+        #map-page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #map { position: absolute; top: 64px; left: 0; right: 0; bottom: 81px; width: 100%; background: var(--mbg); }
+        #map-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #0D3B2E; font-size: 1rem; z-index: 5; pointer-events: none; text-align: center; background: rgba(237,237,227,0.9); padding: 12px 20px; border-radius: 10px; border: 1px solid #0D3B2E; }
+        #search-bar { position: absolute; top: 74px; left: 50%; transform: translateX(-50%); z-index: 25; display: flex; gap: 6px; background: rgba(237,237,227,0.97); padding: 7px 10px; border-radius: 25px; border: 1.5px solid #0D3B2E; width: 90%; max-width: 380px; }
+        #search-bar input { flex: 1; background: transparent; border: none; color: #1a1a1a; font-size: 0.9rem; outline: none; font-family: Georgia, serif; padding: 2px 6px; }
+        #search-bar input::placeholder { color: #888; }
+        #search-bar button { background: var(--gold); color: #0D3B2E; border: none; border-radius: 18px; padding: 5px 14px; font-size: 0.85rem; cursor: pointer; font-family: Georgia, serif; font-weight: bold; width: auto; }
+        .travel-btn { display: none; }
+        #btn-ugyelet { position: absolute; top: 126px; right: 5%; z-index: 20; background: transparent; border: 1.5px solid #dc2626; color: #dc2626; border-radius: 20px; padding: 6px 16px; font-size: 0.85rem; cursor: pointer; width: auto; font-family: Georgia, serif; font-weight: bold; }
+        #btn-ugyelet.active { background: #dc2626; color: #fff; }
+        .iw-btn { display: inline-block; margin-top: 6px; background: var(--gold); color: #0D3B2E; padding: 3px 10px; border-radius: 4px; font-size: .8rem; cursor: pointer; border: none; font-family: Georgia, serif; font-weight: bold; }
+        #map-legend { position: absolute; bottom: 96px; left: 10px; background: rgba(237,237,227,0.92); padding: 8px 12px; border-radius: 8px; font-size: 0.75rem; z-index: 10; border: 1px solid #0D3B2E; }
+        #map-legend span { color: #0D3B2E; font-weight: bold; }
+        #osm-status { position: absolute; bottom: 96px; right: 10px; background: rgba(237,237,227,0.92); padding: 6px 10px; border-radius: 8px; font-size: 0.7rem; z-index: 10; border: 1px solid #0D3B2E; color: #0D3B2E; font-family: Georgia, serif; max-width: 160px; text-align: center; }
+
+        /* INDULÁS gomb */
+        #indulas-btn {
+            display: none;
+            position: absolute;
+            bottom: calc(54px + 27px + 16px);
+            left: 50%; transform: translateX(-50%);
+            z-index: 50;
+            background: #22c55e; color: #fff;
+            border: none; border-radius: 30px;
+            padding: 14px 32px; font-size: 1.1rem; font-weight: bold;
+            font-family: Georgia, serif; cursor: pointer;
+            box-shadow: 0 4px 20px rgba(34,197,94,0.5);
+            white-space: nowrap; width: auto; letter-spacing: 1px;
+        }
+        #indulas-btn:hover { background: #16a34a; }
+
+        /* NAVIGÁCIÓ VÁLASZTÓ PANEL */
+        #nav-choice-panel {
+            display: none;
+            position: absolute;
+            bottom: calc(54px + 27px);
+            left: 0; right: 0;
+            z-index: 50;
+            background: rgba(237,237,227,0.98);
+            border-top: 2px solid #0D3B2E;
+            padding: 14px;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #nav-choice-panel.active { display: flex; }
+        #nav-choice-title { color: #0D3B2E; font-size: 0.9rem; text-align: center; margin-bottom: 4px; font-weight: bold; font-family: Georgia, serif; }
+        .nav-choice-btn { padding: 13px; border-radius: 10px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; font-family: Georgia, serif; }
+        #btn-apple-maps { background: #1a73e8; color: #fff; border: none; }
+        #btn-google-maps { background: #34a853; color: #fff; border: none; }
+        #btn-waze { background: #6c3fc5; color: #fff; border: none; }
+        #btn-nav-cancel { background: #ccc; color: #555; font-size: 0.9rem; padding: 10px; border: none; }
+
+        /* LISTA */
+        #lista-page { display: none; flex-direction: column; }
+        #lista-page.active { display: flex; }
+        #lista-search-wrap { padding: 10px 12px 8px 12px; background: var(--pbg); flex-shrink: 0; }
+        #lista-search-input { width: 100%; background: #fff; border: 1.5px solid #0D3B2E; color: #1a1a1a; font-size: 0.95rem; padding: 10px 14px; border-radius: 22px; outline: none; font-family: Georgia, serif; }
+        #lista-search-input::placeholder { color: #888; }
+        #lista-body { display: flex; flex: 1; overflow: hidden; }
+        #cat-sidebar { width: 72px; background: #deded4; border-right: 1.5px solid #ccc; display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; padding: 6px 0; scrollbar-width: none; }
+        #cat-sidebar::-webkit-scrollbar { display: none; }
+        .cat-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 10px 4px; cursor: pointer; border: none; border-left: 3px solid transparent; background: transparent; color: #666; font-size: 0.6rem; font-family: Georgia, serif; width: 100%; border-radius: 0; transition: all 0.15s; line-height: 1.2; text-align: center; }
+        .cat-btn .cat-ikon { font-size: 1.5rem; line-height: 1; }
+        .cat-btn:hover { color: #0D3B2E; background: #cde8d8; }
+        .cat-btn.active { color: #0D3B2E; background: #b8ddc8; border-left: 3px solid #0D3B2E; font-weight: bold; }
+        #bolt-lista { flex: 1; overflow-y: auto; padding: 8px 10px; padding-bottom: calc(var(--navbar) + 35px); background: var(--pbg); }
+        .bolt-card { background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 11px 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; transition: border-color 0.2s; }
+        .bolt-card:active { border-color: #0D3B2E; background: #eaf4ee; }
+        .bolt-cat-icon { font-size: 1.6rem; flex-shrink: 0; width: 36px; text-align: center; }
+        .bolt-info { flex: 1; min-width: 0; }
+        .bolt-nev { color: #0D3B2E; font-size: 0.85rem; font-weight: bold; font-family: Georgia, serif; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bolt-cim { color: #666; font-size: 0.75rem; line-height: 1.4; }
+        .bolt-cat-badge { display: inline-block; margin-top: 4px; background: #e8f4ed; border: 1px solid #b8ddc8; border-radius: 10px; padding: 2px 7px; font-size: 0.65rem; color: #0D3B2E; }
+        .bolt-route-btn { background: var(--gold); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(255,215,0,0.4); }
+        .bolt-route-btn:hover { background: #e6c200; }
+        .lista-empty { text-align: center; color: #888; padding: 40px 20px; font-size: 0.9rem; }
+        .lista-loading { text-align: center; color: #0D3B2E; padding: 40px 20px; font-size: 0.9rem; font-family: Georgia, serif; }
+
+        /* PARTNEREK */
+        .content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: calc(var(--navbar) + 40px); background: var(--pbg); }
+        .partner-section { margin-bottom: 25px; }
+        .partner-section h2 { color: #0D3B2E; font-size: 0.85rem; letter-spacing: 1px; border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 12px; font-family: Georgia, serif; }
+        .partner-card { background: #fff; border: 1px solid #0D3B2E; border-radius: 8px; padding: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #1a1a1a; cursor: pointer; }
+        .partner-card:hover { background: #eaf4ee; }
+        .partner-icon { font-size: 2rem; flex-shrink: 0; }
+        .partner-info { flex: 1; }
+        .partner-info h3 { color: #0D3B2E; font-size: 0.95rem; margin: 0 0 3px; font-family: Georgia, serif; }
+        .partner-info p { font-size: 0.8rem; color: #666; margin: 2px 0; }
+        .partner-arrow { color: #0D3B2E; font-size: 1.2rem; flex-shrink: 0; }
+        .copyright-bar { text-align: center; padding: 15px; font-size: 0.72rem; color: #888; border-top: 1px solid #ccc; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<!-- KEZDŐLAP -->
+<div id="landing-page" class="page active">
+    <header>
+        <div style="text-align:center">
+            <div class="logo-text">PATIKA VADÁSZ</div>
+            <div class="logo-sub">Gyógyszertár kereső</div>
+        </div>
+    </header>
+    <div class="hero">
+        <div class="patika-logo-wrap">
+            <div class="logo-icon">💊</div>
+            <div class="logo-title">PATIKA VADÁSZ</div>
+            <div class="logo-sub2">GYÓGYSZERTÁR KERESŐ</div>
+        </div>
+        <h2>Üdvözöllek!</h2>
+        <p>Találd meg a legközelebbi gyógyszertárat! 🏥</p>
+        <div class="hero-buttons">
+            <button onclick="showPage('map-page')">🗺️ TÉRKÉP NÉZET</button>
+            <button onclick="showPage('lista-page')" style="background:transparent;border-color:#aaa;color:#555;">📋 PATIKA LISTA</button>
+        </div>
+    </div>
+    <div class="navbar">
+        <span onclick="showPage('landing-page')" class="active">🏠<br>Kezdő</span>
+        <span onclick="showPage('map-page')">🗺️<br>Térkép</span>
+        <span onclick="showPage('lista-page')">📋<br>Lista</span>
+        <span onclick="showPage('partner-page')">🌐<br>Partnerek</span>
+    </div>
+</div>
+
+<!-- TÉRKÉP -->
+<div id="map-page" class="page">
+    <header><h1>💊 Gyógyszertárak</h1></header>
+    <div id="map"></div>
+    <div id="map-msg">🗺️ Térkép betöltése...</div>
+    <div id="search-bar">
+        <input type="text" id="city-search" placeholder="🔍 Keresés városra, patikára...">
+        <button onclick="searchCity()">Keresés</button>
+    </div>
+    <button id="btn-ugyelet" onclick="ugyeletSzuro()">🌙 Ügyelet</button>
+
+    <div id="map-legend"><span>💊 Gyógyszertár</span></div>
+    <div id="osm-status">⏳ OSM adatok betöltése...</div>
+
+    <!-- INDULÁS gomb -->
+    <button id="indulas-btn" onclick="navValasztoMegnyit()">🧭 INDULÁS!</button>
+
+    <!-- NAVIGÁCIÓ VÁLASZTÓ PANEL -->
+    <div id="nav-choice-panel">
+        <div id="nav-choice-title">🧭 Válassz navigációs appot</div>
+        <button class="nav-choice-btn" id="btn-apple-maps" onclick="navMegnyit('apple')">🗺️ Apple Maps</button>
+        <button class="nav-choice-btn" id="btn-google-maps" onclick="navMegnyit('google')">🌍 Google Maps</button>
+        <button class="nav-choice-btn" id="btn-waze" onclick="navMegnyit('waze')">🚗 Waze</button>
+        <button class="nav-choice-btn" id="btn-nav-cancel" onclick="navValasztoZar()">✕ Mégsem</button>
+    </div>
+
+    <div class="navbar">
+        <span onclick="showPage('landing-page')">🏠<br>Kezdő</span>
+        <span onclick="showPage('map-page')" class="active">🗺️<br>Térkép</span>
+        <span onclick="showPage('lista-page')">📋<br>Lista</span>
+        <span onclick="showPage('partner-page')">🌐<br>Partnerek</span>
+    </div>
+</div>
+
+<!-- LISTA -->
+<div id="lista-page" class="page">
+    <header><h1>📋 Patikalista</h1></header>
+    <div id="lista-search-wrap">
+        <input type="text" id="lista-search-input" placeholder="🔍 Keresés patika vagy város neve alapján..." oninput="renderLista()">
+    </div>
+    <div id="lista-body">
+        <div id="cat-sidebar">
+            <button class="cat-btn active" onclick="setKat('mind')" id="kat-mind"><span class="cat-ikon">💊</span>Összes</button>
+            <button class="cat-btn" onclick="setKat('benu')" id="kat-benu"><span class="cat-ikon">🟡</span>Benú</button>
+            <button class="cat-btn" onclick="setKat('kek')" id="kat-kek"><span class="cat-ikon">🔵</span>Kék ker.</button>
+            <button class="cat-btn" onclick="setKat('ugyelet')" id="kat-ugyelet"><span class="cat-ikon">🌙</span>Ügyelet</button>
+            <button class="cat-btn" onclick="setKat('korhazi')" id="kat-korhazi"><span class="cat-ikon">🏥</span>Kórházi</button>
+            <button class="cat-btn" onclick="setKat('gyogyfu')" id="kat-gyogyfu"><span class="cat-ikon">🌿</span>Gyógyfű</button>
+            <button class="cat-btn" onclick="setKat('altalanos')" id="kat-altalanos"><span class="cat-ikon">🏪</span>Egyéb</button>
+        </div>
+        <div id="bolt-lista"></div>
+    </div>
+    <div class="navbar">
+        <span onclick="showPage('landing-page')">🏠<br>Kezdő</span>
+        <span onclick="showPage('map-page')">🗺️<br>Térkép</span>
+        <span onclick="showPage('lista-page')" class="active">📋<br>Lista</span>
+        <span onclick="showPage('partner-page')">🌐<br>Partnerek</span>
+    </div>
+</div>
+
+<!-- PARTNEREK -->
+<div id="partner-page" class="page">
+    <header><h1>🌐 Partnerek</h1></header>
+    <div class="content">
+        <div class="partner-section">
+            <h2>⭐ TÁMOGATÓK & SZPONZOROK</h2>
+            <a class="partner-card" href="/cdn-cgi/l/email-protection#82f2e3f6ebe9e3acf4e3e6e3f1f8c2e5efe3ebeeace1edef">
+                <div class="partner-icon">⭐</div>
+                <div class="partner-info"><h3>Légy Te az első szponzor!</h3><p>Írj emailt nekünk!</p></div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="partner-section">
+            <h2>🐾 VADÁSZ ALKALMAZÁSOK</h2>
+            <a class="partner-card" href="https://vadasz-apps.web.app" target="_blank">
+                <div class="partner-icon">🛡️</div>
+                <div class="partner-info">
+                    <h3>Ismerd meg az összes Vadász appot!</h3>
+                    <p>Trafik, Szivar, Hangszerbolt és még több – egy helyen, ingyen, telepítési útmutatóval!</p>
+                </div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="partner-section">
+            <h2>❤️ TÁMOGASD AZ APPOT</h2>
+            <a class="partner-card" href="https://ko-fi.com/patikavadasz" target="_blank">
+                <div class="partner-icon">☕</div>
+                <div class="partner-info"><h3>Vegyél egy kávét a fejlesztőnek!</h3><p>Az app ingyenes, de a fejlesztés nem az 😄</p></div>
+                <div class="partner-arrow">›</div>
+            </a>
+            <div style="text-align:center;margin-top:10px">
+                <a href="https://ko-fi.com/patikavadasz" target="_blank">
+                    <img src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" alt="Ko-fi" style="height:40px;border-radius:8px">
+                </a>
+            </div>
+        </div>
+        <div class="copyright-bar">
+            © 2026 Patika Vadász. Minden jog fenntartva.<br>
+            Készítette: Králik Zola | v1.0
+        </div>
+    </div>
+    <div class="navbar">
+        <span onclick="showPage('landing-page')">🏠<br>Kezdő</span>
+        <span onclick="showPage('map-page')">🗺️<br>Térkép</span>
+        <span onclick="showPage('lista-page')">📋<br>Lista</span>
+        <span onclick="showPage('partner-page')" class="active">🌐<br>Partnerek</span>
+    </div>
+</div>
+
+<div id="global-copyright">2026 Copyright ©</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ── STATIKUS ADATOK ────────────────────────────────────────────────────────
+var STATIKUS_BOLTOK = [
+    {nev:"Benú Gyógyszertár Budapest I.", cim:"1011 Budapest, Bem rakpart 3", lat:47.5072, lng:19.0397, kat:"benu"},
+    {nev:"Benú Gyógyszertár Budapest VII.", cim:"1072 Budapest, Rákóczi út 39", lat:47.4991, lng:19.0627, kat:"benu"},
+    {nev:"Benú Gyógyszertár Budapest IX.", cim:"1091 Budapest, Üllői út 45", lat:47.4801, lng:19.0712, kat:"benu"},
+    {nev:"Benú Gyógyszertár Győr", cim:"9021 Győr, Árpád út 32", lat:47.6875, lng:17.6504, kat:"benu"},
+    {nev:"Benú Gyógyszertár Debrecen", cim:"4024 Debrecen, Piac utca 35", lat:47.5316, lng:21.6273, kat:"benu"},
+    {nev:"Benú Gyógyszertár Pécs", cim:"7621 Pécs, Király utca 11", lat:46.0727, lng:18.2323, kat:"benu"},
+    {nev:"Kék Kereszt Patika Budapest V.", cim:"1051 Budapest, Vörösmarty tér 4", lat:47.4978, lng:19.0497, kat:"kek"},
+    {nev:"Kék Kereszt Patika Budapest VIII.", cim:"1082 Budapest, Baross utca 15", lat:47.4897, lng:19.0812, kat:"kek"},
+    {nev:"Kék Kereszt Patika Sopron", cim:"9400 Sopron, Várkerület 22", lat:47.6849, lng:16.5845, kat:"kek"},
+    {nev:"Arany Patika – Éjjel-Nappali", cim:"1083 Budapest, Rákóczi út 86", lat:47.4958, lng:19.0832, kat:"ugyelet"},
+    {nev:"Rózsa Éjjeli Patika", cim:"1091 Budapest, Üllői út 121", lat:47.4712, lng:19.0834, kat:"ugyelet"},
+    {nev:"Csillag Ügyeletes Patika", cim:"1072 Budapest, Erzsébet krt. 8", lat:47.4991, lng:19.0647, kat:"ugyelet"},
+    {nev:"Semmelweis Kórházi Patika", cim:"1085 Budapest, Üllői út 26", lat:47.4863, lng:19.0785, kat:"korhazi"},
+    {nev:"Debreceni Egyetemi Patika", cim:"4032 Debrecen, Nagyerdei krt. 98", lat:47.5449, lng:21.6176, kat:"korhazi"},
+    {nev:"Gyógyfű Patika Budapest", cim:"1082 Budapest, József krt. 54", lat:47.4921, lng:19.0756, kat:"gyogyfu"},
+    {nev:"Kristály Patika Budapest", cim:"1071 Budapest, Dohány u. 22", lat:47.4991, lng:19.0637, kat:"altalanos"},
+    {nev:"Veszprém Gyógyszertár", cim:"8200 Veszprém, Óváros tér 6", lat:47.0979, lng:17.9087, kat:"altalanos"},
+    {nev:"Kaposvári Patika", cim:"7400 Kaposvár, Fő utca 18", lat:46.3593, lng:17.7961, kat:"altalanos"},
+    {nev:"Nyíregyháza Centrum Patika", cim:"4400 Nyíregyháza, Kossuth tér 3", lat:47.9554, lng:21.7167, kat:"altalanos"},
+];
+
+var KAT_INFO = {
+    'benu':      {ikon:'🟡', label:'Benú Gyógyszertár'},
+    'kek':       {ikon:'🔵', label:'Kék Kereszt Patika'},
+    'ugyelet':   {ikon:'🌙', label:'Ügyeletes patika'},
+    'korhazi':   {ikon:'🏥', label:'Kórházi gyógyszertár'},
+    'gyogyfu':   {ikon:'🌿', label:'Gyógyfű / természetes'},
+    'altalanos': {ikon:'💊', label:'Általános gyógyszertár'},
+};
+
+var BOLTOK = STATIKUS_BOLTOK.slice();
+var osmBetoltve = false;
+var activeKat = 'mind';
+
+// ── NAVIGÁCIÓ cél ─────────────────────────────────────────────────────────
+var navCelLat = null, navCelLng = null, navCelNev = null;
+
+// ── NATÍV NAVIGÁCIÓ ───────────────────────────────────────────────────────
+window.navValasztoMegnyit = function() {
+    if (!navCelLat || !navCelLng) return;
+    document.getElementById('nav-choice-panel').classList.add('active');
+    document.getElementById('indulas-btn').style.display = 'none';
+};
+
+window.navValasztoZar = function() {
+    document.getElementById('nav-choice-panel').classList.remove('active');
+    document.getElementById('indulas-btn').style.display = 'block';
+};
+
+window.navMegnyit = function(tipus) {
+    if (!navCelLat || !navCelLng) return;
+    var lat = navCelLat, lng = navCelLng;
+    var url = '';
+    if (tipus === 'apple') {
+        url = 'maps://maps.apple.com/?daddr=' + lat + ',' + lng + '&dirflg=d&t=m';
+    } else if (tipus === 'google') {
+        url = 'comgooglemaps://?daddr=' + lat + ',' + lng + '&directionsmode=driving';
+        setTimeout(function() {
+            window.open('https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng, '_blank');
+        }, 500);
+    } else if (tipus === 'waze') {
+        url = 'waze://?ll=' + lat + ',' + lng + '&navigate=yes';
+        setTimeout(function() {
+            window.open('https://waze.com/ul?ll=' + lat + ',' + lng + '&navigate=yes', '_blank');
+        }, 500);
+    }
+    if (url) window.location.href = url;
+    document.getElementById('nav-choice-panel').classList.remove('active');
+};
+
+// ── OVERPASS API ──────────────────────────────────────────────────────────
+function osmBetoltes() {
+    setOsmStatus('⏳ Közeli patikák betöltése...');
+    var R = 30 / 111.0;
+    var s = userLoc.lat - R, n = userLoc.lat + R;
+    var w = userLoc.lng - R / Math.cos(userLoc.lat * Math.PI/180);
+    var e = userLoc.lng + R / Math.cos(userLoc.lat * Math.PI/180);
+    var bbox = s.toFixed(4)+','+w.toFixed(4)+','+n.toFixed(4)+','+e.toFixed(4);
+    var query = '[out:json][timeout:30];(node["amenity"="pharmacy"]('+bbox+');way["amenity"="pharmacy"]('+bbox+'););out center 500;';
+    var url = 'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query);
+    fetch(url)
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+            var elements = data.elements || [];
+            var ujak = [];
+            elements.forEach(function(el){
+                var lat = el.lat || (el.center && el.center.lat);
+                var lng = el.lon || (el.center && el.center.lon);
+                if (!lat || !lng) return;
+                var tags = el.tags || {};
+                var nev = tags.name || tags['name:hu'] || 'Gyógyszertár';
+                var cim = '';
+                if (tags['addr:city']) cim += tags['addr:city'];
+                if (tags['addr:street']) cim += (cim?', ':'')+tags['addr:street'];
+                if (tags['addr:housenumber']) cim += ' '+tags['addr:housenumber'];
+                if (!cim) cim = 'Magyarország';
+                var kat = 'altalanos';
+                var nevL = nev.toLowerCase();
+                if (nevL.indexOf('benú')!==-1||nevL.indexOf('benu')!==-1) kat='benu';
+                else if (nevL.indexOf('kék')!==-1||nevL.indexOf('kek')!==-1) kat='kek';
+                else if (nevL.indexOf('éjjel')!==-1||nevL.indexOf('ejjel')!==-1||nevL.indexOf('ügyelet')!==-1) kat='ugyelet';
+                else if (nevL.indexOf('kórház')!==-1||nevL.indexOf('korhaz')!==-1||nevL.indexOf('klinikai')!==-1) kat='korhazi';
+                else if (nevL.indexOf('gyógyfű')!==-1||nevL.indexOf('gyogyfu')!==-1||nevL.indexOf('természet')!==-1) kat='gyogyfu';
+                ujak.push({nev:nev, cim:cim, lat:lat, lng:lng, kat:kat});
+            });
+            BOLTOK = STATIKUS_BOLTOK.concat(ujak);
+            osmBetoltve = true;
+            setOsmStatus('✅ '+ujak.length+' közeli patika betöltve');
+            setTimeout(function(){ document.getElementById('osm-status').style.display='none'; }, 3000);
+            if (gmap) addOsmMarkersToMap(ujak);
+            if (document.getElementById('lista-page').classList.contains('active')) renderLista();
+        })
+        .catch(function(e){
+            osmBetoltve = true;
+            setOsmStatus('⚠️ OSM hiba – statikus adatok');
+            setTimeout(function(){ document.getElementById('osm-status').style.display='none'; }, 4000);
+            if (document.getElementById('lista-page').classList.contains('active')) renderLista();
+        });
+}
+
+function setOsmStatus(txt) {
+    var el = document.getElementById('osm-status');
+    if (el) { el.textContent = txt; el.style.display = 'block'; }
+}
+
+function addOsmMarkersToMap(ujak) {
+    ujak.forEach(function(b){
+        var m = new google.maps.Marker({
+            position:{lat:b.lat,lng:b.lng}, map:gmap, title:b.nev,
+            icon:{path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:'#FFD700',fillOpacity:1,strokeColor:'#0D3B2E',strokeWeight:1.5},
+            zIndex:4
+        });
+        var div = document.createElement('div');
+        div.style.cssText='color:#1a1a1a;max-width:220px;font-family:Georgia,serif;padding:4px';
+        div.innerHTML='<b>💊 '+b.nev+'</b><br><small>📍 '+b.cim+'</small>';
+        var btn = document.createElement('button');
+        btn.className='iw-btn'; btn.textContent='🧭 Navigálás';
+        (function(la,ln,nv){ btn.onclick=function(){ window.showRoute(la,ln,nv); }; })(b.lat,b.lng,b.nev);
+        div.appendChild(btn);
+        var iw = new google.maps.InfoWindow({content:div});
+        m.addListener('click',function(){iw.open(gmap,m);});
+        markers.push(m);
+    });
+}
+
+// ── LISTA ─────────────────────────────────────────────────────────────────
+window.setKat = function(kat) {
+    activeKat = kat;
+    document.querySelectorAll('.cat-btn').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('kat-'+kat).classList.add('active');
+    renderLista();
+};
+
+window.renderLista = function() {
+    var q = (document.getElementById('lista-search-input').value||'').toLowerCase().trim();
+    var filtered = BOLTOK.filter(function(b){
+        var katOk = activeKat==='mind' || b.kat===activeKat;
+        var searchOk = !q || b.nev.toLowerCase().indexOf(q)!==-1 || b.cim.toLowerCase().indexOf(q)!==-1;
+        return katOk && searchOk;
+    });
+    var el = document.getElementById('bolt-lista');
+    if (!osmBetoltve) {
+        el.innerHTML = '<div class="lista-loading">⏳ Adatok betöltése...<br><small>Kérjük várj egy pillanatot.</small></div>';
+        return;
+    }
+    if (filtered.length === 0) {
+        var uzenet = BOLTOK.length <= STATIKUS_BOLTOK.length
+            ? '<div class="lista-loading">⚠️ Az OSM szerver jelenleg túlterhelt.<br><small>Csak az alap adatok érhetők el.<br>Próbáld újra pár perc múlva!</small></div>'
+            : '<div class="lista-empty">😔 Nincs találat.</div>';
+        el.innerHTML = uzenet;
+        return;
+    }
+    el.innerHTML = filtered.map(function(b){
+        var ki = KAT_INFO[b.kat]||{ikon:'💊',label:'Gyógyszertár'};
+        return '<div class="bolt-card">'+
+            '<div class="bolt-cat-icon">'+ki.ikon+'</div>'+
+            '<div class="bolt-info">'+
+                '<div class="bolt-nev">'+b.nev+'</div>'+
+                '<div class="bolt-cim">📍 '+b.cim+'</div>'+
+                '<span class="bolt-cat-badge">'+ki.label+'</span>'+
+            '</div>'+
+            '<button class="bolt-route-btn" onclick="routeFromList('+b.lat+','+b.lng+',\''+b.nev.replace(/'/g,'')+'\')">🧭</button>'+
+        '</div>';
+    }).join('');
+};
+
+window.routeFromList = function(lat, lng, nev) {
+    showPage('map-page');
+    setTimeout(function(){ window.showRoute(lat, lng, nev||''); }, 400);
+};
+
+// ── OLDALVÁLTÁS ───────────────────────────────────────────────────────────
+window.showPage = function(pageId) {
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+    document.getElementById(pageId).classList.add('active');
+    document.querySelectorAll('.navbar span').forEach(function(s){ s.classList.remove('active'); });
+    document.querySelectorAll('#'+pageId+' .navbar span').forEach(function(s){
+        if (s.getAttribute('onclick')&&s.getAttribute('onclick').indexOf(pageId)!==-1) s.classList.add('active');
+    });
+    if (pageId==='map-page') { fixMapSize(); setTimeout(window.loadMap, 80); }
+    else {
+        document.getElementById('indulas-btn').style.display='none';
+        document.getElementById('nav-choice-panel').classList.remove('active');
+    }
+    if (pageId==='lista-page') renderLista();
+};
+
+function fixMapSize() {
+    var el = document.getElementById('map');
+    if (!el) return;
+    el.style.height = (window.innerHeight-64-54-27)+'px';
+    el.style.top = '64px';
+    el.style.bottom = (54+27)+'px';
+}
+
+// ── KÖZLEKEDÉSI MÓD ───────────────────────────────────────────────────────
+window.setTravelMode = function(mode) {
+    currentTravelMode = mode;
+};
+
+// ── TÉRKÉP ────────────────────────────────────────────────────────────────
+var gmap=null, markers=[], userLoc={lat:47.4979,lng:19.0402};
+var dirService=null, dirRenderer=null, currentTravelMode='DRIVING';
+var mapBuilt=false, mapsApiReady=false;
+
+function initDirService() {
+    if (!dirService) {
+        dirService = new google.maps.DirectionsService();
+        dirRenderer = new google.maps.DirectionsRenderer({map:gmap, suppressMarkers:true, polylineOptions:{strokeColor:'#0D3B2E',strokeWeight:5}});
+    }
+}
+
+window.showRoute = function(lat, lng, nev) {
+    navCelLat = lat; navCelLng = lng; navCelNev = nev || '';
+    var try_ = function(){
+        if (!gmap||typeof google==='undefined'){setTimeout(try_,400);return;}
+        initDirService();
+        dirService.route({origin:userLoc,destination:{lat:lat,lng:lng},travelMode:google.maps.TravelMode[currentTravelMode]},
+            function(result,status){
+                if (status==='OK'){
+                    dirRenderer.setDirections(result);
+                    document.getElementById('map-msg').style.display='none';
+                    document.getElementById('indulas-btn').style.display='block';
+                } else {
+                    gmap.setCenter({lat:lat,lng:lng});
+                    gmap.setZoom(15);
+                    document.getElementById('indulas-btn').style.display='block';
+                }
+            });
+    };
+    if (!gmap){setTimeout(try_,600);}else{try_();}
+};
+
+// ── GOOGLE PLACES KERESÉS ─────────────────────────────────────────────────
+var autocomplete = null;
+
+function initAutocomplete() {
+    var input = document.getElementById('city-search');
+    if (!input || !google || !google.maps || !google.maps.places) return;
+    autocomplete = new google.maps.places.Autocomplete(input, {
+        componentRestrictions: {country: 'hu'},
+        fields: ['geometry', 'name']
+    });
+    autocomplete.addListener('place_changed', function() {
+        var place = autocomplete.getPlace();
+        if (!place.geometry) return;
+        gmap.setCenter(place.geometry.location);
+        gmap.setZoom(14);
+        input.blur();
+    });
+}
+
+window.searchCity = function() {
+    var q = document.getElementById('city-search').value.trim();
+    if (!q || !gmap) return;
+    var geocoder = new google.maps.Geocoder();
+    geocoder.geocode({address: q + ', Magyarország'}, function(results, status) {
+        if (status === 'OK' && results[0]) {
+            var loc = results[0].geometry.location;
+            gmap.setCenter(loc);
+            gmap.setZoom(13);
+            document.getElementById('city-search').blur();
+            markers.forEach(function(m){ m.setMap(null); });
+            markers = [];
+            BOLTOK = STATIKUS_BOLTOK.slice();
+            osmBetoltve = false;
+            userLoc = {lat: loc.lat(), lng: loc.lng()};
+            osmBetoltes();
+        } else {
+            alert('Nem található: ' + q);
+        }
+    });
+};
+
+// ── ÜGYELET SZŰRŐ ────────────────────────────────────────────────────────
+var ugyeletAktiv = false;
+var ugyeletMarkers = [];
+
+window.ugyeletSzuro = function() {
+    ugyeletAktiv = !ugyeletAktiv;
+    var btn = document.getElementById('btn-ugyelet');
+    if (ugyeletAktiv) {
+        if (btn) btn.classList.add('active');
+        ugyeletBetoltes();
+    } else {
+        if (btn) btn.classList.remove('active');
+        ugyeletMarkers.forEach(function(m){ m.setMap(null); });
+        ugyeletMarkers = [];
+    }
+};
+
+function ugyeletBetoltes() {
+    setOsmStatus('🌙 Ügyeletes patikák keresése...');
+    var R = 30 / 111.0;
+    var s = userLoc.lat - R, n = userLoc.lat + R;
+    var w = userLoc.lng - R / Math.cos(userLoc.lat * Math.PI/180);
+    var e = userLoc.lng + R / Math.cos(userLoc.lat * Math.PI/180);
+    var bbox = s.toFixed(4)+','+w.toFixed(4)+','+n.toFixed(4)+','+e.toFixed(4);
+    var query = '[out:json][timeout:30];(node["amenity"="pharmacy"]["opening_hours"~"24/7|00:00-24:00"]('+bbox+');node["amenity"="pharmacy"]["name"~"ügyelet|ejjel|éjjel|nappali",i]('+bbox+'););out center 100;';
+    var url = 'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query);
+    fetch(url).then(function(r){return r.json();}).then(function(data){
+        var els = data.elements||[];
+        els.forEach(function(el){
+            var lat=el.lat||(el.center&&el.center.lat);
+            var lng=el.lon||(el.center&&el.center.lon);
+            if(!lat||!lng) return;
+            var nev=(el.tags&&el.tags.name)||'Ügyeletes Patika';
+            var m = new google.maps.Marker({
+                position:{lat:lat,lng:lng}, map:gmap, title:nev,
+                icon:{path:google.maps.SymbolPath.CIRCLE,scale:13,fillColor:'#dc2626',fillOpacity:1,strokeColor:'#fff',strokeWeight:2},
+                zIndex:99
+            });
+            var div=document.createElement('div');
+            div.style.cssText='color:#1a1a1a;max-width:220px;font-family:Georgia,serif;padding:4px';
+            div.innerHTML='<b>🌙 '+nev+'</b><br><small style="color:#dc2626">⏰ Éjjel-nappali ügyelet</small>';
+            var btn2=document.createElement('button');
+            btn2.className='iw-btn'; btn2.textContent='🧭 Navigálás';
+            (function(la,ln,nv){ btn2.onclick=function(){ window.showRoute(la,ln,nv); }; })(lat,lng,nev);
+            div.appendChild(btn2);
+            var iw=new google.maps.InfoWindow({content:div});
+            m.addListener('click',function(){iw.open(gmap,m);});
+            ugyeletMarkers.push(m);
+        });
+        setOsmStatus(ugyeletMarkers.length > 0 ? '🌙 '+ugyeletMarkers.length+' ügyeletes patika' : '😔 Nincs ügyelet 30km-en belül');
+        setTimeout(function(){ document.getElementById('osm-status').style.display='none'; }, 4000);
+    }).catch(function(){
+        setOsmStatus('⚠️ Ügyelet lekérés sikertelen');
+        setTimeout(function(){ document.getElementById('osm-status').style.display='none'; }, 4000);
+    });
+}
+
+window.mapsReady = function(){
+    mapsApiReady = true;
+    initAutocomplete();
+    if(document.getElementById('map-page').classList.contains('active')) window.loadMap();
+};
+
+window.loadMap = function(){
+    if(!mapsApiReady||typeof google==='undefined'||!google.maps){setTimeout(window.loadMap,200);return;}
+    if(gmap){
+        fixMapSize();
+        setTimeout(function(){google.maps.event.trigger(gmap,'resize');gmap.setCenter(userLoc);document.getElementById('map-msg').style.display='none';},100);
+        return;
+    }
+    if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(
+            function(p){userLoc={lat:p.coords.latitude,lng:p.coords.longitude};buildMap();},
+            function(){buildMap();},{timeout:6000}
+        );
+    }else{buildMap();}
+};
+
+function buildMap(){
+    if(mapBuilt)return; mapBuilt=true;
+    fixMapSize();
+    document.getElementById('map-msg').style.display='none';
+    gmap=new google.maps.Map(document.getElementById('map'),{
+        center:userLoc, zoom:7,
+        fullscreenControl:false, mapTypeControl:false, streetViewControl:false, zoomControl:true,
+        styles:[
+            {elementType:"geometry",stylers:[{color:"#E3F3E9"}]},
+            {elementType:"labels.text.stroke",stylers:[{color:"#E3F3E9"}]},
+            {elementType:"labels.text.fill",stylers:[{color:"#0D3B2E"}]},
+            {featureType:"road",elementType:"geometry",stylers:[{color:"#ffffff"}]},
+            {featureType:"road",elementType:"labels.text.fill",stylers:[{color:"#555"}]},
+            {featureType:"water",elementType:"geometry",stylers:[{color:"#a8d5b5"}]},
+            {featureType:"poi",stylers:[{visibility:"off"}]},
+            {featureType:"transit",stylers:[{visibility:"off"}]}
+        ]
+    });
+    new google.maps.Marker({
+        position:userLoc, map:gmap,
+        icon:{path:google.maps.SymbolPath.FORWARD_CLOSED_ARROW,scale:6,fillColor:"#0D3B2E",fillOpacity:1,strokeColor:"#fff",strokeWeight:2,rotation:0},
+        title:"Te vagy itt", zIndex:999
+    });
+    STATIKUS_BOLTOK.forEach(function(b){
+        var ki=KAT_INFO[b.kat]||{ikon:'💊'};
+        var m=new google.maps.Marker({
+            position:{lat:b.lat,lng:b.lng},map:gmap,title:b.nev,
+            icon:{path:google.maps.SymbolPath.CIRCLE,scale:11,fillColor:'#FFD700',fillOpacity:1,strokeColor:'#0D3B2E',strokeWeight:2},
+            zIndex:5
+        });
+        var div=document.createElement('div');
+        div.style.cssText='color:#1a1a1a;max-width:220px;font-family:Georgia,serif;padding:4px';
+        div.innerHTML='<b>'+ki.ikon+' '+b.nev+'</b><br><small>📍 '+b.cim+'</small>';
+        var btn=document.createElement('button'); btn.className='iw-btn'; btn.textContent='🧭 Navigálás';
+        (function(la,ln,nv){ btn.onclick=function(){ window.showRoute(la,ln,nv); }; })(b.lat,b.lng,b.nev);
+        div.appendChild(btn);
+        var iw=new google.maps.InfoWindow({content:div});
+        m.addListener('click',function(){iw.open(gmap,m);});
+        markers.push(m);
+    });
+    google.maps.event.trigger(gmap,'resize'); gmap.setCenter(userLoc);
+    setTimeout(function(){google.maps.event.trigger(gmap,'resize');gmap.setCenter(userLoc);},500);
+    osmBetoltes();
+}
+
+window.addEventListener('resize',function(){
+    if(gmap){fixMapSize();google.maps.event.trigger(gmap,'resize');gmap.setCenter(userLoc);}
+});
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqCZBsFCKSnHm_NXAS2lcb6X860e1xMYk&libraries=places&callback=mapsReady" async defer></script>
+</body>
+</html>

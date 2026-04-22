@@ -1,0 +1,681 @@
+<!-- © 2026 Pizza Vadász. Minden jog fenntartva. -->
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pizza Vadász</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#8B0000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pizza Vadász">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="icon" type="image/png" href="/icons/icon-192.png">
+    <link rel="shortcut icon" href="/icons/icon-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'DM Sans', sans-serif; background: #FFF8F0; color: #1A0A00; }
+        :root {
+            --red:    #8B0000;
+            --red2:   #A50000;
+            --cream:  #FFF8F0;
+            --gold:   #FFD700;
+            --dark:   #1A0A00;
+            --gray:   #7A6A60;
+            --green:  #22c55e;
+            --navbar: 54px;
+            --header: 64px;
+            --copy:   27px;
+        }
+
+        /* ── PAGES ── */
+        .page { display: none; flex-direction: column; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+        .page.active { display: flex; }
+
+        /* ── HEADER ── */
+        header { height: var(--header); padding: 0 15px; background: var(--red); border-bottom: 2px solid var(--gold); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 50; }
+        header h1 { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; }
+        .logo-block { text-align: center; }
+        .logo-text { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: var(--gold); letter-spacing: 1px; line-height: 1.2; }
+        .logo-sub  { font-size: 0.75rem; color: rgba(255,255,255,0.6); letter-spacing: 1.5px; text-transform: uppercase; }
+
+        .btn-hungry-hdr {
+            background: var(--gold); color: var(--red); border: none; border-radius: 22px;
+            padding: 7px 13px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,.2); -webkit-tap-highlight-color: transparent;
+        }
+        .pulse-dot { width: 7px; height: 7px; background: var(--red); border-radius: 50%; animation: pulse 1.4s infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.6);opacity:.5} }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            height: var(--navbar); display: flex; justify-content: space-around; align-items: center;
+            background: var(--red); border-top: 2px solid var(--gold);
+            position: fixed; bottom: var(--copy); width: 100%; z-index: 1000;
+            touch-action: manipulation; user-select: none; -webkit-user-select: none;
+        }
+        .navbar span {
+            color: rgba(255,255,255,0.5); font-size: 0.63rem; cursor: pointer;
+            padding: 4px 6px; text-align: center; display: flex; flex-direction: column;
+            align-items: center; gap: 1px; -webkit-tap-highlight-color: transparent;
+            border-bottom: 2px solid transparent;
+        }
+        .navbar span.active, .navbar span:hover { color: var(--gold); border-bottom-color: var(--gold); }
+
+        /* ── COPYRIGHT ── */
+        #global-copyright { position: fixed; bottom: 0; left: 0; width: 100%; height: var(--copy); line-height: var(--copy); text-align: center; background: var(--red); color: var(--gold); font-size: 0.68rem; font-weight: bold; z-index: 1001; }
+
+        /* ════ KEZDŐLAP ════ */
+        .hero { text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; flex: 1; padding: 20px; padding-bottom: calc(var(--navbar) + var(--copy) + 10px); overflow: hidden; background: var(--cream); }
+        .hero-logo-wrap { width: 195px; height: 195px; border: 3px solid var(--red); border-radius: 20px; background: var(--red); display: flex; flex-direction: column; align-items: center; justify-content: center; filter: drop-shadow(0 0 24px rgba(139,0,0,.35)); margin-bottom: 10px; }
+        .hero-logo-wrap .logo-icon  { font-size: 4.2rem; line-height: 1; }
+        .hero-logo-wrap .logo-title { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 900; letter-spacing: 1px; margin-top: 8px; }
+        .hero-logo-wrap .logo-sub2  { color: rgba(255,255,255,0.55); font-size: 0.65rem; margin-top: 3px; letter-spacing: 1px; }
+        .hero h2 { font-family: 'Playfair Display', serif; font-size: 1.65rem; color: var(--red); margin: 12px 0 5px; }
+        .hero p  { color: var(--gray); margin-bottom: 18px; max-width: 300px; line-height: 1.6; font-size: 0.88rem; }
+        .hero-buttons { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 300px; }
+        .btn-primary   { background: var(--red); color: var(--gold); padding: 14px; border: 2px solid var(--red); width: 100%; font-weight: 700; font-size: 1rem; border-radius: 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+        .btn-secondary { background: transparent; color: var(--gray); padding: 14px; border: 1.5px solid #ccc; width: 100%; font-weight: 600; font-size: 1rem; border-radius: 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+        .btn-hungry-hero { background: var(--gold); color: var(--red); padding: 15px; border: none; width: 100%; font-weight: 800; font-size: 1rem; border-radius: 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; box-shadow: 0 4px 18px rgba(255,215,0,.4); display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+        /* ════ TÉRKÉP LAP ════ */
+        #map-page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #map { position: absolute; top: var(--header); left: 0; right: 0; bottom: calc(var(--navbar) + var(--copy)); width: 100%; background: #F5EFE0; }
+        #map-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: var(--red); font-size: 1rem; z-index: 5; pointer-events: none; text-align: center; background: rgba(255,248,240,.95); padding: 12px 20px; border-radius: 10px; border: 1px solid var(--red); font-family: 'Playfair Display', serif; }
+
+        #search-bar { position: absolute; top: calc(var(--header) + 10px); left: 50%; transform: translateX(-50%); z-index: 25; display: flex; gap: 6px; background: rgba(255,248,240,.97); padding: 7px 10px; border-radius: 25px; border: 1.5px solid var(--red); width: 90%; max-width: 380px; }
+        #search-bar input { flex: 1; background: transparent; border: none; color: var(--dark); font-size: .9rem; outline: none; font-family: 'DM Sans', sans-serif; padding: 2px 6px; }
+        #search-bar input::placeholder { color: #999; }
+        #search-bar button { background: var(--gold); color: var(--red); border: none; border-radius: 18px; padding: 5px 14px; font-size: .85rem; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 700; width: auto; }
+
+        #filter-bar { position: absolute; top: calc(var(--header) + 62px); left: 0; right: 0; z-index: 20; display: flex; gap: 7px; overflow-x: auto; padding: 0 12px; scrollbar-width: none; }
+        #filter-bar::-webkit-scrollbar { display: none; }
+        .filter-chip { background: rgba(255,248,240,.95); color: var(--red); border: 1.5px solid var(--red); border-radius: 20px; padding: 5px 13px; font-size: 11px; font-weight: 700; white-space: nowrap; cursor: pointer; transition: all .15s; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+        .filter-chip.active { background: var(--red); color: var(--gold); }
+
+        .travel-btn { display: none; }
+
+        #map-legend { position: absolute; bottom: calc(var(--navbar) + var(--copy) + 12px); left: 10px; background: rgba(255,248,240,.93); padding: 7px 12px; border-radius: 8px; font-size: .72rem; z-index: 10; border: 1px solid var(--red); }
+        #map-legend span { color: var(--red); font-weight: 700; }
+        #osm-status { position: absolute; bottom: calc(var(--navbar) + var(--copy) + 12px); right: 10px; background: rgba(255,248,240,.93); padding: 6px 10px; border-radius: 8px; font-size: .7rem; z-index: 10; border: 1px solid var(--red); color: var(--red); max-width: 160px; text-align: center; }
+
+        #indulas-btn { display: none; position: absolute; bottom: calc(var(--navbar) + var(--copy) + 16px); left: 50%; transform: translateX(-50%); z-index: 50; background: var(--green); color: #fff; border: none; border-radius: 30px; padding: 14px 36px; font-size: 1.1rem; font-weight: 800; font-family: 'DM Sans', sans-serif; cursor: pointer; box-shadow: 0 4px 20px rgba(34,197,94,.5); white-space: nowrap; width: auto; letter-spacing: 1px; }
+        #nav-choice-panel { display: none; position: absolute; bottom: calc(var(--navbar) + var(--copy)); left: 0; right: 0; z-index: 50; background: rgba(255,248,240,.98); border-top: 2px solid var(--green); padding: 12px 14px 14px; flex-direction: column; gap: 8px; box-shadow: 0 -4px 20px rgba(0,0,0,.12); }
+        #nav-choice-panel.active { display: flex; }
+        #nav-choice-cim { color: var(--dark); font-size: .85rem; font-weight: 700; text-align: center; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #nav-choice-buttons { display: flex; gap: 8px; }
+        .nav-choice-btn { flex: 1; padding: 10px 4px; border-radius: 10px; border: none; font-family: 'DM Sans', sans-serif; font-size: .78rem; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        #nav-btn-apple  { background: #000; color: #fff; }
+        #nav-btn-google { background: #4285F4; color: #fff; }
+        #nav-btn-waze   { background: #33CCFF; color: #000; }
+        #nav-btn-cancel { background: #eee; color: #666; flex: 0 0 52px; }
+        .iw-btn { display: inline-block; margin-top: 6px; background: var(--gold); color: var(--red); padding: 4px 12px; border-radius: 5px; font-size: .8rem; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; font-weight: 700; }
+
+        /* ════ LISTA LAP ════ */
+        #lista-page { display: none; flex-direction: column; }
+        #lista-page.active { display: flex; }
+        #lista-search-wrap { padding: 10px 12px 8px; background: var(--cream); flex-shrink: 0; }
+        #lista-search-input { width: 100%; background: #fff; border: 1.5px solid var(--red); color: var(--dark); font-size: .92rem; padding: 10px 14px; border-radius: 22px; outline: none; font-family: 'DM Sans', sans-serif; }
+        #lista-search-input::placeholder { color: #999; }
+        #lista-body { display: flex; flex: 1; overflow: hidden; }
+
+        #cat-sidebar { width: 74px; background: #F5EDE0; border-right: 1.5px solid #E0CEBB; display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; padding: 6px 0; scrollbar-width: none; }
+        #cat-sidebar::-webkit-scrollbar { display: none; }
+        .cat-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 10px 4px; cursor: pointer; border: none; border-left: 3px solid transparent; background: transparent; color: #888; font-size: .58rem; font-family: 'DM Sans', sans-serif; width: 100%; border-radius: 0; transition: all .15s; line-height: 1.2; text-align: center; -webkit-tap-highlight-color: transparent; }
+        .cat-btn .cat-ikon { font-size: 1.4rem; line-height: 1; }
+        .cat-btn:hover  { color: var(--red); background: #FFE8D0; }
+        .cat-btn.active { color: var(--red); background: #FFD9BB; border-left: 3px solid var(--red); font-weight: 700; }
+
+        #bolt-lista { flex: 1; overflow-y: auto; padding: 8px 10px; padding-bottom: calc(var(--navbar) + var(--copy) + 10px); background: var(--cream); }
+        .bolt-card { background: #fff; border: 1px solid #E8D8C8; border-radius: 12px; padding: 11px 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; transition: border-color .2s; cursor: pointer; }
+        .bolt-card:active { border-color: var(--red); background: #FFF0E4; }
+        .bolt-cat-icon { font-size: 1.6rem; flex-shrink: 0; width: 36px; text-align: center; }
+        .bolt-info { flex: 1; min-width: 0; }
+        .bolt-nev { color: var(--red); font-size: .85rem; font-weight: 700; font-family: 'Playfair Display', serif; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bolt-cim { color: var(--gray); font-size: .73rem; line-height: 1.4; }
+        .bolt-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+        .bolt-badge { background: #FFF0E0; border: 1px solid #FFCCA0; border-radius: 10px; padding: 2px 7px; font-size: .6rem; color: var(--red); font-weight: 600; }
+        .bolt-badge.open     { background: #E6F9EE; border-color: #A0DDB8; color: #1A7A40; }
+        .bolt-badge.closed   { background: #FDE8E8; border-color: #F0AAAA; color: #B00020; }
+        .bolt-badge.delivery { background: #EDE9FF; border-color: #C4BCFF; color: #5B3DB8; }
+        .bolt-route-btn { background: var(--gold); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(255,215,0,.4); }
+        .lista-empty   { text-align: center; color: var(--gray); padding: 40px 20px; font-size: .9rem; }
+        .lista-loading { text-align: center; color: var(--red); padding: 40px 20px; font-size: .9rem; font-family: 'Playfair Display', serif; }
+
+        /* ════ PARTNEREK ════ */
+        .content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: calc(var(--navbar) + var(--copy) + 15px); background: var(--cream); }
+        .partner-section { margin-bottom: 22px; }
+        .partner-section h2 { color: var(--red); font-size: .75rem; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #E0CEBB; padding-bottom: 8px; margin-bottom: 12px; font-weight: 700; }
+        .partner-card { background: #fff; border: 1px solid var(--red); border-radius: 10px; padding: 13px; margin-bottom: 9px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--dark); cursor: pointer; }
+        .partner-card:hover { background: #FFF0E4; }
+        .partner-icon { font-size: 1.85rem; flex-shrink: 0; }
+        .partner-info h3 { color: var(--red); font-size: .9rem; margin: 0 0 3px; font-family: 'Playfair Display', serif; }
+        .partner-info p  { font-size: .76rem; color: var(--gray); margin: 2px 0; }
+        .partner-arrow   { color: var(--red); font-size: 1.2rem; flex-shrink: 0; }
+        .copyright-bar   { text-align: center; padding: 14px; font-size: .68rem; color: var(--gray); border-top: 1px solid #E0CEBB; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<!-- ═══ KEZDŐLAP ═══ -->
+<div id="landing-page" class="page active">
+    <header>
+        <div class="logo-block">
+            <div class="logo-text">🍕 PIZZA VADÁSZ</div>
+            <div class="logo-sub">Pizzéria kereső</div>
+        </div>
+        <button class="btn-hungry-hdr" onclick="goHungry()"><div class="pulse-dot"></div> Éhes vagyok!</button>
+    </header>
+    <div class="hero">
+        <div class="hero-logo-wrap">
+            <div class="logo-icon">🍕</div>
+            <div class="logo-title">PIZZA VADÁSZ</div>
+            <div class="logo-sub2">PIZZÉRIA KERESŐ</div>
+        </div>
+        <h2>Üdvözöllek!</h2>
+        <p>Találd meg a legjobb pizzériát a közeledben!</p>
+        <div class="hero-buttons">
+            <button class="btn-hungry-hero" onclick="goHungry()"><div class="pulse-dot"></div> ÉHES VAGYOK!</button>
+            <button class="btn-primary"   onclick="showPage('map-page')">🗺️ TÉRKÉP NÉZET</button>
+            <button class="btn-secondary" onclick="showPage('lista-page')">📋 PIZZÉRIA LISTA</button>
+        </div>
+    </div>
+    <div class="navbar">
+        <span onclick="showPage('landing-page')" class="active">🏠<br>Kezdő</span>
+        <span onclick="showPage('map-page')">🗺️<br>Térkép</span>
+        <span onclick="showPage('lista-page')">📋<br>Lista</span>
+        <span onclick="showPage('partner-page')">🌐<br>Partnerek</span>
+    </div>
+</div>
+
+<!-- ═══ TÉRKÉP ═══ -->
+<div id="map-page" class="page">
+    <header>
+        <h1>🍕 Pizzériák a közelben</h1>
+        <button class="btn-hungry-hdr" onclick="goHungry()"><div class="pulse-dot"></div> Éhes!</button>
+    </header>
+    <div id="map"></div>
+    <div id="map-msg">🍕 Térkép betöltése...</div>
+    <div id="search-bar">
+        <input type="text" id="city-search" placeholder="🔍 Keresés városra, pizzériára...">
+        <button onclick="searchCity()">Keresés</button>
+    </div>
+    <div id="filter-bar">
+        <div class="filter-chip active" data-f="all"      onclick="setMapFilter(this)">🍕 Mind</div>
+        <div class="filter-chip"        data-f="italian"  onclick="setMapFilter(this)">🇮🇹 Olasz</div>
+        <div class="filter-chip"        data-f="american" onclick="setMapFilter(this)">🥊 American</div>
+        <div class="filter-chip"        data-f="woodfire" onclick="setMapFilter(this)">🔥 Kemencés</div>
+        <div class="filter-chip"        data-f="vegan"    onclick="setMapFilter(this)">🌱 Vegán</div>
+        <div class="filter-chip"        data-f="delivery" onclick="setMapFilter(this)">🛵 Házhozszállít</div>
+        <div class="filter-chip"        data-f="open"     onclick="setMapFilter(this)">🟢 Most nyitva</div>
+    </div>
+    <div id="travel-mode-bar" style="display:none"></div>
+    <div id="map-legend"><span>🍕 Pizzéria</span></div>
+    <div id="osm-status">⏳ OSM adatok betöltése...</div>
+    <button id="indulas-btn" onclick="navValasztoMegnyit()">🧭 INDULÁS!</button>
+    <div id="nav-choice-panel">
+        <div id="nav-choice-cim">🍕 Navigáció indítása</div>
+        <div id="nav-choice-buttons">
+            <button class="nav-choice-btn" id="nav-btn-apple"  onclick="navIndit('apple')">🍎 Apple Maps</button>
+            <button class="nav-choice-btn" id="nav-btn-google" onclick="navIndit('google')">🗺️ Google Maps</button>
+            <button class="nav-choice-btn" id="nav-btn-waze"   onclick="navIndit('waze')">🚗 Waze</button>
+            <button class="nav-choice-btn" id="nav-btn-cancel" onclick="navValasztoZar()">✕ Mégsem</button>
+        </div>
+    </div>
+    <div class="navbar">
+        <span onclick="showPage('landing-page')">🏠<br>Kezdő</span>
+        <span onclick="showPage('map-page')" class="active">🗺️<br>Térkép</span>
+        <span onclick="showPage('lista-page')">📋<br>Lista</span>
+        <span onclick="showPage('partner-page')">🌐<br>Partnerek</span>
+    </div>
+</div>
+
+<!-- ═══ LISTA ═══ -->
+<div id="lista-page" class="page">
+    <header><h1>📋 Pizzéria lista</h1></header>
+    <div id="lista-search-wrap">
+        <input type="text" id="lista-search-input" placeholder="🔍 Keresés pizzéria vagy város neve alapján..." oninput="renderLista()">
+    </div>
+    <div id="lista-body">
+        <div id="cat-sidebar">
+            <button class="cat-btn active" onclick="setKat('mind')"     id="kat-mind">    <span class="cat-ikon">🍕</span>Összes</button>
+            <button class="cat-btn"        onclick="setKat('italian')"  id="kat-italian"> <span class="cat-ikon">🇮🇹</span>Olasz</button>
+            <button class="cat-btn"        onclick="setKat('american')" id="kat-american"><span class="cat-ikon">🥊</span>American</button>
+            <button class="cat-btn"        onclick="setKat('woodfire')" id="kat-woodfire"><span class="cat-ikon">🔥</span>Kemencés</button>
+            <button class="cat-btn"        onclick="setKat('vegan')"    id="kat-vegan">   <span class="cat-ikon">🌱</span>Vegán</button>
+            <button class="cat-btn"        onclick="setKat('delivery')" id="kat-delivery"><span class="cat-ikon">🛵</span>Házhozszállít</button>
+            <button class="cat-btn"        onclick="setKat('open')"     id="kat-open">    <span class="cat-ikon">🟢</span>Most nyitva</button>
+            <button class="cat-btn"        onclick="setKat('thin')"     id="kat-thin">    <span class="cat-ikon">⬡</span>Vékony tészta</button>
+            <button class="cat-btn"        onclick="setKat('deepdish')" id="kat-deepdish"><span class="cat-ikon">🫕</span>Deep dish</button>
+            <button class="cat-btn"        onclick="setKat('calzone')"  id="kat-calzone"> <span class="cat-ikon">🌯</span>Calzone</button>
+        </div>
+        <div id="bolt-lista"></div>
+    </div>
+    <div class="navbar">
+        <span onclick="showPage('landing-page')">🏠<br>Kezdő</span>
+        <span onclick="showPage('map-page')">🗺️<br>Térkép</span>
+        <span onclick="showPage('lista-page')" class="active">📋<br>Lista</span>
+        <span onclick="showPage('partner-page')">🌐<br>Partnerek</span>
+    </div>
+</div>
+
+<!-- ═══ PARTNEREK ═══ -->
+<div id="partner-page" class="page">
+    <header><h1>🌐 Partnerek</h1></header>
+    <div class="content">
+        <div class="partner-section">
+            <h2>⭐ Támogatók & Szponzorok</h2>
+            <a class="partner-card" href="/cdn-cgi/l/email-protection#147d7a727b54647d6e6e753962757075676e3a6371763a756464">
+                <div class="partner-icon">⭐</div>
+                <div class="partner-info"><h3>Légy Te az első szponzor!</h3><p>Írj emailt nekünk!</p></div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="partner-section">
+            <h2>🐾 VADÁSZ ALKALMAZÁSOK</h2>
+            <a class="partner-card" href="https://vadasz-apps.web.app" target="_blank">
+                <div class="partner-icon">🛡️</div>
+                <div class="partner-info">
+                    <h3>Ismerd meg az összes Vadász appot!</h3>
+                    <p>Trafik, Szivar, Hangszerbolt és még több – egy helyen, ingyen, telepítési útmutatóval!</p>
+                </div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="partner-section">
+            <h2>❤️ Támogasd az appot</h2>
+            <a class="partner-card" href="https://ko-fi.com/pizzavadasz" target="_blank">
+                <div class="partner-icon">☕</div>
+                <div class="partner-info"><h3>Vegyél egy kávét a fejlesztőnek!</h3><p>Az app ingyenes, de a fejlesztés nem az 😄</p></div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="copyright-bar">© 2026 Pizza Vadász. Minden jog fenntartva.<br>Készítette: Králik Zola | v1.0</div>
+    </div>
+    <div class="navbar">
+        <span onclick="showPage('landing-page')">🏠<br>Kezdő</span>
+        <span onclick="showPage('map-page')">🗺️<br>Térkép</span>
+        <span onclick="showPage('lista-page')">📋<br>Lista</span>
+        <span onclick="showPage('partner-page')" class="active">🌐<br>Partnerek</span>
+    </div>
+</div>
+
+<div id="global-copyright">2026 Copyright © Pizza Vadász</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ── KATEGÓRIA INFÓ ─────────────────────────────────────────────────────────
+var KAT_INFO = {
+    'italian':  {ikon:'🇮🇹', label:'Olasz pizzéria'},
+    'american': {ikon:'🥊',  label:'American pizza'},
+    'woodfire': {ikon:'🔥',  label:'Kemencés pizza'},
+    'vegan':    {ikon:'🌱',  label:'Vegán lehetőség'},
+    'thin':     {ikon:'⬡',   label:'Vékony tészta'},
+    'deepdish': {ikon:'🫕',  label:'Deep dish'},
+    'calzone':  {ikon:'🌯',  label:'Calzone'},
+    'general':  {ikon:'🍕',  label:'Pizzéria'},
+};
+
+// ── STATIKUS FALLBACK ──────────────────────────────────────────────────────
+var STATIKUS_BOLTOK = [
+    {nev:"Pomo d'Oro",             cim:"1051 Budapest, Arany János u. 9",      lat:47.5038, lng:19.0509, kat:"italian",  delivery:false, open:true},
+    {nev:"Il Treno Pizzéria",      cim:"1065 Budapest, Bajcsy-Zsilinszky út 24",lat:47.5068,lng:19.0547, kat:"woodfire", delivery:true,  open:true},
+    {nev:"New York Pizza Budapest",cim:"1072 Budapest, Rákóczi út 38",          lat:47.4991, lng:19.0627, kat:"american", delivery:true,  open:true},
+    {nev:"Pizzica",                cim:"1137 Budapest, Pozsonyi út 1",          lat:47.5188, lng:19.0541, kat:"italian",  delivery:false, open:true},
+    {nev:"Vegan Pizza Bar",        cim:"1061 Budapest, Andrássy út 22",         lat:47.5047, lng:19.0594, kat:"vegan",    delivery:true,  open:false},
+    {nev:"Tüzes Kemence Pizzéria", cim:"1082 Budapest, Baross u. 28",           lat:47.4897, lng:19.0801, kat:"woodfire", delivery:false, open:true},
+    {nev:"Chicago Deep Dish HU",   cim:"1094 Budapest, Ferenc krt. 12",         lat:47.4822, lng:19.0734, kat:"american", delivery:true,  open:true},
+    {nev:"La Calzone Roma",        cim:"1054 Budapest, Alkotmány u. 5",         lat:47.5050, lng:19.0490, kat:"italian",  delivery:false, open:true},
+    {nev:"Pizza e Basta",          cim:"1055 Budapest, Falk Miksa u. 10",       lat:47.5102, lng:19.0484, kat:"italian",  delivery:true,  open:true},
+    {nev:"Pizza Hut Westend",      cim:"1062 Budapest, Váci út 1-3",            lat:47.5117, lng:19.0524, kat:"american", delivery:true,  open:true},
+];
+
+var BOLTOK = STATIKUS_BOLTOK.slice();
+var osmBetoltve = false;
+var activeKat = 'mind';
+var mapFilter  = 'all';
+
+// ── OSM BETÖLTÉS – radius alapú + mirror fallback ──────────────────────────
+function osmBetoltes() {
+    setOsmStatus('⏳ Betöltés...');
+    // 10 km-es sugár a felhasználó körül – sokkal gyorsabb mint egész MO
+    var radius = 10000;
+    var lat = userLoc.lat, lng = userLoc.lng;
+    var query = '[out:json][timeout:25];(node["amenity"="restaurant"]["cuisine"~"pizza",i](around:'+radius+','+lat+','+lng+');node["amenity"="fast_food"]["cuisine"~"pizza",i](around:'+radius+','+lat+','+lng+');way["amenity"="restaurant"]["cuisine"~"pizza",i](around:'+radius+','+lat+','+lng+'););out center 200;';
+    var mirrors = [
+        'https://overpass-api.de/api/interpreter',
+        'https://overpass.kumi.systems/api/interpreter',
+        'https://overpass.openstreetmap.ru/api/interpreter'
+    ];
+    function processData(data) {
+        var ujak=[];
+        (data.elements||[]).forEach(function(el){
+            var elat=el.lat||(el.center&&el.center.lat);
+            var elng=el.lon||(el.center&&el.center.lon);
+            if(!elat||!elng) return;
+            var t=el.tags||{};
+            var nev=t.name||t['name:hu']||'Pizzéria';
+            var cim='';
+            if(t['addr:city'])        cim+=t['addr:city'];
+            if(t['addr:street'])      cim+=(cim?', ':'')+t['addr:street'];
+            if(t['addr:housenumber']) cim+=' '+t['addr:housenumber'];
+            if(!cim) cim='Magyarország';
+            var cuisine=(t.cuisine||'').toLowerCase(), nameL=nev.toLowerCase();
+            var kat='italian';
+            if(cuisine.includes('american')||nameL.includes('ameri')||nameL.includes('new york')) kat='american';
+            else if(cuisine.includes('wood')||nameL.includes('kemenc')||nameL.includes('tüzes')||nameL.includes('tuzes')) kat='woodfire';
+            else if(t['diet:vegan']==='yes'||t['diet:vegan']==='only') kat='vegan';
+            var delivery=t['delivery']==='yes';
+            var isOpen=checkOpen(t['opening_hours']||'');
+            ujak.push({nev:nev,cim:cim,lat:elat,lng:elng,kat:kat,delivery:delivery,open:isOpen});
+        });
+        BOLTOK=STATIKUS_BOLTOK.concat(ujak);
+        osmBetoltve=true;
+        setOsmStatus('✅ '+BOLTOK.length+' pizzéria betöltve');
+        setTimeout(function(){var s=document.getElementById('osm-status');if(s)s.style.display='none';},3000);
+        if(gmap) addOsmMarkersToMap(ujak);
+        if(document.getElementById('lista-page').classList.contains('active')) renderLista();
+    }
+    function tryMirror(idx) {
+        if(idx >= mirrors.length) {
+            osmBetoltve=true;
+            setOsmStatus('⚠️ OSM szerver nem elérhető');
+            setTimeout(function(){var s=document.getElementById('osm-status');if(s)s.style.display='none';},4000);
+            if(document.getElementById('lista-page').classList.contains('active')) renderLista();
+            return;
+        }
+        if(idx>0) setOsmStatus('⏳ Tükör szerver '+(idx+1)+'...');
+        fetch(mirrors[idx]+'?data='+encodeURIComponent(query))
+            .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+            .then(processData)
+            .catch(function(){ tryMirror(idx+1); });
+    }
+    tryMirror(0);
+}
+
+function setOsmStatus(t){var e=document.getElementById('osm-status');if(e){e.textContent=t;e.style.display='block';}}
+function checkOpen(hours){
+    if(!hours) return null;
+    try{
+        var now=new Date(),hm=now.getHours()*60+now.getMinutes();
+        var days=['Su','Mo','Tu','We','Th','Fr','Sa'],today=days[now.getDay()];
+        var parts=hours.split(';');
+        for(var i=0;i<parts.length;i++){
+            var p=parts[i].trim(),m=p.match(/(\d{2}:\d{2})-(\d{2}:\d{2})/);
+            if(!m) continue;
+            var op=timeToMin(m[1]),cl=timeToMin(m[2]),dp=p.split(' ')[0];
+            if(dp.includes('-')){var a=dp.split('-'),di=days.indexOf(a[0]),de=days.indexOf(a[1]),dc=days.indexOf(today);if(di<=dc&&dc<=de) return hm>=op&&hm<cl;}
+            else if(dp===today) return hm>=op&&hm<cl;
+        }
+        return null;
+    }catch(e){return null;}
+}
+function timeToMin(s){var p=s.split(':');return parseInt(p[0])*60+parseInt(p[1]);}
+function hashStr(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))&0xffff;return h;}
+
+// ── LISTA ─────────────────────────────────────────────────────────────────
+window.setKat=function(kat){
+    activeKat=kat;
+    document.querySelectorAll('.cat-btn').forEach(function(b){b.classList.remove('active');});
+    var el=document.getElementById('kat-'+kat);if(el)el.classList.add('active');
+    renderLista();
+};
+
+window.renderLista=function(){
+    var q=(document.getElementById('lista-search-input').value||'').toLowerCase().trim();
+    var filtered=BOLTOK.filter(function(b){
+        if(activeKat!=='mind'){
+            if(activeKat==='open'     &&b.open!==true)  return false;
+            if(activeKat==='delivery' &&!b.delivery)     return false;
+            if(activeKat==='vegan'    &&b.kat!=='vegan') return false;
+            if(activeKat==='woodfire' &&b.kat!=='woodfire') return false;
+            if(activeKat==='american' &&b.kat!=='american') return false;
+            if(activeKat==='italian'  &&b.kat!=='italian')  return false;
+            // thin/deepdish/calzone: OSM nem mindig jelöli, így az összes megjelenik mint "közel"
+            if(activeKat==='thin'     &&b.kat!=='thin')     return false;
+            if(activeKat==='deepdish' &&b.kat!=='american') return false;
+            if(activeKat==='calzone'  &&b.kat!=='italian')  return false;
+        }
+        if(q&&b.nev.toLowerCase().indexOf(q)===-1&&b.cim.toLowerCase().indexOf(q)===-1) return false;
+        return true;
+    });
+    var el=document.getElementById('bolt-lista');if(!el) return;
+    if(!osmBetoltve){
+        el.innerHTML='<div class="lista-loading">⏳ Adatok betöltése...<br><small>Kérjük várj egy pillanatot.</small></div>';
+        return;
+    }
+    if(filtered.length===0){
+        var uzenet=BOLTOK.length<=STATIKUS_BOLTOK.length
+            ?'<div class="lista-loading">⚠️ Az OSM szerver jelenleg túlterhelt.<br><small>Csak az alap adatok érhetők el.<br>Próbáld újra pár perc múlva!</small></div>'
+            :'<div class="lista-empty">😔 Nincs találat ezzel a szűrővel.</div>';
+        el.innerHTML=uzenet;return;
+    }
+    el.innerHTML=filtered.map(function(b){
+        var ki=KAT_INFO[b.kat]||KAT_INFO['general'];
+        var rating=(3.5+(hashStr(b.nev)%15)/10).toFixed(1);
+        var badges='<span class="bolt-badge">'+ki.label+'</span>';
+        if(b.open===true)  badges+='<span class="bolt-badge open">🟢 Nyitva</span>';
+        if(b.open===false) badges+='<span class="bolt-badge closed">🔴 Zárva</span>';
+        if(b.delivery)     badges+='<span class="bolt-badge delivery">🛵 Házhozszállítás</span>';
+        return '<div class="bolt-card">'+
+            '<div class="bolt-cat-icon">'+ki.ikon+'</div>'+
+            '<div class="bolt-info">'+
+                '<div class="bolt-nev">'+b.nev+'</div>'+
+                '<div class="bolt-cim">📍 '+b.cim+'</div>'+
+                '<div class="bolt-badges">'+badges+'</div>'+
+                '<div style="font-size:.7rem;color:var(--gray);margin-top:3px">⭐ '+rating+'</div>'+
+            '</div>'+
+            '<button class="bolt-route-btn" onclick="routeFromList('+b.lat+','+b.lng+',\'' + b.nev.replace(/'/g,'') + '\')" title="Útvonal">🧭</button>'+
+        '</div>';
+    }).join('');
+};
+
+window.routeFromList=function(lat,lng,nev){showPage('map-page');setTimeout(function(){window.showRoute(lat,lng,nev);},500);};
+
+// ── OLDALVÁLTÁS ────────────────────────────────────────────────────────────
+window.showPage=function(pageId){
+    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+    document.getElementById(pageId).classList.add('active');
+    document.querySelectorAll('.navbar span').forEach(function(s){s.classList.remove('active');});
+    document.querySelectorAll('#'+pageId+' .navbar span').forEach(function(s){
+        if(s.getAttribute('onclick')&&s.getAttribute('onclick').indexOf(pageId)!==-1) s.classList.add('active');
+    });
+    if(pageId==='map-page'){fixMapSize();setTimeout(window.loadMap,80);}
+    else{document.getElementById('indulas-btn').style.display='none';document.getElementById('nav-choice-panel').classList.remove('active');}
+    if(pageId==='lista-page') renderLista();
+};
+
+function fixMapSize(){
+    var el=document.getElementById('map');if(!el) return;
+    el.style.height=(window.innerHeight-64-54-27)+'px';
+    el.style.top='64px';
+}
+
+// ── MAP FILTER ─────────────────────────────────────────────────────────────
+window.setMapFilter=function(chipEl){
+    var f=chipEl.dataset.f;
+    document.querySelectorAll('#filter-bar .filter-chip').forEach(function(c){c.classList.remove('active');});
+    chipEl.classList.add('active');
+    mapFilter=f;
+    if(gmap){
+        allMapMarkers.forEach(function(m){m.setMap(null);});
+        allMapMarkers=[];
+        var toShow=mapFilter==='all'?BOLTOK:BOLTOK.filter(function(b){
+            if(mapFilter==='delivery') return b.delivery;
+            if(mapFilter==='vegan')    return b.kat==='vegan';
+            if(mapFilter==='woodfire') return b.kat==='woodfire';
+            if(mapFilter==='american') return b.kat==='american';
+            if(mapFilter==='italian')  return b.kat==='italian';
+            if(mapFilter==='open')     return b.open===true;
+            return true;
+        });
+        toShow.forEach(function(b){addSingleMarker(b);});
+    }
+};
+
+// ── KÖZLEKEDÉSI MÓD ────────────────────────────────────────────────────────
+var currentTravelMode='DRIVING';
+window.setTravelMode=function(mode){ currentTravelMode=mode; };
+
+// ── TÉRKÉP ─────────────────────────────────────────────────────────────────
+var gmap=null, allMapMarkers=[], userLoc={lat:47.4979,lng:19.0402};
+var dirService=null, dirRenderer=null;
+var mapBuilt=false, mapsApiReady=false;
+var navRouteResult=null;
+
+function initDirService(){
+    if(!dirService){
+        dirService=new google.maps.DirectionsService();
+        dirRenderer=new google.maps.DirectionsRenderer({map:gmap,polylineOptions:{strokeColor:'#8B0000',strokeWeight:5}});
+    }
+}
+
+window.showRoute=function(lat,lng,nev){
+    var try_=function(){
+        if(!gmap||typeof google==='undefined'){setTimeout(try_,400);return;}
+        initDirService();
+        dirService.route({origin:userLoc,destination:{lat:lat,lng:lng},travelMode:google.maps.TravelMode[currentTravelMode]},
+            function(result,status){
+                if(status==='OK'){
+                    dirRenderer.setDirections(result);navRouteResult=result;
+                    navCelLat=lat; navCelLng=lng; navCelNev=nev||'Pizzéria';
+                    document.getElementById('map-msg').style.display='none';
+                    document.getElementById('nav-choice-panel').classList.remove('active');
+                    document.getElementById('indulas-btn').style.display='block';
+                }else{alert('Útvonal hiba: '+status);}
+            });
+    };
+    if(!gmap){setTimeout(try_,600);}else{try_();}
+};
+
+function addOsmMarkersToMap(ujak){ujak.forEach(function(b){addSingleMarker(b);});}
+
+function addSingleMarker(b){
+    if(!gmap) return;
+    var ki=KAT_INFO[b.kat]||KAT_INFO['general'];
+    var colors={italian:'#FFD700',american:'#FF6B35',woodfire:'#FF4500',vegan:'#22c55e',general:'#FFD700'};
+    var fc=colors[b.kat]||colors['general'];
+    var m=new google.maps.Marker({
+        position:{lat:b.lat,lng:b.lng},map:gmap,title:b.nev,
+        icon:{path:google.maps.SymbolPath.CIRCLE,scale:11,fillColor:fc,fillOpacity:1,strokeColor:'#8B0000',strokeWeight:2},
+        zIndex:5
+    });
+    var rating=(3.5+(hashStr(b.nev)%15)/10).toFixed(1);
+    var openTxt=b.open===true?'<span style="color:#1A7A40">🟢 Nyitva</span>':b.open===false?'<span style="color:#B00020">🔴 Zárva</span>':'';
+    var div=document.createElement('div');
+    div.style.cssText='color:#1A0A00;max-width:230px;font-family:"DM Sans",sans-serif;padding:4px';
+    div.innerHTML='<b style="font-family:\'Playfair Display\',serif;font-size:14px;color:#8B0000">'+ki.ikon+' '+b.nev+'</b>'+
+        '<br><small>📍 '+b.cim+'</small>'+
+        '<br><small>⭐ '+rating+' &nbsp;'+openTxt+(b.delivery?' &nbsp; 🛵 Házhozszállítás':'')+'</small>';
+    var btn=document.createElement('button');btn.className='iw-btn';btn.textContent='🧭 INDULÁS!';
+    (function(la,ln,nv){btn.onclick=function(){window.showRoute(la,ln,nv);};})(b.lat,b.lng,b.nev);
+    div.appendChild(btn);
+    var iw=new google.maps.InfoWindow({content:div});
+    m.addListener('click',function(){iw.open(gmap,m);});
+    allMapMarkers.push(m);
+}
+
+// ── ÉHES VAGYOK ───────────────────────────────────────────────────────────
+window.goHungry=function(){
+    showPage('map-page');
+    setTimeout(function(){
+        if(!BOLTOK.length) return;
+        var open=BOLTOK.filter(function(b){return b.open===true;});
+        var pool=open.length?open:BOLTOK;
+        var best=pool.reduce(function(best,b){
+            var d=Math.sqrt(Math.pow(b.lat-userLoc.lat,2)+Math.pow(b.lng-userLoc.lng,2));
+            if(!best||d<best.d) return {b:b,d:d};
+            return best;
+        },null);
+        if(best) window.showRoute(best.b.lat,best.b.lng,best.b.nev);
+    },600);
+};
+
+// ── CITY SEARCH ────────────────────────────────────────────────────────────
+window.searchCity=function(){
+    var q=document.getElementById('city-search').value.trim();
+    if(!q||!gmap) return;
+    new google.maps.Geocoder().geocode({address:q+', Magyarország'},function(results,status){
+        if(status==='OK'&&results[0]){gmap.setCenter(results[0].geometry.location);gmap.setZoom(14);document.getElementById('city-search').blur();}
+        else{alert('Nem található: '+q);}
+    });
+};
+
+// ── NAVIGÁCIÓ – külső GPS app választó ────────────────────────────────────
+var navCelLat=null, navCelLng=null, navCelNev='';
+
+window.navValasztoMegnyit=function(){
+    if(navCelLat===null) return;
+    document.getElementById('nav-choice-cim').textContent='🍕 ' + navCelNev;
+    document.getElementById('indulas-btn').style.display='none';
+    document.getElementById('nav-choice-panel').classList.add('active');
+};
+
+window.navValasztoZar=function(){
+    document.getElementById('nav-choice-panel').classList.remove('active');
+    document.getElementById('indulas-btn').style.display='block';
+};
+
+window.navIndit=function(app){
+    if(navCelLat===null) return;
+    var lat=navCelLat, lng=navCelLng, nev=encodeURIComponent(navCelNev);
+    var url='';
+    if(app==='apple')  url='maps://maps.apple.com/?daddr='+lat+','+lng+'&dirflg=d';
+    if(app==='google') url='https://www.google.com/maps/dir/?api=1&destination='+lat+','+lng+'&travelmode=driving';
+    if(app==='waze')   url='https://waze.com/ul?ll='+lat+','+lng+'&navigate=yes';
+    window.open(url, '_blank');
+    document.getElementById('nav-choice-panel').classList.remove('active');
+};
+
+// ── GOOGLE MAPS INIT ───────────────────────────────────────────────────────
+window.mapsReady=function(){
+    mapsApiReady=true;
+    var input=document.getElementById('city-search');
+    if(input&&google.maps.places){
+        var ac=new google.maps.places.Autocomplete(input,{componentRestrictions:{country:'hu'},fields:['geometry','name']});
+        ac.addListener('place_changed',function(){var pl=ac.getPlace();if(pl.geometry){gmap.setCenter(pl.geometry.location);gmap.setZoom(14);input.blur();}});
+    }
+    if(document.getElementById('map-page').classList.contains('active')) window.loadMap();
+};
+
+window.loadMap=function(){
+    if(!mapsApiReady||typeof google==='undefined'||!google.maps){setTimeout(window.loadMap,200);return;}
+    if(gmap){fixMapSize();setTimeout(function(){google.maps.event.trigger(gmap,'resize');gmap.setCenter(userLoc);document.getElementById('map-msg').style.display='none';},100);return;}
+    if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){userLoc={lat:p.coords.latitude,lng:p.coords.longitude};buildMap();},function(){buildMap();},{timeout:6000});}
+    else{buildMap();}
+};
+
+function buildMap(){
+    if(mapBuilt) return; mapBuilt=true;
+    fixMapSize();
+    document.getElementById('map-msg').style.display='none';
+    gmap=new google.maps.Map(document.getElementById('map'),{
+        center:userLoc, zoom:14,
+        styles:[
+            {elementType:"geometry",stylers:[{color:"#FFF5E6"}]},
+            {elementType:"labels.text.stroke",stylers:[{color:"#FFF5E6"}]},
+            {elementType:"labels.text.fill",stylers:[{color:"#5A1A00"}]},
+            {featureType:"road",elementType:"geometry",stylers:[{color:"#ffffff"}]},
+            {featureType:"road",elementType:"labels.text.fill",stylers:[{color:"#7A4A30"}]},
+            {featureType:"road.highway",elementType:"geometry",stylers:[{color:"#FFD9AA"}]},
+            {featureType:"water",elementType:"geometry",stylers:[{color:"#AED4E8"}]},
+            {featureType:"poi",stylers:[{visibility:"off"}]},
+            {featureType:"transit",stylers:[{visibility:"off"}]}
+        ]
+    });
+    new google.maps.Marker({position:userLoc,map:gmap,icon:{path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:'#8B0000',fillOpacity:1,strokeColor:'#FFD700',strokeWeight:3},title:'Te vagy itt',zIndex:999});
+    STATIKUS_BOLTOK.forEach(function(b){addSingleMarker(b);});
+    google.maps.event.trigger(gmap,'resize');gmap.setCenter(userLoc);
+    setTimeout(function(){google.maps.event.trigger(gmap,'resize');gmap.setCenter(userLoc);},500);
+    osmBetoltes();
+}
+
+window.addEventListener('resize',function(){if(gmap){fixMapSize();google.maps.event.trigger(gmap,'resize');gmap.setCenter(userLoc);}});
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqCZBsFCKSnHm_NXAS2lcb6X860e1xMYk&libraries=places&callback=mapsReady" async defer></script>
+</body>
+</html>

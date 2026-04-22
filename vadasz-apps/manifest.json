@@ -1,0 +1,39 @@
+{
+  "name": "Vadász Apps",
+  "short_name": "Vadász Apps",
+  "description": "Magyar kereső alkalmazások – Trafik, Szivar, Bor, Patika és még több!",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0D3B2E",
+  "theme_color": "#0D3B2E",
+  "lang": "hu",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["navigation", "utilities"],
+  "prefer_related_applications": false
+}

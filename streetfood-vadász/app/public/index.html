@@ -1,0 +1,504 @@
+<!-- © 2026 Street Food Vadász. Minden jog fenntartva. -->
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Street Food Vadász</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1565C0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Street Food Vadász">
+<link rel="apple-touch-icon" href="/icons/sf-icon-v1.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Lato',sans-serif;background:#E3F2FD;color:#0D1B2A;}
+:root{--blue:#1565C0;--blue2:#1976D2;--light:#E3F2FD;--dark:#0D1B2A;--mid:#1E3A5F;--accent:#FF6B35;--accent2:#E85D2A;--white:#FFFFFF;--muted:#5C7A99;--green:#22c55e;--navbar:54px;--header:64px;--copy:27px;}
+.page{display:none;flex-direction:column;width:100%;height:100%;position:absolute;top:0;left:0;}.page.active{display:flex;}
+header{height:var(--header);padding:0 15px;background:var(--blue);border-bottom:2px solid var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;z-index:50;}
+header h1{color:var(--white);font-family:'Nunito',sans-serif;font-size:1.2rem;letter-spacing:1px;}
+.logo-text{font-family:'Nunito',sans-serif;font-size:1.6rem;font-weight:900;color:var(--white);letter-spacing:2px;line-height:1.2;}
+.logo-sub{font-size:0.8rem;color:rgba(255,255,255,0.8);letter-spacing:2px;text-transform:uppercase;}
+input,textarea{width:100%;padding:12px;background:var(--white);border:1.5px solid #90CAF9;color:var(--dark);border-radius:10px;font-size:1rem;font-family:'Lato',sans-serif;}
+input::placeholder,textarea::placeholder{color:var(--muted);}
+button{background:var(--blue);color:var(--white);padding:15px;border:none;width:100%;font-weight:700;font-size:1rem;border-radius:10px;cursor:pointer;font-family:'Lato',sans-serif;transition:background 0.2s;}
+button:hover{background:var(--blue2);}
+.btn-outline{background:transparent;border:2px solid var(--white);color:var(--white);}
+.btn-accent{background:var(--accent);color:var(--white);}
+.btn-accent:hover{background:var(--accent2);}
+.navbar{height:var(--navbar);display:flex;justify-content:space-around;align-items:center;background:var(--blue);border-top:2px solid var(--accent);position:fixed;bottom:var(--copy);width:100%;z-index:1000;touch-action:manipulation;user-select:none;-webkit-user-select:none;}
+.navbar span{color:rgba(255,255,255,0.6);font-size:0.63rem;cursor:pointer;padding:4px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;text-align:center;line-height:1.3;border-bottom:2px solid transparent;}
+.navbar span.active,.navbar span:hover{color:var(--white);border-bottom-color:var(--accent);}
+#global-copyright{position:fixed;bottom:0;left:0;width:100%;height:var(--copy);line-height:var(--copy);text-align:center;background:var(--dark);color:rgba(255,255,255,0.6);font-size:0.65rem;font-weight:bold;z-index:1001;letter-spacing:1px;}
+.content{flex:1;overflow-y:auto;padding:15px;padding-bottom:calc(var(--navbar) + var(--copy) + 20px);}
+.hero{text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;flex:1;padding:20px;padding-bottom:calc(var(--navbar) + var(--copy) + 10px);overflow:hidden;background:linear-gradient(160deg,#1565C0 0%,#1976D2 50%,#0D47A1 100%);}
+.hero-glass{font-size:5rem;filter:drop-shadow(0 0 20px rgba(255,107,53,0.6));animation:floatGlass 3s ease-in-out infinite;display:block;margin-bottom:10px;}
+@keyframes floatGlass{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.hero h2{font-family:'Nunito',sans-serif;font-size:1.7rem;color:var(--white);margin:10px 0 8px;font-weight:900;}
+.hero p{color:rgba(255,255,255,0.85);margin-bottom:18px;max-width:300px;line-height:1.6;font-size:0.95rem;}
+.hero-buttons{display:flex;flex-direction:column;gap:10px;width:100%;max-width:300px;}
+.tagline-strip{margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.2);font-size:0.78rem;color:rgba(255,255,255,0.7);letter-spacing:1px;}
+.style-filter-bar{display:flex;gap:7px;overflow-x:auto;padding:10px 15px;background:var(--blue);border-bottom:1px solid rgba(255,255,255,0.2);flex-shrink:0;scrollbar-width:none;}
+.style-filter-bar::-webkit-scrollbar{display:none;}
+.style-chip{white-space:nowrap;padding:6px 13px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.85);font-size:0.75rem;cursor:pointer;font-family:'Lato',sans-serif;transition:all 0.2s;flex-shrink:0;width:auto;}
+.style-chip.active,.style-chip:hover{background:var(--accent);color:var(--white);font-weight:700;border-color:var(--accent);}
+.mode-toggle{display:flex;gap:0;margin:10px 15px;border-radius:10px;overflow:hidden;border:1.5px solid #90CAF9;flex-shrink:0;}
+.mode-toggle-btn{flex:1;padding:8px;background:var(--white);color:var(--muted);font-size:0.8rem;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;font-family:'Lato',sans-serif;text-align:center;}
+.mode-toggle-btn.active{background:var(--blue);color:var(--white);}
+.price-badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:0.7rem;font-weight:700;margin-left:5px;}
+.price-budget{background:#1a3300;color:#6fe040;border:1px solid #2d5500;}
+.price-mid{background:#1565C0;color:#fff;border:1px solid #1976D2;}
+.price-premium{background:var(--accent);color:#fff;border:1px solid var(--accent2);}
+.sf-card{background:var(--white);border:1px solid #BBDEFB;border-radius:12px;padding:13px;margin-bottom:10px;display:flex;align-items:center;gap:12px;transition:all 0.2s;box-shadow:0 2px 8px rgba(21,101,192,0.08);}
+.sf-card:hover{border-color:var(--blue2);box-shadow:0 4px 16px rgba(21,101,192,0.15);}
+.sf-icon{font-size:1.9rem;flex-shrink:0;}
+.sf-details{flex:1;min-width:0;}
+.sf-details h3{margin:0 0 3px;color:var(--blue);font-size:0.95rem;font-family:'Nunito',sans-serif;font-weight:700;}
+.sf-details p{margin:2px 0;font-size:0.78rem;color:var(--muted);}
+.sf-badge{font-size:0.7rem;margin-top:3px;display:block;color:var(--muted);}
+.tag-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
+.tag{padding:2px 7px;border-radius:4px;font-size:0.65rem;background:#E3F2FD;color:var(--blue);border:1px solid #90CAF9;}
+.nav-btn{background:var(--accent);color:var(--white);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;flex-shrink:0;border:none;box-shadow:0 2px 8px rgba(255,107,53,0.4);}
+#meglepj-btn{display:block;margin:0 15px 10px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;color:var(--white);font-size:0.95rem;font-weight:700;padding:13px;cursor:pointer;font-family:'Lato',sans-serif;width:calc(100% - 30px);letter-spacing:1px;transition:all 0.2s;text-align:center;box-shadow:0 4px 15px rgba(255,107,53,0.4);}
+.event-card{background:var(--white);border:1px solid #BBDEFB;border-radius:12px;padding:13px;margin-bottom:10px;position:relative;box-shadow:0 2px 8px rgba(21,101,192,0.08);}
+.event-date{color:var(--blue);font-size:0.8rem;font-weight:700;margin-bottom:4px;}
+.event-title{color:var(--dark);font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;margin-bottom:4px;}
+.event-loc{color:var(--muted);font-size:0.78rem;}
+.event-type-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.65rem;font-weight:700;margin-left:6px;}
+.event-fesztival{background:#E3F2FD;color:var(--blue);border:1px solid #90CAF9;}
+.event-street{background:#FFF3E0;color:#E65100;border:1px solid #FFCC80;}
+.event-popup{background:#F3E5F5;color:#6A1B9A;border:1px solid #CE93D8;}
+.event-akcios{background:#E8F5E9;color:#2E7D32;border:1px solid #A5D6A7;}
+.event-nav-btn{position:absolute;top:13px;right:13px;background:var(--accent);color:var(--white);border:none;border-radius:50%;width:38px;height:38px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(255,107,53,0.4);}
+#esemeny-bekuldese-btn{display:block;margin-bottom:15px;background:linear-gradient(135deg,var(--blue),var(--blue2));border:none;border-radius:12px;color:var(--white);font-size:0.95rem;font-weight:700;padding:13px;cursor:pointer;font-family:'Lato',sans-serif;width:100%;letter-spacing:1px;text-align:center;box-shadow:0 4px 15px rgba(21,101,192,0.3);}
+#event-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:3000;align-items:center;justify-content:center;padding:16px;}
+#event-modal.active{display:flex;}
+#event-modal-box{background:var(--white);border:2px solid var(--blue);border-radius:16px;padding:24px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;}
+#event-modal-box h2{color:var(--blue);font-family:'Nunito',sans-serif;font-size:1.1rem;margin-bottom:16px;}
+#event-modal-box input,#event-modal-box textarea{background:#F5F9FF;border-color:#90CAF9;color:var(--dark);}
+#event-modal-box select{background:#F5F9FF;border:1.5px solid #90CAF9;color:var(--dark);width:100%;padding:12px;border-radius:10px;font-size:1rem;font-family:'Lato',sans-serif;-webkit-appearance:none;}
+#map-page{position:absolute;top:0;left:0;width:100%;height:100%;}
+#map{position:absolute;top:var(--header);left:0;right:0;bottom:calc(var(--navbar) + var(--copy));width:100%;background:#E3F2FD;}
+#map-msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--blue);font-size:1rem;z-index:5;pointer-events:none;}
+#map-legend{position:absolute;bottom:calc(var(--navbar) + var(--copy) + 12px);left:10px;background:rgba(255,255,255,0.95);padding:8px 12px;border-radius:10px;font-size:0.72rem;z-index:10;display:flex;flex-direction:column;gap:4px;border:1px solid #90CAF9;}
+#map-legend span{color:var(--dark);}
+#indulas-btn{display:none;position:absolute;bottom:calc(var(--navbar) + var(--copy) + 16px);left:50%;transform:translateX(-50%);z-index:50;background:var(--green);color:#fff;border:none;border-radius:30px;padding:14px 32px;font-size:1.1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(34,197,94,0.5);white-space:nowrap;width:auto;letter-spacing:1px;font-family:'Lato',sans-serif;}
+#nav-choice-panel{display:none;position:absolute;bottom:calc(var(--navbar) + var(--copy));left:0;right:0;z-index:50;background:rgba(13,27,42,0.97);border-top:2px solid var(--accent);padding:14px;flex-direction:column;gap:10px;}
+#nav-choice-panel.active{display:flex;}
+#nav-choice-title{color:var(--white);font-size:0.9rem;text-align:center;margin-bottom:4px;font-weight:bold;font-family:'Nunito',sans-serif;}
+.nav-choice-btn{padding:13px;border-radius:10px;border:none;font-size:1rem;font-weight:bold;cursor:pointer;width:100%;font-family:'Lato',sans-serif;}
+#btn-apple-maps{background:#1a73e8;color:#fff;}#btn-google-maps{background:#34a853;color:#fff;}#btn-waze{background:#6c3fc5;color:#fff;}
+#btn-nav-cancel{background:#1E3A5F;color:rgba(255,255,255,0.7);font-size:0.9rem;padding:10px;border:1px solid #2d5a8f;}
+#travel-mode-bar{display:flex;gap:6px;padding:8px 12px;background:var(--blue);border-bottom:1px solid rgba(255,255,255,0.15);flex-shrink:0;justify-content:center;}
+.travel-btn{flex:1;max-width:110px;padding:7px 6px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.85);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;transition:all 0.2s;text-align:center;}
+.travel-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.form-group{margin-bottom:14px;}
+label.form-label{display:block;color:var(--muted);font-size:0.8rem;margin-bottom:5px;letter-spacing:1px;text-transform:uppercase;}
+select{width:100%;padding:12px;background:var(--white);border:1.5px solid #90CAF9;color:var(--dark);border-radius:10px;font-size:1rem;font-family:'Lato',sans-serif;-webkit-appearance:none;}
+.checkbox-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;}
+.checkbox-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;}
+.checkbox-row span{font-size:0.85rem;color:var(--dark);}
+.small-note{font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.5;}
+#meglepj-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center;padding:20px;}
+#meglepj-modal.active{display:flex;}
+#meglepj-box{background:linear-gradient(160deg,#E3F2FD,#BBDEFB);border:2px solid var(--blue);border-radius:16px;padding:28px 22px;max-width:340px;width:100%;text-align:center;position:relative;box-shadow:0 8px 40px rgba(21,101,192,0.2);}
+#meglepj-glass{font-size:4rem;animation:floatGlass 2.5s ease-in-out infinite;display:block;margin-bottom:12px;}
+#meglepj-name{font-family:'Nunito',sans-serif;font-size:1.4rem;color:var(--blue);margin-bottom:6px;font-weight:900;}
+#meglepj-type{color:var(--muted);font-size:0.85rem;margin-bottom:10px;}
+#meglepj-shop{color:var(--dark);font-size:0.9rem;margin-bottom:16px;line-height:1.5;}
+#meglepj-close{position:absolute;top:12px;right:16px;background:none;border:none;color:var(--muted);font-size:1.5rem;cursor:pointer;padding:0;width:auto;line-height:1;}
+#meglepj-route{margin-bottom:10px;background:var(--accent);}
+#meglepj-again{background:transparent;border:2px solid var(--blue);color:var(--blue);font-size:0.85rem;padding:10px;}
+.partner-section{margin-bottom:22px;}
+.partner-section h2{color:var(--blue);font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid #BBDEFB;padding-bottom:8px;margin-bottom:12px;font-family:'Lato',sans-serif;}
+.partner-card{background:var(--white);border:1px solid #BBDEFB;border-radius:10px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--dark);transition:all 0.2s;box-shadow:0 2px 8px rgba(21,101,192,0.08);}
+.partner-card:hover{border-color:var(--blue);}
+.partner-icon{font-size:2rem;flex-shrink:0;}
+.partner-info{flex:1;}
+.partner-info h3{color:var(--blue);font-size:0.95rem;margin:0 0 3px;font-family:'Nunito',sans-serif;font-weight:700;}
+.partner-info p{font-size:0.78rem;color:var(--muted);margin:2px 0;}
+.partner-arrow{color:var(--blue);font-size:1.2rem;flex-shrink:0;}
+.copyright-bar{text-align:center;padding:15px;font-size:0.7rem;color:var(--muted);border-top:1px solid #BBDEFB;margin-top:10px;line-height:1.7;}
+#qr-wrap{position:absolute;top:var(--header);left:0;right:0;bottom:calc(var(--navbar) + var(--copy));display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000;overflow:hidden;}
+#qr-video{width:100%;max-width:420px;}#qr-canvas{display:none;}
+#qr-aim{position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);width:200px;height:200px;border:3px solid var(--accent);border-radius:12px;box-shadow:0 0 0 1000px rgba(0,0,0,0.45);pointer-events:none;}
+#qr-status{position:absolute;bottom:80px;left:0;right:0;text-align:center;color:var(--white);font-size:0.9rem;padding:0 20px;}
+#qr-result-box{position:absolute;bottom:80px;left:10px;right:10px;background:var(--white);border:1px solid var(--blue);border-radius:10px;padding:14px;display:none;}
+#qr-result-text{font-size:0.82rem;color:var(--dark);margin-bottom:10px;word-break:break-all;}
+#qr-search-btn{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:11px;font-size:1rem;font-weight:bold;cursor:pointer;width:100%;}
+#qr-start-btn{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:0.95rem;font-weight:bold;padding:14px 28px;border-radius:50px;cursor:pointer;z-index:20;box-shadow:0 0 15px rgba(255,107,53,0.4);white-space:nowrap;font-family:'Lato',sans-serif;}
+.search-option{width:100%;background:var(--white);border:1.5px solid #90CAF9;color:var(--dark);border-radius:10px;padding:15px;text-align:center;text-decoration:none;font-size:1rem;display:block;transition:all 0.2s;}
+.search-option-primary{border-color:var(--blue);color:var(--blue);font-weight:700;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:#E3F2FD;}::-webkit-scrollbar-thumb{background:#90CAF9;border-radius:2px;}
+</style>
+<script>
+function showPage(pageId){var ap=document.querySelector('.page.active');if(ap&&ap.id==='qr-page'&&pageId!=='qr-page'&&typeof window.stopQR==='function')window.stopQR();document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});document.getElementById(pageId).classList.add('active');document.querySelectorAll('.navbar span').forEach(function(s){s.classList.remove('active');});document.querySelectorAll('#'+pageId+' .navbar span').forEach(function(s){if(s.getAttribute('onclick')&&s.getAttribute('onclick').indexOf(pageId)!==-1)s.classList.add('active');});if(pageId==='map-page'){fixMapSize();if(typeof window.loadMap==='function')window.loadMap();}else{document.getElementById('indulas-btn').style.display='none';document.getElementById('nav-choice-panel').classList.remove('active');}if(pageId==='list-page'&&typeof window.loadList==='function')window.loadList();if(pageId==='events-page'&&typeof window.loadEvents==='function')window.loadEvents();}
+function filterList(){if(typeof window._filterList==='function')window._filterList();}
+function saveShop(useGPS){if(typeof window._saveShop==='function')window._saveShop(useGPS);else alert('Még tölt!');}
+function meglepjEngem(){if(typeof window._meglepjEngem==='function')window._meglepjEngem();}
+function meglepjIndulas(){if(typeof window._meglepjIndulas==='function')window._meglepjIndulas();}
+function submitEvent(){if(typeof window._submitEvent==='function')window._submitEvent();}
+function closeEventModal(){if(typeof window._closeEventModal==='function')window._closeEventModal();}
+function fixMapSize(){var m=document.getElementById('map');if(!m)return;m.style.height=(window.innerHeight-64-54-27)+'px';m.style.top='64px';}
+window.addEventListener('resize',function(){if(document.getElementById('map-page').classList.contains('active')){fixMapSize();if(typeof gmap!=='undefined'&&gmap)google.maps.event.trigger(gmap,'resize');}});
+</script>
+</head>
+<body>
+
+<!-- KEZDŐLAP -->
+<div id="landing-page" class="page active">
+<header><div style="text-align:center"><div class="logo-text">🌮 STREET FOOD VADÁSZ</div><div class="logo-sub">Food truck & fesztivál kereső</div></div></header>
+<div class="hero">
+<span class="hero-glass">🌮</span>
+<h2>Üdv, Street Food Vadász!</h2>
+<p>Találd meg a legfinomabb food truckokat, street food fesztiválokat és helyi ételcsodákat a közelben!</p>
+<div class="hero-buttons">
+<button onclick="showPage('map-page')" class="btn-accent">📍 TÉRKÉP NÉZET</button>
+<button onclick="showPage('list-page')" class="btn-outline">📜 HELYLISTA</button>
+<button onclick="showPage('events-page')" class="btn-outline" style="border-color:rgba(255,255,255,0.5)">📅 FESZTIVÁLOK & ESEMÉNYEK</button>
+</div>
+<div class="tagline-strip">🚚 Food Truck &nbsp;·&nbsp; 🍔 Burger &nbsp;·&nbsp; 🍕 Pizza &nbsp;·&nbsp; 🥙 Gyros &nbsp;·&nbsp; 🍜 Ázsiai &nbsp;·&nbsp; 🥩 BBQ</div>
+</div>
+<div class="navbar">
+<span onclick="showPage('landing-page')" class="active">🏠<br>Kezdő</span>
+<span onclick="showPage('map-page')">📍<br>Térkép</span>
+<span onclick="showPage('list-page')">📜<br>Lista</span>
+<span onclick="showPage('add-page')">➕<br>Új</span>
+<span onclick="showPage('events-page')">📅<br>Fesztiválok</span>
+<span onclick="showPage('partner-page')">🌐<br>Partnerek</span>
+</div>
+</div>
+
+<!-- TÉRKÉP -->
+<div id="map-page" class="page">
+<header><h1>🌮 Street Food & Food Truckok</h1></header>
+<div id="travel-mode-bar">
+<button class="travel-btn active" id="tm-driving" onclick="setTravelMode('DRIVING',this)">🚗 Autó</button>
+<button class="travel-btn" id="tm-transit" onclick="setTravelMode('TRANSIT',this)">🚌 Tömegközl.</button>
+<button class="travel-btn" id="tm-walking" onclick="setTravelMode('WALKING',this)">🚶 Gyalog</button>
+</div>
+<div id="map"></div><div id="map-msg">🗺️ Térkép betöltése...</div>
+<div id="map-legend"><span>🟠 Food Truck</span><span>🔵 Megerősített hely</span><span>🔴 Közösségi jelölés</span></div>
+<button id="indulas-btn" onclick="navValasztoMegnyit()">🧭 INDULÁS!</button>
+<div id="nav-choice-panel">
+<div id="nav-choice-title">🧭 Válassz navigációs appot</div>
+<button class="nav-choice-btn" id="btn-apple-maps" onclick="navMegnyit('apple')">🗺️ Apple Maps</button>
+<button class="nav-choice-btn" id="btn-google-maps" onclick="navMegnyit('google')">🌍 Google Maps</button>
+<button class="nav-choice-btn" id="btn-waze" onclick="navMegnyit('waze')">🚗 Waze</button>
+<button class="nav-choice-btn" id="btn-nav-cancel" onclick="navValasztoZar()">✕ Mégsem</button>
+</div>
+<div class="navbar">
+<span onclick="showPage('landing-page')">🏠<br>Kezdő</span><span onclick="showPage('map-page')" class="active">📍<br>Térkép</span><span onclick="showPage('list-page')">📜<br>Lista</span><span onclick="showPage('add-page')">➕<br>Új</span><span onclick="showPage('events-page')">📅<br>Fesztiválok</span><span onclick="showPage('partner-page')">🌐<br>Partnerek</span>
+</div>
+</div>
+
+<!-- LISTA -->
+<div id="list-page" class="page">
+<header><input type="text" id="searchInput" placeholder="🔍 Keresés hely neve, város..." oninput="filterList()" style="margin:0;background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.4);color:white;"></header>
+<div class="style-filter-bar">
+<button class="style-chip active" onclick="setStyleFilter('all',this)">🌮 Mind</button>
+<button class="style-chip" onclick="setStyleFilter('foodtruck',this)">🚚 Food Truck</button>
+<button class="style-chip" onclick="setStyleFilter('burger',this)">🍔 Burger</button>
+<button class="style-chip" onclick="setStyleFilter('pizza',this)">🍕 Pizza</button>
+<button class="style-chip" onclick="setStyleFilter('gyros',this)">🥙 Gyros</button>
+<button class="style-chip" onclick="setStyleFilter('azsia',this)">🍜 Ázsiai</button>
+<button class="style-chip" onclick="setStyleFilter('bbq',this)">🥩 BBQ</button>
+<button class="style-chip" onclick="setStyleFilter('dessert',this)">🍩 Desszert</button>
+<button class="style-chip" onclick="setStyleFilter('vegan',this)">🥗 Vegán</button>
+</div>
+<div class="mode-toggle">
+<button class="mode-toggle-btn active" onclick="setMode('all',this)">🌐 Mindkettő</button>
+<button class="mode-toggle-btn" onclick="setMode('truck',this)">🚚 Food Truck</button>
+<button class="mode-toggle-btn" onclick="setMode('restaurant',this)">🍽️ Étterem</button>
+</div>
+<button id="meglepj-btn" onclick="meglepjEngem()">🎯 LEPJ MEG! — Véletlenszerű street food ajánló</button>
+<div id="list-container" class="content" style="padding-top:5px;background:#F5F9FF"></div>
+<div class="navbar">
+<span onclick="showPage('landing-page')">🏠<br>Kezdő</span><span onclick="showPage('map-page')">📍<br>Térkép</span><span onclick="showPage('list-page')" class="active">📜<br>Lista</span><span onclick="showPage('add-page')">➕<br>Új</span><span onclick="showPage('events-page')">📅<br>Fesztiválok</span><span onclick="showPage('partner-page')">🌐<br>Partnerek</span>
+</div>
+</div>
+
+<!-- FESZTIVÁLOK -->
+<div id="events-page" class="page">
+<header><h1>📅 Fesztiválok & Események</h1></header>
+<div class="content" id="events-container" style="background:#F5F9FF"><p style="text-align:center;color:#888;padding:30px 0">⏳ Betöltés...</p></div>
+<div class="navbar">
+<span onclick="showPage('landing-page')">🏠<br>Kezdő</span><span onclick="showPage('map-page')">📍<br>Térkép</span><span onclick="showPage('list-page')">📜<br>Lista</span><span onclick="showPage('add-page')">➕<br>Új</span><span onclick="showPage('events-page')" class="active">📅<br>Fesztiválok</span><span onclick="showPage('partner-page')">🌐<br>Partnerek</span>
+</div>
+</div>
+
+<!-- ÚJ HELY -->
+<div id="add-page" class="page">
+<header><h1>➕ Új hely beküldése</h1></header>
+<div class="content" style="background:#F5F9FF">
+<div class="form-group"><label class="form-label">Típus</label>
+<div class="mode-toggle" style="margin:0"><button class="mode-toggle-btn active" id="typeShop" onclick="selectType('truck')">🚚 Food Truck</button><button class="mode-toggle-btn" id="typeBar" onclick="selectType('restaurant')">🍽️ Étterem</button></div>
+</div>
+<div class="form-group"><label class="form-label">Hely neve *</label><input type="text" id="shopName" placeholder="pl. Big Burger Food Truck"></div>
+<div class="form-group"><label class="form-label">Cím / Helyszín *</label><input type="text" id="shopAddress" placeholder="Utca, házszám, város"></div>
+<div class="form-group"><label class="form-label">Leírás</label><textarea id="shopDesc" placeholder="Mit árulnak? Nyitvatartás..." rows="3"></textarea></div>
+<div class="form-group"><label class="form-label">Konyha típusa</label>
+<div id="styleCheckboxes">
+<label class="checkbox-row"><input type="checkbox" value="foodtruck"><span>🚚 Food Truck</span></label>
+<label class="checkbox-row"><input type="checkbox" value="burger"><span>🍔 Hamburger / Burger</span></label>
+<label class="checkbox-row"><input type="checkbox" value="pizza"><span>🍕 Pizza</span></label>
+<label class="checkbox-row"><input type="checkbox" value="gyros"><span>🥙 Gyros / Közel-keleti</span></label>
+<label class="checkbox-row"><input type="checkbox" value="azsia"><span>🍜 Ázsiai</span></label>
+<label class="checkbox-row"><input type="checkbox" value="bbq"><span>🥩 BBQ / Grill</span></label>
+<label class="checkbox-row"><input type="checkbox" value="dessert"><span>🍩 Desszert / Sütemény</span></label>
+<label class="checkbox-row"><input type="checkbox" value="vegan"><span>🥗 Vegán / Vege</span></label>
+</div></div>
+<div class="form-group"><label class="form-label">Árkategória</label>
+<select id="priceCategory"><option value="">-- Válassz --</option><option value="budget">💚 Budget</option><option value="mid">🟡 Mid-range</option><option value="premium">🟠 Prémium</option></select>
+</div>
+<button onclick="saveShop(true)" style="margin-bottom:10px" class="btn-accent">📍 Küldés jelenlegi helyzet alapján</button>
+<button onclick="saveShop(false)" style="background:transparent;border:2px solid var(--blue);color:var(--blue)">✏️ Küldés beírt cím alapján</button>
+<p class="small-note">Az új helyeket először ellenőrizzük, mielőtt megjelennének a térképen.</p>
+</div>
+<div class="navbar">
+<span onclick="showPage('landing-page')">🏠<br>Kezdő</span><span onclick="showPage('map-page')">📍<br>Térkép</span><span onclick="showPage('list-page')">📜<br>Lista</span><span onclick="showPage('add-page')" class="active">➕<br>Új</span><span onclick="showPage('events-page')">📅<br>Fesztiválok</span><span onclick="showPage('partner-page')">🌐<br>Partnerek</span>
+</div>
+</div>
+
+<!-- QR -->
+<div id="qr-page" class="page">
+<header><h1>🔍 QR Szkennelés</h1></header>
+<div id="qr-wrap"><video id="qr-video" autoplay playsinline muted></video><canvas id="qr-canvas"></canvas><div id="qr-aim"></div><div id="qr-start-btn" onclick="window.startQR()">📷 Kamera indítása</div><div id="qr-status">Tartsd a QR kódot a keretbe!</div><div id="qr-result-box"><div id="qr-result-text"></div><button id="qr-search-btn" onclick="window.qrDoSearch()">🔎 Google keresés</button></div></div>
+<div class="navbar"><span onclick="showPage('landing-page')">🏠<br>Kezdő</span><span onclick="showPage('map-page')">📍<br>Térkép</span><span onclick="showPage('list-page')">📜<br>Lista</span><span onclick="showPage('add-page')">➕<br>Új</span><span onclick="showPage('events-page')">📅<br>Fesztiválok</span><span onclick="showPage('partner-page')">🌐<br>Partnerek</span></div>
+</div>
+
+<!-- KERESÉS -->
+<div id="search-page" class="page">
+<header style="justify-content:space-between;padding:0 15px"><button onclick="showPage('qr-page')" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:white;width:auto;padding:6px 12px;font-size:0.85rem">← Vissza</button><h1 style="font-size:1rem">🔎 Keresés</h1><div style="width:70px"></div></header>
+<div class="content" style="display:flex;flex-direction:column;align-items:center;padding:30px 20px;gap:13px;background:#F5F9FF">
+<span style="font-size:3.5rem">🌮</span>
+<div id="search-title" style="color:var(--blue);font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:bold;text-align:center"></div>
+<div id="search-code" style="color:var(--muted);font-size:0.82rem;text-align:center;margin-bottom:10px"></div>
+<a id="search-google" href="#" onclick="return false" class="search-option search-option-primary">🔍 Google keresés</a>
+<a id="search-images" href="#" onclick="return false" class="search-option">🖼️ Google Képek</a>
+<a id="search-youtube" href="#" onclick="return false" class="search-option">▶️ YouTube videók</a>
+<a id="search-wiki" href="#" onclick="return false" class="search-option">📖 Wikipedia</a>
+</div>
+<div class="navbar"><span onclick="showPage('landing-page')">🏠<br>Kezdő</span><span onclick="showPage('map-page')">📍<br>Térkép</span><span onclick="showPage('list-page')">📜<br>Lista</span><span onclick="showPage('add-page')">➕<br>Új</span><span onclick="showPage('events-page')">📅<br>Fesztiválok</span><span onclick="showPage('partner-page')">🌐<br>Partnerek</span></div>
+</div>
+
+<!-- PARTNEREK -->
+<div id="partner-page" class="page">
+<header><h1>🌐 Partnerek</h1></header>
+<div class="content" style="background:#F5F9FF">
+<div class="partner-section"><h2>⭐ Támogatók & Szponzorok</h2>
+<a class="partner-card" href="mailto:vadaszapps@gmail.com" style="border-color:var(--accent)"><div class="partner-icon">⭐</div><div class="partner-info"><h3>Légy Te az első szponzor!</h3><p>Prémium célközönség — gasztronómia szerelmesek</p></div><div class="partner-arrow">›</div></a>
+</div>
+<div class="partner-section"><h2>🐾 Vadász Alkalmazások</h2>
+<a class="partner-card" href="https://vadasz-apps.web.app" target="_blank"><div class="partner-icon">🛡️</div><div class="partner-info"><h3>Ismerd meg az összes Vadász appot!</h3><p>Trafik, Szivar, Whiskey, Bor, Sör és még több</p></div><div class="partner-arrow">›</div></a>
+</div>
+<div class="partner-section"><h2>❤️ Támogasd az Appot</h2>
+<a class="partner-card" href="https://ko-fi.com/vadaszapps" target="_blank" style="border-color:var(--accent)"><div class="partner-icon">☕</div><div class="partner-info"><h3>Vegyél egy street foodot a fejlesztőnek!</h3><p>Az app ingyenes, de a fejlesztés nem az 😄</p></div><div class="partner-arrow">›</div></a>
+</div>
+<div class="partner-section"><h2>📱 Kapcsolat</h2>
+<a class="partner-card" href="mailto:vadaszapps@gmail.com"><div class="partner-icon">✉️</div><div class="partner-info"><h3>EMAIL</h3><p>Hely bejelentés, partnerség, hibajelentés</p></div><div class="partner-arrow">›</div></a>
+</div>
+<div class="copyright-bar">© 2026 Street Food Vadász. Minden jog fenntartva.<br>Készítette: Králik Zola | v1.0<br>Az alkalmazás tartalma szerzői jogi védelem alatt áll.</div>
+</div>
+<div class="navbar"><span onclick="showPage('landing-page')">🏠<br>Kezdő</span><span onclick="showPage('map-page')">📍<br>Térkép</span><span onclick="showPage('list-page')">📜<br>Lista</span><span onclick="showPage('add-page')">➕<br>Új</span><span onclick="showPage('events-page')">📅<br>Fesztiválok</span><span onclick="showPage('partner-page')" class="active">🌐<br>Partnerek</span></div>
+</div>
+
+<!-- MEGLEPJ MODAL -->
+<div id="meglepj-modal"><div id="meglepj-box">
+<button id="meglepj-close" onclick="document.getElementById('meglepj-modal').classList.remove('active')">✕</button>
+<span id="meglepj-glass">🌮</span>
+<div id="meglepj-name">Ismeretlen Street Food</div>
+<div id="meglepj-type">Food Truck</div>
+<div id="meglepj-shop">Keresés...</div>
+<button id="meglepj-route" onclick="meglepjIndulas()">🚗 Navigálj oda!</button>
+<button id="meglepj-again" onclick="meglepjEngem()">🎲 Másikat kérek!</button>
+</div></div>
+
+<!-- ESEMÉNY MODAL -->
+<div id="event-modal"><div id="event-modal-box">
+<h2>🎉 Esemény beküldése</h2>
+<div class="form-group"><label class="form-label">Esemény neve *</label><input type="text" id="eventName" placeholder="pl. Budapest Street Food Fesztivál"></div>
+<div class="form-group"><label class="form-label">Dátum *</label><input type="text" id="eventDatum" placeholder="pl. 2026. június 15."></div>
+<div class="form-group"><label class="form-label">Helyszín *</label><input type="text" id="eventHely" placeholder="pl. Budapest, Városliget"></div>
+<div class="form-group"><label class="form-label">Típus</label>
+<select id="eventTipus"><option value="fesztival">🎉 Fesztivál</option><option value="street">🚚 Street Food esemény</option><option value="popup">🏕️ Pop-up</option><option value="akcios">💰 Akció</option></select>
+</div>
+<div class="form-group"><label class="form-label">Leírás</label><textarea id="eventLeiras" placeholder="Rövid leírás..." rows="3"></textarea></div>
+<button onclick="submitEvent()" style="margin-bottom:10px" class="btn-accent">📤 Beküldés</button>
+<button onclick="closeEventModal()" style="background:transparent;border:2px solid var(--blue);color:var(--blue)">✕ Mégsem</button>
+<p class="small-note" style="margin-top:10px">Az eseményt ellenőrzés után tesszük közzé.</p>
+</div></div>
+
+<div id="global-copyright">© 2026 Street Food Vadász · Minden jog fenntartva</div>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqCZBsFCKSnHm_NXAS2lcb6X860e1xMYk&libraries=places&loading=async"></script>
+
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+import{getFirestore,collection,getDocs,addDoc}from'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+const app=initializeApp({
+    apiKey:"AIzaSyC3mz7Z6E4qW8xNmg1zvtEeJZD3hHZtg7s",
+    authDomain:"street-food-vadasz.firebaseapp.com",
+    projectId:"street-food-vadasz",
+    storageBucket:"street-food-vadasz.firebasestorage.app",
+    messagingSenderId:"765991201216",
+    appId:"1:765991201216:web:e181f40b03ee23da7a0025",
+    measurementId:"G-DXZFHYJTS7"
+});
+const db=getFirestore(app);
+
+var gmap=null,markers=[],allShops=[],osmShops=[];
+var userLoc={lat:47.4979,lng:19.0402},userLocSet=false;
+var navCelLat=null,navCelLng=null;
+var dirService=null,dirRenderer=null;
+var activeStyleFilter='all',activeMode='all';
+var meglepjLat=null,meglepjLng=null,meglepjAddr=null;
+var selectedType='truck',listSearchTimer=null,activeTravelMode='DRIVING';
+
+window.navValasztoMegnyit=function(){if(!navCelLat||!navCelLng)return;document.getElementById('nav-choice-panel').classList.add('active');document.getElementById('indulas-btn').style.display='none';};
+window.navValasztoZar=function(){document.getElementById('nav-choice-panel').classList.remove('active');document.getElementById('indulas-btn').style.display='block';};
+window.navMegnyit=function(tipus){if(!navCelLat||!navCelLng)return;var lat=navCelLat,lng=navCelLng,url='';if(tipus==='apple')url='maps://maps.apple.com/?daddr='+lat+','+lng+'&dirflg=d&t=m';else if(tipus==='google'){url='comgooglemaps://?daddr='+lat+','+lng+'&directionsmode=driving';setTimeout(function(){window.open('https://www.google.com/maps/dir/?api=1&destination='+lat+','+lng,'_blank');},500);}else if(tipus==='waze'){url='waze://?ll='+lat+','+lng+'&navigate=yes';setTimeout(function(){window.open('https://waze.com/ul?ll='+lat+','+lng+'&navigate=yes','_blank');},500);}if(url)window.location.href=url;document.getElementById('nav-choice-panel').classList.remove('active');};
+
+window.selectType=function(t){selectedType=t;document.getElementById('typeShop').classList.toggle('active',t==='truck');document.getElementById('typeBar').classList.toggle('active',t==='restaurant');};
+window.setStyleFilter=function(style,btn){activeStyleFilter=style;document.querySelectorAll('.style-chip').forEach(function(c){c.classList.remove('active');});btn.classList.add('active');if(typeof window._filterList==='function')window._filterList();};
+window.setMode=function(mode,btn){activeMode=mode;document.querySelectorAll('.mode-toggle .mode-toggle-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');if(typeof window._filterList==='function')window._filterList();};
+window.setTravelMode=function(mode,btn){activeTravelMode=mode;document.querySelectorAll('.travel-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');if(dirRenderer&&navCelLat&&navCelLng)window.showRoute(navCelLat,navCelLng,'');};
+
+function priceBadge(cat){if(!cat)return'';var map={budget:'<span class="price-badge price-budget">💚 Budget</span>',mid:'<span class="price-badge price-mid">🟡 Mid</span>',premium:'<span class="price-badge price-premium">🟠 Prémium</span>'};return map[cat]||'';}
+var styleLabels={foodtruck:'🚚 Food Truck',burger:'🍔 Burger',pizza:'🍕 Pizza',gyros:'🥙 Gyros',azsia:'🍜 Ázsiai',bbq:'🥩 BBQ',dessert:'🍩 Desszert',vegan:'🥗 Vegán'};
+var styleIcons={foodtruck:'🚚',burger:'🍔',pizza:'🍕',gyros:'🥙',azsia:'🍜',bbq:'🥩',dessert:'🍩',vegan:'🥗'};
+function styleTags(styles){if(!styles||!styles.length)return'';return'<div class="tag-row">'+styles.map(function(s){return'<span class="tag">'+(styleLabels[s]||s)+'</span>';}).join('')+'</div>';}
+function haversineDist(lat1,lng1,lat2,lng2){var R=6371000,r=Math.PI/180,dLat=(lat2-lat1)*r,dLng=(lng2-lng1)*r,a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin(dLng/2)*Math.sin(dLng/2);return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+
+function initDirService(){if(!dirService){dirService=new google.maps.DirectionsService();dirRenderer=new google.maps.DirectionsRenderer({map:gmap,suppressMarkers:true,polylineOptions:{strokeColor:'#FF6B35',strokeWeight:5}});}}
+
+window.showRoute=function(lat,lng,nev){navCelLat=lat;navCelLng=lng;showPage('map-page');var try_=function(){if(!gmap||typeof google==='undefined'){setTimeout(try_,400);return;}initDirService();dirService.route({origin:userLoc,destination:{lat:lat,lng:lng},travelMode:google.maps.TravelMode[activeTravelMode]||google.maps.TravelMode.DRIVING},function(result,status){if(status==='OK'){dirRenderer.setDirections(result);document.getElementById('map-msg').style.display='none';document.getElementById('indulas-btn').style.display='block';}else{gmap.setCenter({lat:lat,lng:lng});gmap.setZoom(15);document.getElementById('indulas-btn').style.display='block';}});};if(!gmap){setTimeout(try_,600);}else{try_();}};
+
+window.showRouteByAddress=function(address,nev){showPage('map-page');var try_=function(){if(!gmap||typeof google==='undefined'){setTimeout(try_,400);return;}initDirService();dirService.route({origin:userLoc,destination:address,travelMode:google.maps.TravelMode[activeTravelMode]||google.maps.TravelMode.DRIVING},function(result,status){if(status==='OK'){var endLoc=result.routes[0].legs[0].end_location;navCelLat=endLoc.lat();navCelLng=endLoc.lng();dirRenderer.setDirections(result);document.getElementById('indulas-btn').style.display='block';}else{new google.maps.Geocoder().geocode({address:address},function(res,st){if(st==='OK'){gmap.setCenter(res[0].geometry.location);gmap.setZoom(16);}});}});};if(!gmap){setTimeout(try_,600);}else{try_();}};
+
+window.loadMap=function(){if(typeof google==='undefined'||!google.maps){setTimeout(window.loadMap,300);return;}if(gmap){fixMapSize();setTimeout(function(){google.maps.event.trigger(gmap,'resize');gmap.setCenter(userLoc);document.getElementById('map-msg').style.display='none';},100);return;}if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(pos){userLoc={lat:pos.coords.latitude,lng:pos.coords.longitude};userLocSet=true;buildMap();},function(){buildMap();},{timeout:6000});}else{buildMap();}};
+
+function buildMap(){fixMapSize();document.getElementById('map-msg').style.display='none';gmap=new google.maps.Map(document.getElementById('map'),{center:userLocSet?userLoc:{lat:47.4979,lng:19.0402},zoom:userLocSet?13:7,fullscreenControl:false,mapTypeControl:false,streetViewControl:false,zoomControl:true,styles:[{elementType:"geometry",stylers:[{color:"#E8F4FD"}]},{elementType:"labels.text.stroke",stylers:[{color:"#E8F4FD"}]},{elementType:"labels.text.fill",stylers:[{color:"#1565C0"}]},{featureType:"road",elementType:"geometry",stylers:[{color:"#ffffff"}]},{featureType:"road",elementType:"labels.text.fill",stylers:[{color:"#5C7A99"}]},{featureType:"road.highway",elementType:"geometry",stylers:[{color:"#BBDEFB"}]},{featureType:"water",elementType:"geometry",stylers:[{color:"#90CAF9"}]},{featureType:"poi",stylers:[{visibility:"off"}]},{featureType:"transit",stylers:[{visibility:"off"}]}]});
+new google.maps.Marker({position:userLoc,map:gmap,icon:{path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:'#FF6B35',fillOpacity:1,strokeColor:'#fff',strokeWeight:3},title:'Te vagy itt',zIndex:999});
+loadShopsOnMap();loadKozeli();setTimeout(function(){google.maps.event.trigger(gmap,'resize');gmap.setCenter(userLoc);},500);}
+
+function makeInfoWindow(title,subtitle,desc,badge,lat,lng,isTruck){var div=document.createElement('div');div.style.cssText='color:#0D1B2A;max-width:230px;font-family:sans-serif;padding:4px';div.innerHTML='<b style="color:#1565C0">'+(isTruck?'🚚 ':'🍽️ ')+title+'</b><br><small style="color:#5C7A99">📍 '+subtitle+'</small>'+(desc?'<br><small style="color:#666">'+desc+'</small>':'')+(badge?'<br><small style="color:#1565C0">'+badge+'</small>':'');var btn=document.createElement('button');btn.style.cssText='display:inline-block;margin-top:6px;background:#FF6B35;color:#fff;padding:4px 12px;border-radius:6px;font-size:.8rem;cursor:pointer;border:none;font-family:Lato,sans-serif;font-weight:700;';btn.textContent='🧭 INDULÁS!';(function(la,ln){btn.onclick=function(){window.showRoute(la,ln,'');};})(lat,lng);div.appendChild(btn);return div;}
+
+function loadShopsOnMap(){getDocs(collection(db,"streetfood")).then(function(snap){markers.forEach(function(m){m.setMap(null);});markers=[];snap.forEach(function(doc){var s=doc.data();if(!s.lat||!s.lng)return;var lat=parseFloat(s.lat),lng=parseFloat(s.lng),isTruck=s.tipus==='truck';var iconUrl=isTruck?'https://maps.google.com/mapfiles/ms/icons/orange-dot.png':(s.megerositve?'https://maps.google.com/mapfiles/ms/icons/blue-dot.png':'https://maps.google.com/mapfiles/ms/icons/red-dot.png');var m=new google.maps.Marker({position:{lat:lat,lng:lng},map:gmap,title:s.nev||'?',icon:{url:iconUrl},zIndex:10});var iw=new google.maps.InfoWindow({content:makeInfoWindow(s.nev||'?',s.cim||'',s.leiras||'',s.megerositve?'✓ Megerősített':'',lat,lng,isTruck)});m.addListener('click',function(){iw.open(gmap,m);});markers.push(m);});});}
+
+async function loadKozeli(){try{var seen={};var{Place}=await google.maps.importLibrary('places');function addM(place,isTruck){if(!place.location)return;var id=place.id||(place.location.lat()+','+place.location.lng());if(seen[id])return;seen[id]=true;var lat=place.location.lat(),lng=place.location.lng(),nev=place.displayName||(isTruck?'Food Truck':'Étterem');var m=new google.maps.Marker({position:{lat:lat,lng:lng},map:gmap,title:nev,icon:{path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:isTruck?'#FF6B35':'#1565C0',fillOpacity:1,strokeColor:'#fff',strokeWeight:2},zIndex:5});var iw=new google.maps.InfoWindow({content:makeInfoWindow(nev,place.formattedAddress||'','',isTruck?'Food Truck':'Étterem',lat,lng,isTruck)});m.addListener('click',function(){iw.open(gmap,m);});markers.push(m);}
+var bounds=new google.maps.Circle({center:userLoc,radius:30000}).getBounds();
+var queries=[{q:'food truck Budapest',t:true},{q:'street food Budapest',t:true},{q:'burger étterem',t:false},{q:'gyros',t:false},{q:'ázsiai étterem',t:false},{q:'BBQ étterem',t:false}];
+for(var i=0;i<queries.length;i++){try{var resp=await Place.searchByText({textQuery:queries[i].q,fields:['id','displayName','location','formattedAddress'],locationRestriction:bounds,maxResultCount:15});if(resp&&resp.places)resp.places.forEach(function(p){addM(p,queries[i].t);});}catch(e){}}
+}catch(e){}}
+
+window.loadList=function(){var c=document.getElementById('list-container');c.innerHTML='<p style="text-align:center;color:#888;padding:20px">⏳ Betöltés...</p>';getDocs(collection(db,"streetfood")).then(function(snap){allShops=[];snap.forEach(function(doc){allShops.push(doc.data());});window._filterList();loadOsmKozeli();}).catch(function(e){c.innerHTML='<p style="text-align:center;color:#e55;padding:20px">❌ '+e.message+'</p>';loadOsmKozeli();});};
+
+function makeCard(s){var lat=s.lat?parseFloat(s.lat):null,lng=s.lng?parseFloat(s.lng):null,isTruck=s.tipus==='truck',nev=s.nev||'Ismeretlen';var nevQ=nev.replace(/'/g,'');var icon=s.stilus&&s.stilus.length?(styleIcons[s.stilus[0]]||'🌮'):(isTruck?'🚚':'🍽️');var navBtn='';if(lat&&lng)navBtn='<button class="nav-btn" onclick="window.showRoute('+lat+','+lng+',\''+nevQ+'\')">🧭</button>';else if(s.cim){var sa=(s.cim||'').replace(/'/g,'');navBtn='<button class="nav-btn" onclick="window.showRouteByAddress(\''+sa+'\',\''+nevQ+'\')">🧭</button>';}return'<div class="sf-card"><div class="sf-icon">'+icon+'</div><div class="sf-details"><h3>'+nev+priceBadge(s.arkategoria)+'</h3><p>📍 '+(s.cim||'')+'</p>'+(s.leiras?'<p style="margin-top:3px">📝 '+s.leiras+'</p>':'')+(s.stilus&&s.stilus.length?styleTags(s.stilus):'')+(s.megerositve?'<span class="sf-badge">✓ Megerősített</span>':'')+(s.source==='osm'?'<span class="sf-badge">🗺️ OpenStreetMap</span>':'')+'</div>'+navBtn+'</div>';}
+
+function renderList(shops){var c=document.getElementById('list-container');if(!shops.length){c.innerHTML='<p style="text-align:center;color:#888;padding:30px">Nincs találat.</p>';return;}c.innerHTML=shops.map(makeCard).join('');}
+
+function renderTwoSection(fbShops,osmList){var c=document.getElementById('list-container');var html='';if(fbShops.length){html+=fbShops.map(makeCard).join('');}if(osmList.length){if(fbShops.length){html+='<div style="margin:14px 0 10px;padding:8px 12px;background:#E3F2FD;border-radius:8px;font-size:0.75rem;font-weight:700;color:#1565C0;letter-spacing:1px;">🗺️ KÖZELI HELYEK — OPENSTREETMAP</div>';}html+=osmList.map(makeCard).join('');}if(!html)html='<p style="text-align:center;color:#888;padding:30px">Nincs találat.</p>';c.innerHTML=html;}
+
+window._filterList=function(){var q=((document.getElementById('searchInput')||{}).value||'').trim().toLowerCase();if(q.length>=3){var nameMatch=allShops.filter(function(s){return(s.nev||'').toLowerCase().indexOf(q)!==-1||(s.cim||'').toLowerCase().indexOf(q)!==-1;});var osmNameMatch=osmShops.filter(function(s){return(s.nev||'').toLowerCase().indexOf(q)!==-1||(s.cim||'').toLowerCase().indexOf(q)!==-1;});if(!nameMatch.length&&!osmNameMatch.length){if(listSearchTimer)clearTimeout(listSearchTimer);listSearchTimer=setTimeout(function(){doListCitySearch(q);},700);document.getElementById('list-container').innerHTML='<p style="text-align:center;color:#888;padding:20px">🔍 '+q+' keresése 30 km körzetben...</p>';return;}}function applyFilter(list){return list.filter(function(s){var textMatch=!q||(s.nev||'').toLowerCase().indexOf(q)!==-1||(s.cim||'').toLowerCase().indexOf(q)!==-1;var styleMatch=activeStyleFilter==='all'||(s.stilus&&s.stilus.indexOf(activeStyleFilter)!==-1);var modeMatch=activeMode==='all'||(activeMode==='truck'?s.tipus==='truck':s.tipus==='restaurant');return textMatch&&styleMatch&&modeMatch;});}renderTwoSection(applyFilter(allShops),applyFilter(osmShops));};
+
+function loadOsmKozeli(){
+  if(!userLocSet&&!userLoc)return;
+  var lat=userLoc.lat,lng=userLoc.lng,radius=30000;
+  var query='[out:json][timeout:15];(node["amenity"="fast_food"](around:'+radius+','+lat+','+lng+');node["amenity"="restaurant"](around:'+radius+','+lat+','+lng+');node["cuisine"="burger"](around:'+radius+','+lat+','+lng+');node["cuisine"="pizza"](around:'+radius+','+lat+','+lng+');node["amenity"="food_court"](around:'+radius+','+lat+','+lng+'););out body 40;';
+  var mirrors=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
+  var body='data='+encodeURIComponent(query);
+  function tryMirror(i){
+    if(i>=mirrors.length)return;
+    fetch(mirrors[i],{method:'POST',body:body})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(osm){
+      if(!osm.elements||!osm.elements.length)return;
+      var fbIds=allShops.reduce(function(acc,s){if(s.nev)acc[s.nev.toLowerCase().trim()]=true;return acc;},{});
+      osmShops=osm.elements.map(function(el){
+        var tags=el.tags||{};
+        var nev=tags.name||tags['name:hu']||'';
+        return{nev:nev,cim:tags['addr:street']?(tags['addr:street']+' '+(tags['addr:housenumber']||'')).trim():'',lat:el.lat,lng:el.lon,tipus:'restaurant',stilus:[],source:'osm'};
+      }).filter(function(s){return s.nev&&!fbIds[s.nev.toLowerCase().trim()];});
+      window._filterList();
+    })
+    .catch(function(){tryMirror(i+1);});
+  }
+  tryMirror(0);}
+
+function doListCitySearch(cityName){
+  var c=document.getElementById('list-container');
+  fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=hu&q='+encodeURIComponent(cityName+', Magyarország'),{headers:{'Accept-Language':'hu','User-Agent':'StreetFoodVadasz/1.0'}})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(!data||!data.length){c.innerHTML='<p style="text-align:center;color:#888;padding:30px">❌ Nem találtuk: '+cityName+'</p>';return;}
+    var cityLat=parseFloat(data[0].lat),cityLng=parseFloat(data[0].lon);
+    var fbNear=allShops.filter(function(s){return s.lat&&s.lng&&haversineDist(cityLat,cityLng,parseFloat(s.lat),parseFloat(s.lng))<=30000;});
+    if(fbNear.length){renderList(fbNear);return;}
+    // Firestore üres → Overpass API fallback
+    c.innerHTML='<p style="text-align:center;color:#888;padding:20px">🌍 OSM keresés '+cityName+' környékén...</p>';
+    var radius=30000;
+    var query='[out:json][timeout:15];(node["amenity"="fast_food"](around:'+radius+','+cityLat+','+cityLng+');node["amenity"="restaurant"](around:'+radius+','+cityLat+','+cityLng+');node["cuisine"="burger"](around:'+radius+','+cityLat+','+cityLng+');node["cuisine"="pizza"](around:'+radius+','+cityLat+','+cityLng+');node["amenity"="food_court"](around:'+radius+','+cityLat+','+cityLng+'););out body 30;';
+    var mirrors=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
+    var body='data='+encodeURIComponent(query);
+    function tryM(i){
+      if(i>=mirrors.length){c.innerHTML='<p style="text-align:center;color:#888;padding:30px">❌ OSM hálózati hiba.</p>';return;}
+      fetch(mirrors[i],{method:'POST',body:body})
+      .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+      .then(function(osm){
+        if(!osm.elements||!osm.elements.length){c.innerHTML='<p style="text-align:center;color:#888;padding:30px">Nincs találat '+cityName+' 30 km-es körzetében.</p>';return;}
+        var shops=osm.elements.map(function(el){
+          var tags=el.tags||{};
+          return{nev:tags.name||tags['name:hu']||'',cim:tags['addr:street']?(tags['addr:street']+' '+(tags['addr:housenumber']||'')+', '+cityName).trim():cityName,lat:el.lat,lng:el.lon,tipus:tags.cuisine?'restaurant':'truck',stilus:[],source:'osm'};
+        }).filter(function(s){return s.nev!=='';});
+        if(!shops.length){c.innerHTML='<p style="text-align:center;color:#888;padding:30px">Nincs névvel rendelkező találat '+cityName+' közelében.</p>';return;}
+        renderList(shops);
+      })
+      .catch(function(){tryM(i+1);});
+    }
+    tryM(0);
+  })
+  .catch(function(){c.innerHTML='<p style="text-align:center;color:#888;padding:30px">❌ Hálózati hiba.</p>';});
+}
+
+var sfAjanlok=[{nev:'Smashed Burger',tipus:'🍔 Burger'},{nev:'Bao Bun',tipus:'🍜 Ázsiai'},{nev:'BBQ Pulled Pork',tipus:'🥩 BBQ'},{nev:'Margherita Pizza',tipus:'🍕 Pizza'},{nev:'Gyros Tál',tipus:'🥙 Gyros'},{nev:'Pad Thai',tipus:'🍜 Ázsiai'},{nev:'Lángos Sonkával',tipus:'🥐 Magyar'},{nev:'Churros Csokival',tipus:'🍩 Desszert'},{nev:'Vegan Buddha Bowl',tipus:'🥗 Vegán'},{nev:'Tacos Al Pastor',tipus:'🌮 Taco'}];
+window._meglepjEngem=function(){var ajanlat=sfAjanlok[Math.floor(Math.random()*sfAjanlok.length)];var shop=allShops.length>0?allShops[Math.floor(Math.random()*allShops.length)]:null;document.getElementById('meglepj-name').textContent=ajanlat.nev;document.getElementById('meglepj-type').textContent=ajanlat.tipus;if(shop){meglepjLat=shop.lat?parseFloat(shop.lat):null;meglepjLng=shop.lng?parseFloat(shop.lng):null;meglepjAddr=shop.cim||null;document.getElementById('meglepj-shop').innerHTML='🚚 <b style="color:#1565C0">'+(shop.nev||'?')+'</b><br>📍 '+(shop.cim||'');document.getElementById('meglepj-route').style.display='block';}else{meglepjLat=null;meglepjLng=null;meglepjAddr=null;document.getElementById('meglepj-shop').textContent='Adj hozzá helyet, hogy útvonalat is kapj! 😊';document.getElementById('meglepj-route').style.display='none';}document.getElementById('meglepj-modal').classList.add('active');};
+window._meglepjIndulas=function(){document.getElementById('meglepj-modal').classList.remove('active');if(meglepjLat&&meglepjLng)window.showRoute(meglepjLat,meglepjLng,'');else if(meglepjAddr)window.showRouteByAddress(meglepjAddr,'');};
+
+var demoEvents=[
+{datum:'2026. április 25.',cim:'Asian Street Food Festival',hely:'Botellón Terasz, Budapest',tipus:'fesztival',leiras:'Ázsiai ízek 4 napon át — Kicsi Japán, Wang Mester, Ramenka. Ápr. 25-28.'},
+{datum:'2026. május 16.',cim:'Street Kitchen Fesztivál 2026',hely:'Budapest',tipus:'fesztival',leiras:'Top vendéglátóhelyek, főzőbemutatók, gyerekprogramok. Az ország legjobb ízei egy helyen.'},
+{datum:'2026. június 24.',cim:'Street Food Fesztivál Kecskemét',hely:'Kecskemét',tipus:'street',leiras:'Street food, street art, borászok, koncertek. Jún. 24-27.'},
+{datum:'2026. augusztus 5.',cim:'Alföldi Street Food Fesztivál',hely:'Albertirsa',tipus:'fesztival',leiras:'Egyedi receptek, zenekarok, fergeteges nyári buli. Aug. 5-8.'},
+{datum:'2026. augusztus 20.',cim:'Strand Fesztivál — Street Food',hely:'Zamárdi szabadstrand',tipus:'fesztival',leiras:'Gasztronómiai és street food különlegességek a Balatonnál. Aug. 20-22.'},
+{datum:'2026. szeptember 11.',cim:'Nemzetközi Street Food Fesztivál',hely:'Andrássy út, Budapest',tipus:'fesztival',leiras:'50+ food truck, 17+ ország gasztronómiája. Belépés ingyenes! Szept. 11-12.'},
+];
+
+function renderEvents(events){var c=document.getElementById('events-container');if(!c)return;var html='<button id="esemeny-bekuldese-btn" onclick="window._openEventModal()">🎉 ESEMÉNY BEKÜLDÉSE</button>';html+='<p style="color:var(--muted);font-size:0.8rem;margin-bottom:15px;letter-spacing:1px;font-weight:700">KÖZELGŐ PROGRAMOK</p>';if(!events.length)html+='<p style="text-align:center;color:var(--muted);padding:20px">Még nincs esemény.</p>';events.forEach(function(e){var typeCls=e.tipus==='fesztival'?'event-fesztival':(e.tipus==='street'?'event-street':(e.tipus==='popup'?'event-popup':'event-akcios'));var typeLabel=e.tipus==='fesztival'?'🎉 Fesztivál':(e.tipus==='street'?'🚚 Street Food':(e.tipus==='popup'?'🏕️ Pop-up':'💰 Akció'));var hasLoc=e.hely&&e.hely!=='Online';var helyQ=(e.hely||'').replace(/'/g,'');html+='<div class="event-card" style="padding-right:'+(hasLoc?'58px':'13px')+'">';if(hasLoc)html+='<button class="event-nav-btn" onclick="window.showRouteByAddress(\''+helyQ+'\',\'\')">🧭</button>';html+='<div class="event-date">'+e.datum+'<span class="event-type-badge '+typeCls+'">'+typeLabel+'</span></div><div class="event-title">'+e.cim+'</div><div class="event-loc">📍 '+e.hely+'</div>'+(e.leiras?'<div style="color:var(--muted);font-size:0.75rem;margin-top:6px">'+e.leiras+'</div>':'')+'</div>';});c.innerHTML=html;}
+
+window.loadEvents=function(){var c=document.getElementById('events-container');if(!c)return;c.innerHTML='<p style="text-align:center;color:#888;padding:20px">⏳ Betöltés...</p>';getDocs(collection(db,'events')).then(function(snap){var fsEvents=[];snap.forEach(function(doc){fsEvents.push(doc.data());});fsEvents.sort(function(a,b){return(a.datum||'').localeCompare(b.datum||'');});renderEvents(fsEvents.concat(demoEvents));}).catch(function(){renderEvents(demoEvents);});};
+
+window._openEventModal=function(){['eventName','eventDatum','eventHely','eventLeiras'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('eventTipus').value='fesztival';document.getElementById('event-modal').classList.add('active');};
+window._closeEventModal=function(){document.getElementById('event-modal').classList.remove('active');};
+window._submitEvent=function(){var nev=document.getElementById('eventName').value.trim(),datum=document.getElementById('eventDatum').value.trim(),hely=document.getElementById('eventHely').value.trim(),tipus=document.getElementById('eventTipus').value,leiras=document.getElementById('eventLeiras').value.trim();if(!nev||!datum||!hely){alert('Kérlek töltsd ki a kötelező mezőket! (*)');return;}addDoc(collection(db,'events'),{cim:nev,datum:datum,hely:hely,tipus:tipus,leiras:leiras,feltoltve:new Date().toISOString(),ellenorizve:false}).then(function(){alert('✅ Köszönjük! Az eseményt ellenőrzés után tesszük közzé.');window._closeEventModal();window.loadEvents();}).catch(function(e){alert('❌ '+e.message);});};
+
+window._saveShop=function(useGPS){var name=document.getElementById('shopName').value.trim(),addr=document.getElementById('shopAddress').value.trim(),desc=document.getElementById('shopDesc').value.trim(),price=document.getElementById('priceCategory').value;var styles=[];document.querySelectorAll('#styleCheckboxes input:checked').forEach(function(cb){styles.push(cb.value);});if(!name||!addr){alert('Kérlek töltsd ki a hely nevét és címét!');return;}function saveData(lat,lng){addDoc(collection(db,"streetfood"),{nev:name,cim:addr,leiras:desc,lat:lat,lng:lng,tipus:selectedType,stilus:styles,arkategoria:price,datum:new Date().toISOString(),megerositve:false,source:'user_submit',jelolesek:1}).then(function(){alert('✅ Elmentve! Ellenőrzés után megjelenik.');['shopName','shopAddress','shopDesc'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('priceCategory').value='';document.querySelectorAll('#styleCheckboxes input').forEach(function(cb){cb.checked=false;});showPage('map-page');}).catch(function(e){alert('❌ '+e.message);});}if(useGPS){if(!navigator.geolocation){alert('GPS nem támogatott.');return;}navigator.geolocation.getCurrentPosition(function(pos){saveData(pos.coords.latitude,pos.coords.longitude);},function(e){alert('❌ GPS hiba: '+e.message);},{timeout:10000});}else{fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(addr+', Magyarország'),{headers:{'Accept-Language':'hu','User-Agent':'StreetFoodVadasz/1.0'}}).then(function(r){return r.json();}).then(function(data){if(data&&data.length>0){saveData(parseFloat(data[0].lat),parseFloat(data[0].lon));}else{saveData(null,null);}}).catch(function(){saveData(null,null);});}};
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
+<script>
+var qrStream=null,qrLastResult='',zxingReader=null;
+window.startQR=function(){var video=document.getElementById('qr-video'),status=document.getElementById('qr-status'),result=document.getElementById('qr-result-box'),startBtn=document.getElementById('qr-start-btn');result.style.display='none';status.style.display='block';status.textContent='Kamera indítása...';qrLastResult='';if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){status.textContent='❌ Kamera nem támogatott.';return;}navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}}).then(function(stream){qrStream=stream;video.srcObject=stream;startBtn.style.display='none';video.play().then(function(){status.textContent='Tartsd a kódot a keretbe!';window.startZXing();});}).catch(function(e){status.textContent='❌ Kamera hiba: '+e.message;});};
+window.stopQR=function(){if(zxingReader){try{zxingReader.reset();}catch(e){}zxingReader=null;}if(qrStream){qrStream.getTracks().forEach(function(t){t.stop();});qrStream=null;}var video=document.getElementById('qr-video'),startBtn=document.getElementById('qr-start-btn');if(video)video.srcObject=null;if(startBtn)startBtn.style.display='block';var box=document.getElementById('qr-result-box'),status=document.getElementById('qr-status');if(box)box.style.display='none';if(status){status.style.display='block';status.textContent='Tartsd a kódot a keretbe!';}qrLastResult='';};
+window.startZXing=function(){if(typeof ZXing==='undefined'){document.getElementById('qr-status').textContent='❌ Szkennelő nem töltött be!';return;}var hints=new Map();hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.QR_CODE,ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.EAN_8,ZXing.BarcodeFormat.CODE_128,ZXing.BarcodeFormat.CODE_39,ZXing.BarcodeFormat.UPC_A,ZXing.BarcodeFormat.UPC_E,ZXing.BarcodeFormat.DATA_MATRIX]);zxingReader=new ZXing.BrowserMultiFormatReader(hints);zxingReader.decodeFromVideoDevice(null,'qr-video',function(result,err){if(result&&result.getText()!==qrLastResult){qrLastResult=result.getText();var status=document.getElementById('qr-status'),box=document.getElementById('qr-result-box'),text=document.getElementById('qr-result-text');status.style.display='none';text.textContent='✅ '+(result.getBarcodeFormat()===ZXing.BarcodeFormat.QR_CODE?'QR kód':'Vonalkód')+': '+result.getText();box.style.display='block';if(navigator.vibrate)navigator.vibrate(200);}});};
+window.qrDoSearch=function(){if(!qrLastResult)return;var query=qrLastResult,isUrl=query.startsWith('http://')||query.startsWith('https://'),searchQ=encodeURIComponent(query+' street food étel');document.getElementById('search-title').textContent=isUrl?'🔗 Link beolvasva':query;document.getElementById('search-code').textContent=isUrl?query:'Kód: '+query;['search-google','search-images','search-youtube','search-wiki'].forEach(function(id){var el=document.getElementById(id);el.href=isUrl?query:({'search-google':'https://www.google.com/search?q='+searchQ,'search-images':'https://www.google.com/search?tbm=isch&q='+searchQ,'search-youtube':'https://www.youtube.com/results?search_query='+searchQ,'search-wiki':'https://en.wikipedia.org/w/index.php?search='+encodeURIComponent(query)})[id];el.onclick=function(){window.location.href=this.href;return false;};});showPage('search-page');};
+</script>
+<script>if('serviceWorker'in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}</script>
+</body>
+</html>

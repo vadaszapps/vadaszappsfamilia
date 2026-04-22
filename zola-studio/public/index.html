@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zola — A Jam Forever</title>
+  <meta name="description" content="Zola — Guitarist, Producer, Editor. Ne félj, hanem élj!"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: #111820;
+      background: radial-gradient(ellipse at 50% 30%, #1a2535 0%, #0d1520 50%, #060c14 100%);
+      min-height: 100vh;
+      font-family: 'Share Tech Mono', monospace;
+      color: #ccc;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER IMAGE ── */
+    .amp-header {
+      width: 100%;
+      max-width: 1100px;
+      margin: 20px auto 0;
+      padding: 0 10px;
+      position: relative;
+      user-select: none;
+    }
+
+    .amp-header img {
+      width: 100%;
+      display: block;
+      border-radius: 8px 8px 0 0;
+    }
+
+    /* Clickable nav zones over the image */
+    .nav-zones {
+      position: absolute;
+      top: 0; left: 10px; right: 10px; bottom: 0;
+    }
+
+    /* Each nav zone — invisible overlay on the image */
+    .nav-zone {
+      position: absolute;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-radius: 3px;
+    }
+    .nav-zone:hover {
+      background: rgba(200, 169, 110, 0.12);
+      outline: 1px solid rgba(200,169,110,0.3);
+    }
+    .nav-zone.active {
+      background: rgba(200, 169, 110, 0.18);
+      outline: 1px solid rgba(200,169,110,0.5);
+    }
+
+    /* HU/AN toggle */
+    .lang-toggle {
+      position: absolute;
+      cursor: pointer;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid #444;
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      color: #aaa;
+      transition: all 0.3s;
+    }
+    .lang-toggle:hover { background: rgba(200,169,110,0.2); color: #c8a96e; border-color: #c8a96e; }
+    .lang-toggle.hu { color: #ff6666; }
+    .lang-toggle.en { color: #66aaff; }
+
+    /* ── SUBMENU BAR ── */
+    .submenu-bar {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 10px;
+      display: none;
+    }
+    .submenu-bar.visible { display: block; }
+    .submenu-inner {
+      background: linear-gradient(180deg, #1a1a1a, #141414);
+      border: 1px solid #2a2a2a;
+      border-top: none;
+      display: flex;
+      gap: 2px;
+      padding: 6px 10px;
+    }
+    .sub-btn {
+      font-family: 'Orbitron', monospace;
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #555;
+      border: 1px solid #222;
+      padding: 7px 16px;
+      cursor: pointer;
+      background: rgba(255,255,255,0.02);
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+    .sub-btn:hover, .sub-btn.active { border-color: #c8a96e; color: #c8a96e; background: rgba(200,169,110,0.06); }
+
+    /* ── CONTENT AREA ── */
+    .content-wrap {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 10px 40px;
+    }
+
+    .content-box {
+      background: #080808;
+      border: 2px solid #222;
+      border-top: none;
+      min-height: 400px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* scanlines */
+    .content-box::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.05) 3px, rgba(0,0,0,0.05) 4px);
+      pointer-events: none; z-index: 10;
+    }
+
+    /* All panels hidden by default */
+    .panel { display: none; padding: 40px 48px 52px; animation: fadeIn 0.4s ease; }
+    .panel.active { display: block; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── TYPOGRAPHY ── */
+    .panel-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 10px; letter-spacing: 0.35em;
+      color: #c8a96e; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .panel-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(20px, 3.5vw, 36px);
+      color: #ddd; font-weight: 700;
+      margin-bottom: 28px; line-height: 1.1;
+    }
+    .panel-title em { color: #c8a96e; font-style: normal; }
+
+    /* ── BIO ── */
+    .lang-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'Orbitron', monospace;
+      font-size: 9px; letter-spacing: 0.2em;
+      border: 1px solid #333; padding: 6px 14px;
+      color: #666; cursor: pointer; margin-bottom: 28px;
+      background: rgba(255,255,255,0.02);
+      transition: all 0.3s; user-select: none;
+    }
+    .lang-btn:hover { border-color: #c8a96e; color: #c8a96e; }
+
+    .bio-text { display: none; }
+    .bio-text.active { display: block; }
+
+    .bio-hu p, .bio-en p {
+      color: #666; line-height: 2; margin-bottom: 14px; font-size: 13px; max-width: 700px;
+    }
+    .bio-hu p strong, .bio-en p strong { color: #aaa; font-weight: normal; }
+
+    .band-list {
+      display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 24px;
+    }
+    .band-tag {
+      font-family: 'Orbitron', monospace;
+      font-size: 9px; letter-spacing: 0.15em;
+      border: 1px solid #222; padding: 5px 12px;
+      color: #555; text-decoration: none;
+      transition: all 0.3s;
+    }
+    .band-tag:hover { border-color: #c8a96e; color: #c8a96e; }
+
+    .soundcloud-list { margin-top: 20px; }
+    .sc-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 9px; letter-spacing: 0.25em; color: #c8a96e;
+      margin-bottom: 12px; text-transform: uppercase;
+    }
+    .sc-links { display: flex; flex-wrap: wrap; gap: 8px; }
+    .sc-link {
+      font-size: 11px; color: #444; text-decoration: none;
+      border-bottom: 1px solid #1e1e1e; padding-bottom: 2px;
+      transition: all 0.3s;
+    }
+    .sc-link:hover { color: #c8a96e; border-color: #c8a96e; }
+
+    /* ── DISZKOGRÁFIA ── */
+    .disco-list {
+      columns: 2; column-gap: 40px;
+      max-width: 800px;
+    }
+    @media (max-width: 600px) { .disco-list { columns: 1; } }
+
+    .disco-year-group { break-inside: avoid; margin-bottom: 8px; }
+    .disco-item {
+      display: flex; align-items: baseline; gap: 10px;
+      padding: 4px 0;
+      border-bottom: 1px solid #111;
+    }
+    .disco-year {
+      font-family: 'Orbitron', monospace;
+      font-size: 9px; color: #c8a96e; min-width: 36px; flex-shrink: 0;
+    }
+    .disco-name {
+      font-size: 11px; color: #555; text-decoration: none;
+      transition: color 0.3s; line-height: 1.6;
+    }
+    .disco-name:hover { color: #c8a96e; }
+    a.disco-name { color: #777; }
+    a.disco-name:hover { color: #c8a96e; }
+
+    /* ── ZENE ── */
+    .embeds-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px; margin-top: 8px;
+    }
+    .embed-wrap iframe { width: 100%; border: none; display: block; }
+    .embed-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 8px; letter-spacing: 0.2em; color: #333;
+      text-transform: uppercase; margin-bottom: 4px;
+    }
+
+    /* ── LINKS ── */
+    .links-section { margin-bottom: 32px; }
+    .links-section-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 9px; letter-spacing: 0.25em; color: #c8a96e;
+      text-transform: uppercase; margin-bottom: 12px;
+      padding-bottom: 6px; border-bottom: 1px solid #1a1a1a;
+    }
+    .links-grid {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .link-item {
+      border: 1px solid #1a1a1a; padding: 8px 16px;
+      font-size: 11px; color: #555; text-decoration: none;
+      transition: all 0.3s; background: rgba(255,255,255,0.015);
+    }
+    .link-item:hover { border-color: #c8a96e; color: #c8a96e; }
+
+    /* ── PLACEHOLDER ── */
+    .placeholder {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 300px; gap: 16px;
+    }
+    .placeholder-icon { font-size: 48px; opacity: 0.15; }
+    .placeholder-text {
+      font-family: 'Orbitron', monospace;
+      font-size: 11px; letter-spacing: 0.2em;
+      color: #333; text-transform: uppercase;
+    }
+
+    /* ── PLATFORM BUTTONS ── */
+    .platform-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 32px; }
+    .plat-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid #1e1e1e; padding: 10px 18px;
+      font-family: 'Orbitron', monospace;
+      font-size: 9px; letter-spacing: 0.2em;
+      color: #444; text-decoration: none;
+      background: rgba(255,255,255,0.015);
+      transition: all 0.3s;
+    }
+    .plat-btn:hover { border-color: #c8a96e; color: #c8a96e; }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      max-width: 1100px; width: 100%; margin: 0 auto;
+      text-align: center; padding: 16px 10px;
+      font-family: 'Orbitron', monospace;
+      font-size: 8px; letter-spacing: 0.2em; color: #1e1e1e;
+    }
+
+    @media (max-width: 768px) {
+      .panel { padding: 24px 18px 32px; }
+      .disco-list { columns: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     HEADER — amp image with nav zones
+══════════════════════════════════════ -->
+<div class="amp-header">
+  <img src="head2.png" alt="Zola Amp Header" id="ampImg"/>
+
+  <div class="nav-zones" id="navZones">
+    <!-- Zones positioned as % of image — adjusted after load -->
+    <!-- BIO -->
+    <div class="nav-zone active" id="zone-bio"
+         style="left:22%;top:48%;width:32%;height:10%"
+         onclick="showPanel('bio')"></div>
+    <!-- DISZKOGRÁFIA -->
+    <div class="nav-zone" id="zone-disco"
+         style="left:22%;top:58%;width:32%;height:10%"
+         onclick="showPanel('disco')"></div>
+    <!-- ZENE -->
+    <div class="nav-zone" id="zone-zene"
+         style="left:18%;top:68%;width:20%;height:10%"
+         onclick="showPanel('zene'); showSub('zene')"></div>
+    <!-- MUNKA -->
+    <div class="nav-zone" id="zone-munka"
+         style="left:14%;top:78%;width:24%;height:10%"
+         onclick="showPanel('munka'); showSub('munka')"></div>
+    <!-- EMAIL -->
+    <div class="nav-zone" id="zone-email"
+         style="left:68%;top:53%;width:20%;height:10%"
+         onclick="window.location.href='mailto:zola.kralik@gmail.com'"></div>
+    <!-- LINK -->
+    <div class="nav-zone" id="zone-link"
+         style="left:68%;top:63%;width:20%;height:10%"
+         onclick="showPanel('links')"></div>
+    <!-- HU/AN -->
+    <div class="nav-zone lang-toggle" id="zone-lang"
+         style="left:6%;top:52%;width:10%;height:18%"
+         onclick="toggleLang()">
+      <span id="langLabel">HU</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SUBMENU BAR
+══════════════════════════════════════ -->
+<div class="submenu-bar" id="sub-zene">
+  <div class="submenu-inner">
+    <span class="sub-btn active" onclick="showZeneSub('sajat', this)">Saját</span>
+    <span class="sub-btn" onclick="showZeneSub('projekt', this)">Projekt</span>
+  </div>
+</div>
+
+<div class="submenu-bar" id="sub-munka">
+  <div class="submenu-inner">
+    <a class="sub-btn" href="https://vadasz-apps.web.app/" target="_blank">Web.App</a>
+    <span class="sub-btn" onclick="showPanel('service')">Service</span>
+    <span class="sub-btn" onclick="showPanel('tamogass')">Támogass</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     CONTENT
+══════════════════════════════════════ -->
+<div class="content-wrap">
+<div class="content-box">
+
+  <!-- BIO -->
+  <div class="panel active" id="panel-bio">
+    <div class="panel-label">// Bio</div>
+    <div class="panel-title">Üdv. A nevem <em>Zola</em>.</div>
+
+    <div class="lang-btn" onclick="toggleLang()" id="langBtn">
+      🇭🇺 Magyar — váltás Angolra
+    </div>
+
+    <!-- MAGYAR -->
+    <div class="bio-text bio-hu active" id="bio-hu">
+      <p><strong>1985-ben kezdtem el gitározni</strong> az Iron Maiden hatására!</p>
+      <p>Aztán jött a Metallica, Megadeth, Slayer, Kreator.</p>
+      <p>Kicsit nehezen ment a dolog, mert a saját készítésű gitárjaim nem mindig sikerültek, és hát segítség sem akadt.</p>
+      <p>Alakítottam néhány zenekart, oda is csapódtam néhányhoz, párat meg is említenék:</p>
+      <div class="band-list">
+        <a class="band-tag" href="http://www.myspace.com/break_point" target="_blank">Break Point</a>
+        <a class="band-tag" href="http://fargo.atw.hu/" target="_blank">Fargo</a>
+        <span class="band-tag">V.D.A.</span>
+        <span class="band-tag">Arsenic</span>
+        <span class="band-tag">Revans Blokk</span>
+        <a class="band-tag" href="http://dreamless.atw.hu/" target="_blank">The Dreamless</a>
+        <span class="band-tag">Orion (Metallica Tribute)</span>
+        <a class="band-tag" href="https://zpmband.bandcamp.com/" target="_blank">ZPM (Zola Projekt Ma)</a>
+      </div>
+      <p>2014 óta nem játszottam sehol, és még mindig élvezem a szobagitározás örömeit! :)</p>
+      <p><strong>Tekintsd meg a többi munkámat is:</strong></p>
+      <div class="soundcloud-list">
+        <div class="sc-title">SoundCloud profilok:</div>
+        <div class="sc-links">
+          <a class="sc-link" href="https://soundcloud.com/garagesoundstudio" target="_blank">Garage Sound Studio</a>
+          <a class="sc-link" href="https://soundcloud.com/zolajamm" target="_blank">Zola Jamm</a>
+          <a class="sc-link" href="https://soundcloud.com/zpmband" target="_blank">ZPM</a>
+          <a class="sc-link" href="https://soundcloud.com/wrockband" target="_blank">W-Rock Band</a>
+          <a class="sc-link" href="https://soundcloud.com/zolacska" target="_blank">Zolacska</a>
+          <a class="sc-link" href="https://soundcloud.com/the-dreamless-band" target="_blank">The Dreamless Band</a>
+          <a class="sc-link" href="https://soundcloud.com/user-187739239" target="_blank">El-Coyote</a>
+          <a class="sc-link" href="https://soundcloud.com/cross-fire-23744801" target="_blank">Cross Fire Band</a>
+          <a class="sc-link" href="https://soundcloud.com/break-point-band" target="_blank">Break Point Band</a>
+          <a class="sc-link" href="https://soundcloud.com/felvidek" target="_blank">Felvidék</a>
+          <a class="sc-link" href="https://soundcloud.com/orion-band/albums" target="_blank">Orion Band</a>
+          <a class="sc-link" href="https://soundcloud.com/fargoband-1/sets/nem-viszlek-magammal" target="_blank">FargoBand</a>
+          <a class="sc-link" href="https://soundcloud.com/zola_copied_lines" target="_blank">Zola Copied Lines</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENGLISH -->
+    <div class="bio-text bio-en" id="bio-en">
+      <p><strong>I started playing guitar in 1985</strong>, inspired by Iron Maiden!</p>
+      <p>Then came Metallica, Megadeth, Slayer, Kreator.</p>
+      <p>It wasn't always easy — my homemade guitars didn't always turn out right, and there wasn't much help around.</p>
+      <p>I formed a few bands and joined a few others — here are some worth mentioning:</p>
+      <div class="band-list">
+        <a class="band-tag" href="http://www.myspace.com/break_point" target="_blank">Break Point</a>
+        <a class="band-tag" href="http://fargo.atw.hu/" target="_blank">Fargo</a>
+        <span class="band-tag">V.D.A.</span>
+        <span class="band-tag">Arsenic</span>
+        <span class="band-tag">Revans Blokk</span>
+        <a class="band-tag" href="http://dreamless.atw.hu/" target="_blank">The Dreamless</a>
+        <span class="band-tag">Orion (Metallica Tribute)</span>
+        <a class="band-tag" href="https://zpmband.bandcamp.com/" target="_blank">ZPM (Zola Project Now)</a>
+      </div>
+      <p>Since 2014 I haven't played in any band — and I still enjoy the pleasures of bedroom guitar! :)</p>
+      <p><strong>Hi! I'm a lonely guitarist who is just playing in his own home studio. I'm making instrumental stuff only, but if anyone feels the power for singing, I would be so happy! Thanks for your support and just don't forget to listen to my discography! Metal lives forever!!!</strong></p>
+    </div>
+  </div>
+
+  <!-- DISZKOGRÁFIA -->
+  <div class="panel" id="panel-disco">
+    <div class="panel-label">// Diszkográfia</div>
+    <div class="panel-title">A diszkográfiám</div>
+    <div class="disco-list">
+      <div class="disco-item"><span class="disco-year">1996</span><span class="disco-name">Első Agymenés</span></div>
+      <div class="disco-item"><span class="disco-year">1997</span><span class="disco-name">Guitar Hero</span></div>
+      <div class="disco-item"><span class="disco-year">1998</span><span class="disco-name">Experimenting</span></div>
+      <div class="disco-item"><span class="disco-year">1998</span><span class="disco-name">Into the Desert</span></div>
+      <div class="disco-item"><span class="disco-year">1999</span><a class="disco-name" href="https://soundcloud.com/zolajamm/sets/freedom" target="_blank">Szabadság</a></div>
+      <div class="disco-item"><span class="disco-year">2001</span><a class="disco-name" href="https://soundcloud.com/zolajamm/tunder-mese" target="_blank">Tündérdal</a></div>
+      <div class="disco-item"><span class="disco-year">2002</span><span class="disco-name">Best of Zola</span></div>
+      <div class="disco-item"><span class="disco-year">2002</span><span class="disco-name">MZ Jam</span></div>
+      <div class="disco-item"><span class="disco-year">2002</span><span class="disco-name">Thrash</span></div>
+      <div class="disco-item"><span class="disco-year">2003</span><a class="disco-name" href="https://soundcloud.com/zolajamm/sets/kbd" target="_blank">Kill Blood Death</a></div>
+      <div class="disco-item"><span class="disco-year">2003</span><a class="disco-name" href="https://soundcloud.com/zolajamm/bluesly" target="_blank">Rózsaszín Agymenés</a></div>
+      <div class="disco-item"><span class="disco-year">2004</span><span class="disco-name">Fire Jam</span></div>
+      <div class="disco-item"><span class="disco-year">2005</span><a class="disco-name" href="https://soundcloud.com/zolajamm/csillaghullas" target="_blank">Csillagmámia</a></div>
+      <div class="disco-item"><span class="disco-year">2005</span><span class="disco-name">Válogattam Neked</span></div>
+      <div class="disco-item"><span class="disco-year">2007</span><a class="disco-name" href="https://soundcloud.com/zolajamm/sets/nm" target="_blank">Z&K (Projekt)</a></div>
+      <div class="disco-item"><span class="disco-year">2008</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/guitar-forever" target="_blank">Guitar Forever</a></div>
+      <div class="disco-item"><span class="disco-year">2010</span><span class="disco-name">Fire Rose</span></div>
+      <div class="disco-item"><span class="disco-year">2011</span><span class="disco-name">Backing Tracks</span></div>
+      <div class="disco-item"><span class="disco-year">2011</span><span class="disco-name">Guitar Maniac</span></div>
+      <div class="disco-item"><span class="disco-year">2012</span><a class="disco-name" href="https://soundcloud.com/zola_copied_lines" target="_blank">Copied Lines</a></div>
+      <div class="disco-item"><span class="disco-year">2013</span><span class="disco-name">Bluesly</span></div>
+      <div class="disco-item"><span class="disco-year">2015</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/zero-point-modul" target="_blank">Zero Point Modul</a></div>
+      <div class="disco-item"><span class="disco-year">2017</span><span class="disco-name">Dilemma</span></div>
+      <div class="disco-item"><span class="disco-year">2018</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/secular-manipulations" target="_blank">Secular Manipulations</a></div>
+      <div class="disco-item"><span class="disco-year">2018</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/copied-lines" target="_blank">Copied Lines (Remastered)</a></div>
+      <div class="disco-item"><span class="disco-year">2019</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/world-dominations" target="_blank">World Dominations</a></div>
+      <div class="disco-item"><span class="disco-year">2019</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/other-side" target="_blank">Other Side</a></div>
+      <div class="disco-item"><span class="disco-year">2019</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/my-universe" target="_blank">My Universe</a></div>
+      <div class="disco-item"><span class="disco-year">2019</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/soul-prison" target="_blank">Soul Prison</a></div>
+      <div class="disco-item"><span class="disco-year">2019</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/selfy-forever" target="_blank">Selfy Forever</a></div>
+      <div class="disco-item"><span class="disco-year">2019</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/balkan-progress" target="_blank">Balkan Progress</a></div>
+      <div class="disco-item"><span class="disco-year">2019</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/the-soul-deadness" target="_blank">The Soul Deadness</a></div>
+      <div class="disco-item"><span class="disco-year">2019</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/metal-therapy" target="_blank">Metal Therapy</a></div>
+      <div class="disco-item"><span class="disco-year">2019</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/invictus" target="_blank">Invictus</a></div>
+      <div class="disco-item"><span class="disco-year">2019</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/the-zone" target="_blank">The Zone</a></div>
+      <div class="disco-item"><span class="disco-year">2019</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/eternal-circulations" target="_blank">Eternal Circulations</a></div>
+      <div class="disco-item"><span class="disco-year">2019</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/train-form-the-future" target="_blank">Train Form The Future</a></div>
+      <div class="disco-item"><span class="disco-year">2019</span><span class="disco-name">Balladas</span></div>
+      <div class="disco-item"><span class="disco-year">2019</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/fire-rose-remastered-2019" target="_blank">Fire Rose (Remastered)</a></div>
+      <div class="disco-item"><span class="disco-year">2020</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/new-level" target="_blank">New Level</a></div>
+      <div class="disco-item"><span class="disco-year">2020</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/virus-of-madness" target="_blank">Virus of Madness</a></div>
+      <div class="disco-item"><span class="disco-year">2020</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/star-dust-2" target="_blank">Star Dust</a></div>
+      <div class="disco-item"><span class="disco-year">2020</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/the-great-awakening" target="_blank">The Great Awakening</a></div>
+      <div class="disco-item"><span class="disco-year">2020</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/the-chaos-and-its-brothers" target="_blank">The Chaos And Its Brothers</a></div>
+      <div class="disco-item"><span class="disco-year">2020</span><span class="disco-name">Tribut</span></div>
+      <div class="disco-item"><span class="disco-year">2021</span><a class="disco-name" href="https://zpmband.bandcamp.com/album/road-finder" target="_blank">Road Finder</a></div>
+    </div>
+  </div>
+
+  <!-- ZENE — SAJÁT (Audius) -->
+  <div class="panel" id="panel-zene-sajat">
+    <div class="panel-label">// Zene — Saját</div>
+    <div class="panel-title">Audius <em>albumok</em></div>
+    <div class="platform-row">
+      <a class="plat-btn" href="https://audius.co/zolajamm" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#CC0FE0"><path d="M8.88 3.43a1.25 1.25 0 0 0-1.76 0L.54 10.01a1.87 1.87 0 0 0 0 2.64l6.58 6.58a1.25 1.25 0 0 0 1.76-1.76L2.3 11.33l6.58-6.14a1.25 1.25 0 0 0 0-1.76zm6.24 0a1.25 1.25 0 0 1 1.76 0l6.58 6.58a1.87 1.87 0 0 1 0 2.64l-6.58 6.58a1.25 1.25 0 0 1-1.76-1.76l6.58-6.14-6.58-6.14a1.25 1.25 0 0 1 0-1.76z"/></svg>
+        Audius profil megnyitása
+      </a>
+      <a class="plat-btn" href="https://open.spotify.com/artist/66cTHZeqJErvRKMNNGebOi/discography" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+        Spotify
+      </a>
+      <a class="plat-btn" href="https://www.youtube.com/channel/UCecpbEYy3o7VQpx235hOFKg/featured" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#FF0000"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+        YouTube
+      </a>
+    </div>
+    <div class="embeds-grid">
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/bpZEW?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/5QXkV?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/P54EJ?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/Yobrm?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/v7O7v?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/oEONR?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/OgmNv?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/w7OW2?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/y8Ob7?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/k4OgP?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/B01dx?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/pzOzM?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/79kKr?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/64OmM?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/4jZGE?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/3A9VZ?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/RKmKg?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/79gX7?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/2o1Ed?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/j4OR4?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">Audius</div><iframe src="https://audius.co/embed/album/OgmzV?flavor=card" height="480" allow="encrypted-media"></iframe></div>
+      <div class="embed-wrap"><div class="embed-label">SoundCloud</div>
+        <iframe width="100%" height="450" scrolling="no" frameborder="no" allow="autoplay"
+          src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/1516558348&color=%230b0b0b&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true">
+        </iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZENE — PROJEKT (Bandcamp) -->
+  <div class="panel" id="panel-zene-projekt">
+    <div class="panel-label">// Zene — Projekt</div>
+    <div class="panel-title">Bandcamp <em>albumok</em></div>
+    <div class="platform-row">
+      <a class="plat-btn" href="https://zpmband.bandcamp.com/" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#1DA0C3"><path d="M0 18.75l7.437-12.5H24l-7.438 12.5z"/></svg>
+        ZPM Band Bandcamp
+      </a>
+    </div>
+    <div class="embeds-grid">
+      <div class="embed-wrap"><div class="embed-label">Road Finder</div>
+        <iframe style="border:0;height:470px;" src="https://bandcamp.com/EmbeddedPlayer/album=1333122308/size=large/bgcol=111111/linkcol=c8a96e/tracklist=false/transparent=true/" seamless></iframe>
+      </div>
+      <div class="embed-wrap"><div class="embed-label">The Zone</div>
+        <iframe style="border:0;height:470px;" src="https://bandcamp.com/EmbeddedPlayer/album=2301644909/size=large/bgcol=111111/linkcol=c8a96e/tracklist=false/transparent=true/" seamless></iframe>
+      </div>
+      <div class="embed-wrap"><div class="embed-label">Guitar Forever</div>
+        <iframe style="border:0;height:470px;" src="https://bandcamp.com/EmbeddedPlayer/album=517429488/size=large/bgcol=111111/linkcol=c8a96e/tracklist=false/transparent=true/" seamless></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- MUNKA — SERVICE -->
+  <div class="panel" id="panel-service">
+    <div class="panel-label">// Munka — Service</div>
+    <div class="panel-title"><em>Hamarosan...</em></div>
+    <div class="placeholder">
+      <div class="placeholder-icon">🔧</div>
+      <div class="placeholder-text">Tartalom feltöltés alatt</div>
+    </div>
+  </div>
+
+  <!-- MUNKA — TÁMOGASS -->
+  <div class="panel" id="panel-tamogass">
+    <div class="panel-label">// Támogass</div>
+    <div class="panel-title"><em>Hamarosan...</em></div>
+    <div class="placeholder">
+      <div class="placeholder-icon">🤘</div>
+      <div class="placeholder-text">Támogatási lehetőségek hamarosan</div>
+    </div>
+  </div>
+
+  <!-- LINKS -->
+  <div class="panel" id="panel-links">
+    <div class="panel-label">// Links</div>
+    <div class="panel-title">Barátok <em>oldalai</em></div>
+
+    <div class="links-section">
+      <div class="links-section-title">Zenekarok</div>
+      <div class="links-grid">
+        <a class="link-item" href="http://arsenic.atw.hu" target="_blank">Arsenic Zenekar</a>
+        <a class="link-item" href="http://fargo.atw.hu" target="_blank">Fargo</a>
+        <a class="link-item" href="http://breakpoint.atw.hu" target="_blank">Break Point</a>
+        <a class="link-item" href="http://www.myspace.com/wrockband" target="_blank">W-Rock Zenekar</a>
+        <a class="link-item" href="http://wolframzenekar.atw.hu/" target="_blank">Wolfram Zenekar</a>
+        <a class="link-item" href="http://dreamless.atw.hu/" target="_blank">The Dreamless</a>
+        <a class="link-item" href="http://www.suzybira.com" target="_blank">Suzy Bira</a>
+        <a class="link-item" href="http://duci.atw.hu" target="_blank">Duci a szoba gityós</a>
+      </div>
+    </div>
+
+    <div class="links-section">
+      <div class="links-section-title">Saját platformok</div>
+      <div class="links-grid">
+        <a class="link-item" href="https://soundcloud.com/garagesoundstudio" target="_blank">Garage Sound Studio</a>
+        <a class="link-item" href="http://zolajamm.atw.hu/" target="_blank">ZolaJamm.atw</a>
+        <a class="link-item" href="http://www.riffworld.com/Members/zolajamm" target="_blank">Riff World</a>
+        <a class="link-item" href="https://www.facebook.com/groups/515459225272316" target="_blank">Facebook Klub</a>
+      </div>
+    </div>
+
+    <div class="links-section">
+      <div class="links-section-title">Magyar témák</div>
+      <div class="links-grid">
+        <a class="link-item" href="HTTP://HONT.HU" target="_blank">Hont.hu</a>
+        <a class="link-item" href="http://tsitar.hont.hu" target="_blank">Tsitár</a>
+        <a class="link-item" href="http://hirmondo.hont.hu" target="_blank">Honti Hírmondó</a>
+        <a class="link-item" href="http://www.dregelyvar.hu/nomad/index.html" target="_blank">Nomád Tábor</a>
+        <a class="link-item" href="http://sugarkankalin.hu" target="_blank">Sugárkankalin</a>
+        <a class="link-item" href="http://www.freeweb.hu/arvisura/index.html" target="_blank">Arvisura</a>
+        <a class="link-item" href="http://kowik.web.elte.hu/rovas/" target="_blank">Rovásírás Fordító</a>
+        <a class="link-item" href="http://www.karpathaza.net/" target="_blank">Magyarok Szövetsége</a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content-box -->
+</div><!-- /content-wrap -->
+
+<div class="site-footer">© 2025 Zola — Design by Zol@ — zola-studio.web.app — Metal Lives Forever!</div>
+
+<script>
+  let currentLang = 'hu';
+  let currentZeneSub = 'sajat';
+
+  // Show main panel
+  function showPanel(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    // Hide all submenus
+    document.querySelectorAll('.submenu-bar').forEach(s => s.classList.remove('visible'));
+    // Deactivate zones
+    document.querySelectorAll('.nav-zone').forEach(z => z.classList.remove('active'));
+
+    const panel = document.getElementById('panel-' + name);
+    if (panel) {
+      panel.classList.add('active');
+      const zone = document.getElementById('zone-' + name);
+      if (zone) zone.classList.add('active');
+    }
+  }
+
+  // Show submenu
+  function showSub(name) {
+    const sub = document.getElementById('sub-' + name);
+    if (sub) sub.classList.add('visible');
+    // Activate correct zone
+    const zone = document.getElementById('zone-' + name);
+    if (zone) zone.classList.add('active');
+  }
+
+  // Zene sub
+  function showZeneSub(sub, btn) {
+    document.querySelectorAll('#sub-zene .sub-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (sub === 'sajat') showPanel('zene-sajat');
+    else showPanel('zene-projekt');
+    document.getElementById('sub-zene').classList.add('visible');
+    document.getElementById('zone-zene').classList.add('active');
+  }
+
+  // Language toggle
+  function toggleLang() {
+    currentLang = currentLang === 'hu' ? 'en' : 'hu';
+    document.getElementById('bio-hu').classList.toggle('active', currentLang === 'hu');
+    document.getElementById('bio-en').classList.toggle('active', currentLang === 'en');
+    const btn = document.getElementById('langBtn');
+    const zone = document.getElementById('zone-lang');
+    if (currentLang === 'hu') {
+      btn.textContent = '🇭🇺 Magyar — váltás Angolra';
+      zone.querySelector('#langLabel').textContent = 'HU';
+      zone.className = 'nav-zone lang-toggle hu';
+    } else {
+      btn.textContent = '🇬🇧 English — switch to Hungarian';
+      zone.querySelector('#langLabel').textContent = 'EN';
+      zone.className = 'nav-zone lang-toggle en';
+    }
+    // Make sure bio panel is showing
+    showPanel('bio');
+  }
+
+  // Init
+  showPanel('bio');
+</script>
+</body>
+</html>

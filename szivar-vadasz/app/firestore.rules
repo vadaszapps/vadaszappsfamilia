@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Szivarozók — mindenki olvashat és írhat (bolt beküldés)
+    match /szivarozok/{doc} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
+    }
+
+    // Users — csak a saját dokumentumot kezelheti a bejelentkezett user
+    // A Cloud Function service account-nak admin SDK-val van hozzáférése (rules nem vonatkozik rá)
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /savedCigars/{cigarId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // Ko-fi webhook teszt collection (Cloud Function írja, nyitott marad)
+    match /test_webhook/{doc} {
+      allow read, write: if true;
+    }
+  }
+}

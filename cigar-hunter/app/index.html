@@ -1,0 +1,1740 @@
+<!-- © 2026 Cigar Hunter. All rights reserved. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-59HHDKQZNY"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-59HHDKQZNY');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cigar Hunter</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#D4AF37">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cigar Hunter">
+    <link rel="apple-touch-icon" href="https://firebasestorage.googleapis.com/v0/b/szivar-vadasz.firebasestorage.app/o/01.gif?alt=media&token=106e8d0b-22df-43f3-920b-685c2cd2710b">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #1a0f0a; color: #fff; -webkit-font-smoothing: antialiased; }
+        :root { --gold: #D4AF37; --black: #0a0604; --brown: #2C1B12; --navbar: 54px; --header: 64px; --copyright: 27px; }
+
+        .page { display: none; flex-direction: column; width: 100%; height: 100%; position: absolute; top: 0; left: 0; overflow: hidden; }
+        .page.active { display: flex; }
+
+        header { height: var(--header); padding: 0 15px; background: var(--black); border-bottom: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 50; position: relative; }
+        #lang-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: 1px solid var(--gold); color: var(--gold); border-radius: 20px; padding: 4px 10px; font-size: 0.75rem; font-weight: bold; cursor: pointer; width: auto; }
+        header h1 { color: var(--gold); font-size: 1.2rem; }
+        .logo-text { font-size: 1.85rem; font-weight: bold; color: var(--gold); letter-spacing: 2px; line-height: 1.2; }
+        .logo-sub { font-size: 0.9rem; color: #aa9988; }
+        .cigar-logo { width: 240px; filter: drop-shadow(0 0 14px rgba(212,175,55,0.5)); margin-top: 0; position: relative; z-index: 10; }
+
+        input, textarea { width: 100%; padding: 12px; background: var(--brown); border: 1px solid var(--gold); color: white; border-radius: 8px; font-size: 1rem; outline: none; }
+        input::placeholder, textarea::placeholder { color: #aa9988; }
+        button { background: var(--gold); color: var(--black); padding: 15px; border: none; width: 100%; font-weight: bold; font-size: 1.1rem; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+        button:active { background: #b8960f; }
+        .btn-outline { background: transparent; border: 1px solid var(--gold); color: var(--gold); }
+
+        /* ===== NAVBAR & COPYRIGHT ===== */
+        #global-navbar { height: var(--navbar); display: flex; justify-content: space-around; align-items: center; background: var(--black); border-top: 1px solid var(--gold); position: fixed; bottom: var(--copyright); width: 100%; z-index: 1000; touch-action: manipulation; }
+        #global-navbar span { color: #ccc; font-size: 0.72rem; cursor: pointer; padding: 8px 5px; -webkit-tap-highlight-color: transparent; transition: color 0.2s; }
+        #global-navbar span.active { color: var(--gold); border-bottom: 2px solid var(--gold); }
+        #global-copyright { position: fixed; bottom: 0; left: 0; width: 100%; height: var(--copyright); line-height: var(--copyright); text-align: center; background: var(--black); color: var(--gold); font-size: 0.72rem; font-weight: bold; z-index: 1001; }
+        .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 15px; padding-bottom: calc(var(--navbar) + var(--copyright) + 20px); position: relative; }
+
+        /* ===== HERO ===== */
+        .hero { text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; flex: 1; padding: 20px; overflow: hidden; }
+        .hero h2 { font-size: 1.8rem; color: var(--gold); margin: 15px 0; }
+        .hero p { color: #ddd; margin-bottom: 20px; max-width: 300px; line-height: 1.6; }
+        .hero-buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 300px; }
+        .facebook-link { margin-top: 30px; padding-top: 20px; text-align: center; border-top: 1px solid #4a3326; }
+        .facebook-link a { color: var(--gold); text-decoration: none; border: 1px solid var(--gold); padding: 8px 20px; border-radius: 25px; font-size: 0.9rem; display: inline-block; }
+        .powered-by { font-size: 0.8rem; color: #665544; margin-top: 8px; }
+
+        /* ===== MAP ===== */
+        #map-page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #map { position: absolute; top: var(--header); left: 0; right: 0; bottom: calc(var(--navbar) + var(--copyright)); width: 100%; background: #1a0f0a; }
+        #map-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 5; pointer-events: none; }
+        .spinner { width: 40px; height: 40px; border: 3px solid #4a3326; border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #indulas-btn { display: none; position: absolute; bottom: calc(var(--navbar) + var(--copyright) + 16px); left: 50%; transform: translateX(-50%); z-index: 50; background: #22c55e; color: #fff; border: none; border-radius: 30px; padding: 14px 32px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 20px rgba(34,197,94,0.5); white-space: nowrap; width: auto; }
+        #nav-choice-panel { display: none; position: absolute; bottom: calc(var(--navbar) + var(--copyright)); left: 0; right: 0; z-index: 70; background: rgba(10,6,4,0.97); border-top: 2px solid var(--gold); padding: 14px; flex-direction: column; gap: 10px; }
+        #nav-choice-panel.active { display: flex; }
+        .nav-choice-btn { padding: 13px; border-radius: 10px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; color: #fff; }
+        #btn-apple-maps { background: #1a73e8; }
+        #btn-google-maps { background: #34a853; }
+        #btn-waze { background: #6c3fc5; }
+        #btn-nav-cancel { background: #333; color: #aaa; }
+
+        /* ===== BOLT PANEL ===== */
+        #bolt-panel { display: none; position: absolute; bottom: calc(var(--navbar) + var(--copyright)); left: 0; right: 0; z-index: 60; background: #0a0604; border-top: 2px solid var(--gold); border-radius: 16px 16px 0 0; padding: 16px; box-shadow: 0 -4px 30px rgba(0,0,0,0.7); }
+        #bolt-panel.active { display: block; }
+        #bolt-panel-handle { width: 40px; height: 4px; background: #4a3326; border-radius: 2px; margin: 0 auto 14px; }
+        #bolt-panel-nev { color: var(--gold); font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; }
+        #bolt-panel-cim { color: #aaa; font-size: 0.85rem; margin-bottom: 10px; }
+        #bolt-panel-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+        .badge { padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; border: 1px solid transparent; }
+        .badge-humidor-pro  { background: #14532d; color: #4ade80; border-color: #16a34a; }
+        .badge-humidor-alap { background: #713f12; color: #fbbf24; border-color: #d97706; }
+        .badge-humidor-no   { background: #3f1212; color: #f87171; border-color: #dc2626; }
+        .badge-megeros      { background: #1a2e4a; color: #60a5fa; border-color: #2563eb; }
+        #bolt-panel-leiras { color: #ccc; font-size: 0.82rem; margin-bottom: 14px; }
+        #bolt-panel-close { position: absolute; top: 14px; right: 14px; background: #2C1B12; border: 1px solid #4a3326; color: #aaa; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        #humidor-report-btn { display: none; width: 100%; margin-top: 10px; background: transparent; border: 1px solid var(--gold); color: var(--gold); border-radius: 30px; padding: 10px; font-size: 0.88rem; font-weight: bold; cursor: pointer; }
+        #humidor-report-btn:active { background: var(--gold); color: var(--black); }
+        #humidor-report-thanks { display: none; text-align: center; color: #4ade80; font-size: 0.82rem; margin-top: 8px; padding: 6px; }
+
+        /* ===== LIST & FILTERS ===== */
+        #filter-bar { display: flex; gap: 8px; padding: 8px 12px; background: #0a0604; border-bottom: 1px solid #2a1a0a; overflow-x: auto; flex-shrink: 0; -webkit-overflow-scrolling: touch; }
+        #filter-bar::-webkit-scrollbar { display: none; }
+        .filter-btn { padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; border: 1px solid #4a3326; background: #1a100a; color: #ccc; cursor: pointer; white-space: nowrap; }
+        .filter-btn.active-filter { background: var(--gold); color: var(--black); border-color: var(--gold); }
+        .cigar-card { background: #1a100a; border: 1px solid #4a3326; border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
+        .cigar-icon { font-size: 1.8rem; flex-shrink: 0; }
+        .cigar-details { flex: 1; min-width: 0; }
+        .cigar-details h3 { margin: 0 0 3px; color: var(--gold); font-size: 0.95rem; }
+        .cigar-details p { margin: 2px 0; font-size: 0.8rem; color: #ccc; }
+        .nav-btn { background: var(--gold); color: var(--black); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; flex-shrink: 0; border: none; }
+        .humidor-badge { display: inline-block; font-size: 0.72rem; padding: 2px 8px; border-radius: 10px; margin-top: 4px; }
+        .humidor-badge.pro  { background: #14532d; color: #4ade80; }
+        .humidor-badge.alap { background: #713f12; color: #fbbf24; }
+        .humidor-badge.no   { background: #3f1212; color: #f87171; }
+        .humidor-badge.verified { background: #1a2e4a; color: #60a5fa; border: 1px solid #2563eb; }
+        .country-section-header { padding: 10px 4px 6px; color: #887766; font-size: 0.72rem; font-weight: bold; letter-spacing: 2px; border-bottom: 1px solid #2a1a0a; margin-bottom: 8px; margin-top: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .country-section-header:first-child { margin-top: 0; }
+        .country-count { color: #554433; font-size: 0.68rem; font-weight: normal; letter-spacing: 0; }
+        .dist-badge { font-size: 0.68rem; color: #554433; margin-top: 2px; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #665544; }
+        .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+        .last-updated { font-size: 0.72rem; color: #554433; text-align: right; padding: 4px 12px; }
+
+        /* ===== QR / SCAN ===== */
+        #qr-wrap { position: absolute; top: var(--header); left: 0; right: 0; bottom: calc(var(--navbar) + var(--copyright)); display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; overflow: hidden; }
+        #qr-video { width: 100%; max-width: 420px; }
+        #qr-status { position: absolute; bottom: 96px; left: 0; right: 0; text-align: center; color: var(--gold); font-size: 0.88rem; padding: 0 20px; }
+        #qr-btn-row { position: absolute; bottom: calc(var(--navbar) + var(--copyright) + 16px); left: 0; right: 0; display: flex; flex-direction: column; gap: 10px; padding: 0 20px; }
+        .scan-main-btn { width: 100%; padding: 14px; border-radius: 50px; font-size: 1rem; background: linear-gradient(135deg,#D4AF37 0%,#8a6d0a 100%); color: #000; font-weight: bold; box-shadow: 0 0 20px rgba(212,175,55,0.6); border: none; cursor: pointer; }
+        .scan-alt-btn { width: 100%; padding: 12px; border-radius: 50px; font-size: 0.9rem; background: transparent; border: 1px solid var(--gold); color: var(--gold); cursor: pointer; }
+        #credit-badge { position: absolute; top: 12px; right: 12px; background: rgba(10,6,4,0.85); border: 1px solid var(--gold); color: var(--gold); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: none; }
+        #camera-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; background: #000; }
+
+        /* ===== AI RESULT PAGE ===== */
+        #ai-result-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0604; z-index: 8000; display: none; flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        #ai-result-page.active { display: flex; }
+        #ai-result-header { background: var(--black); border-bottom: 1px solid var(--gold); padding: 14px 16px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        #ai-result-back { background: transparent; border: 1px solid var(--gold); color: var(--gold); border-radius: 8px; padding: 8px 14px; font-size: 0.85rem; font-weight: bold; cursor: pointer; width: auto; white-space: nowrap; }
+        #ai-result-title { color: var(--gold); font-size: 1rem; font-weight: bold; flex: 1; text-align: center; }
+        #ai-result-body-page { padding: 20px 16px; padding-bottom: 40px; flex: 1; }
+        .ai-cigar-name { color: var(--gold); font-size: 1.4rem; font-weight: bold; text-align: center; margin-bottom: 4px; }
+        .ai-cigar-sub { color: #887766; font-size: 0.85rem; text-align: center; margin-bottom: 18px; }
+        .ai-info-card { background: #1a100a; border: 1px solid #3a2010; border-radius: 14px; padding: 14px; margin-bottom: 14px; }
+        .ai-info-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #2a1a0a; }
+        .ai-info-row:last-child { border-bottom: none; }
+        .ai-info-label { color: #887766; font-size: 0.82rem; min-width: 80px; }
+        .ai-info-val { color: #fff; font-size: 0.9rem; flex: 1; }
+        .ai-strength-wrap { display: flex; align-items: center; gap: 8px; }
+        .ai-strength-bar { display: flex; gap: 4px; }
+        .ai-strength-dot { width: 14px; height: 14px; border-radius: 50%; }
+        .ai-strength-label { color: #ccc; font-size: 0.82rem; }
+        .ai-desc-block { background: #0d0804; border-left: 3px solid var(--gold); border-radius: 0 10px 10px 0; padding: 12px 14px; color: #ccc; font-size: 0.88rem; line-height: 1.6; margin-bottom: 14px; }
+        .ai-where-block { background: #1a100a; border: 1px solid #3a2010; border-radius: 14px; padding: 14px; margin-bottom: 16px; }
+        .ai-where-label { color: var(--gold); font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; margin-bottom: 6px; }
+        .ai-where-text { color: #ccc; font-size: 0.85rem; line-height: 1.5; }
+        .ai-action-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .ai-save-btn { flex: 1; background: linear-gradient(135deg,#D4AF37,#8a6d0a); color: #000; border: none; border-radius: 50px; padding: 14px; font-size: 0.9rem; font-weight: bold; cursor: pointer; }
+        .ai-share-btn { flex: 1; }
+        .ai-back-btn { background: transparent; border: 1px solid #4a3326; color: #887766; border-radius: 50px; padding: 12px; font-size: 0.85rem; cursor: pointer; }
+
+        /* ===== PROFILE PANEL ===== */
+        #profile-fab { position: fixed; bottom: calc(var(--navbar) + var(--copyright) + 14px); right: 16px; width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg,#D4AF37,#8a6d0a); color: #000; border: none; font-size: 1.3rem; cursor: pointer; z-index: 900; box-shadow: 0 4px 16px rgba(212,175,55,0.4); display: none; align-items: center; justify-content: center; }
+        #profile-fab.visible { display: flex; }
+        #profile-panel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9500; display: none; flex-direction: row; }
+        #profile-panel.active { display: flex; }
+        #prof-icon-bar { width: 64px; background: #0d0806; border-right: 1px solid #2a1a0a; display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 4px; }
+        .prof-icon-btn { background: transparent; border: none; color: #887766; font-size: 0.58rem; cursor: pointer; padding: 8px 4px; border-radius: 10px; width: 56px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; transition: color 0.2s; }
+        .pib-label { display: block; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .prof-icon-btn span { font-size: 1.3rem; line-height: 1; }
+        .prof-icon-btn.active, .prof-icon-btn:hover { color: var(--gold); background: #1a100a; }
+        #prof-icon-close { background: transparent; border: none; color: #887766; font-size: 1.2rem; cursor: pointer; padding: 10px; margin-top: auto; margin-bottom: 12px; width: auto; }
+        #prof-content { flex: 1; background: #0a0604; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; padding-bottom: calc(var(--navbar) + var(--copyright) + 20px); }
+        .prof-section { display: none; }
+        .prof-section.active { display: block; }
+        .prof-section-title { color: #554433; font-size: 0.72rem; letter-spacing: 2px; margin-bottom: 16px; }
+        .prof-avatar { font-size: 3rem; text-align: center; margin-bottom: 8px; }
+        .prof-name { color: var(--gold); font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 4px; }
+        .prof-email { color: #887766; font-size: 0.8rem; text-align: center; margin-bottom: 14px; }
+        .prof-credit-badge { background: #1a100a; border: 1px solid var(--gold); color: var(--gold); border-radius: 20px; padding: 6px 16px; font-size: 0.88rem; font-weight: bold; text-align: center; margin-bottom: 16px; display: inline-block; width: 100%; }
+        .prof-logout-btn { background: #1a0808; border: 1px solid #dc2626; color: #f87171; border-radius: 10px; padding: 12px; font-size: 0.88rem; cursor: pointer; width: 100%; font-weight: bold; }
+        .kredit-big { text-align: center; margin: 20px 0; }
+        .kredit-big-num { font-size: 3.5rem; font-weight: bold; color: var(--gold); line-height: 1; }
+        .kredit-big-lbl { color: #887766; font-size: 0.82rem; margin-top: 4px; }
+        .kredit-kofi-btn { background: #FF5E5B; color: #fff; border: none; border-radius: 50px; padding: 14px; width: 100%; font-size: 0.95rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; }
+        .kredit-check-btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); border-radius: 50px; padding: 12px; width: 100%; font-size: 0.85rem; cursor: pointer; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+        .stat-card { background: #1a100a; border: 1px solid #3a2010; border-radius: 12px; padding: 14px; text-align: center; }
+        .stat-num { color: var(--gold); font-size: 1.6rem; font-weight: bold; }
+        .stat-lbl { color: #554433; font-size: 0.7rem; margin-top: 4px; }
+        .stat-top { background: #1a100a; border: 1px solid #3a2010; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+        .stat-top-title { color: var(--gold); font-size: 0.78rem; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px; }
+        .stat-top-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #1a0f0a; font-size: 0.82rem; color: #ccc; }
+        .stat-top-item:last-child { border-bottom: none; }
+
+        /* ===== PARTNERS & MISC ===== */
+        .partner-section { margin-bottom: 25px; }
+        .partner-section h2 { color: var(--gold); font-size: 0.85rem; letter-spacing: 1px; border-bottom: 1px solid #4a3326; padding-bottom: 8px; margin-bottom: 12px; }
+        .partner-card { background: #1a100a; border: 1px solid #4a3326; border-radius: 8px; padding: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; }
+        .partner-icon { font-size: 2rem; flex-shrink: 0; }
+        .partner-info h3 { color: var(--gold); font-size: 0.95rem; margin: 0 0 3px; }
+        .partner-info p { font-size: 0.8rem; color: #aaa; }
+        .copyright-bar { text-align: center; padding: 15px; font-size: 0.72rem; color: #554433; border-top: 1px solid #2a1a0a; margin-top: 10px; }
+
+        /* ===== 18+ DISCLAIMER ===== */
+        #disclaimer-overlay { position: fixed; inset: 0; background: rgba(10,6,4,0.98); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 24px; }
+        #disclaimer-box { background: #1a100a; border: 2px solid var(--gold); border-radius: 20px; padding: 32px 24px; max-width: 340px; width: 100%; text-align: center; box-shadow: 0 0 40px rgba(212,175,55,0.3); }
+        #disclaimer-box .disc-icon { font-size: 3rem; margin-bottom: 12px; }
+        #disclaimer-box h2 { color: var(--gold); font-size: 1.4rem; margin-bottom: 10px; }
+        #disclaimer-box p { color: #ccc; font-size: 0.85rem; line-height: 1.6; margin-bottom: 22px; }
+        #disclaimer-box .disc-confirm { background: var(--gold); color: var(--black); border: none; border-radius: 50px; padding: 15px; width: 100%; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        #disclaimer-box .disc-deny { background: transparent; border: 1px solid #4a3326; color: #887766; border-radius: 50px; padding: 12px; width: 100%; font-size: 0.85rem; cursor: pointer; }
+
+        /* ===== LOGIN OVERLAY ===== */
+        #login-overlay { position: fixed; inset: 0; background: rgba(10,6,4,0.97); z-index: 9800; display: none; align-items: center; justify-content: center; padding: 20px; }
+        #login-overlay.active { display: flex; }
+        #login-box { background: #1a100a; border: 2px solid var(--gold); border-radius: 20px; padding: 32px 24px; max-width: 320px; width: 100%; text-align: center; box-shadow: 0 0 30px rgba(212,175,55,0.4); }
+        #login-box h2 { color: var(--gold); font-size: 1.3rem; margin-bottom: 10px; }
+        #login-box p { color: #ccc; font-size: 0.85rem; line-height: 1.6; margin-bottom: 22px; }
+        .login-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; border-radius: 50px; font-size: 0.95rem; font-weight: bold; cursor: pointer; border: none; margin-bottom: 10px; }
+        .login-btn-google { background: #fff; color: #333; }
+        .login-btn-cancel { background: transparent; border: 1px solid #4a3326; color: #887766; }
+
+        /* ===== RATE OVERLAY ===== */
+        #rate-overlay { position: fixed; top:0;left:0;width:100%;height:100%;background:rgba(10,6,4,0.97);z-index:8600;display:none;align-items:center;justify-content:center;padding:20px; }
+
+        /* ===== KO-FI OVERLAY ===== */
+        #kofi-overlay { position: fixed; inset: 0; background: rgba(10,6,4,0.97); z-index: 9700; display: none; align-items: center; justify-content: center; padding: 20px; }
+        #kofi-overlay.active { display: flex; }
+        #kofi-box { background: #1a100a; border: 2px solid var(--gold); border-radius: 20px; padding: 32px 24px; max-width: 320px; width: 100%; text-align: center; }
+        .kofi-icon { font-size: 2.5rem; display: block; margin-bottom: 12px; }
+        #kofi-box h2 { color: var(--gold); font-size: 1.2rem; margin-bottom: 10px; }
+        #kofi-box p { color: #ccc; font-size: 0.85rem; line-height: 1.6; margin-bottom: 10px; }
+        .kofi-highlight { background: #1a2a1a; border: 1px solid #22c55e; border-radius: 10px; padding: 10px; color: #4ade80; }
+        .kofi-btn { background: #FF5E5B; color: #fff; border: none; border-radius: 50px; padding: 14px; width: 100%; font-size: 0.95rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; margin-top: 14px; }
+        .kofi-check-btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); border-radius: 50px; padding: 12px; width: 100%; font-size: 0.85rem; cursor: pointer; margin-bottom: 8px; }
+        .kofi-cancel-btn { background: transparent; border: 1px solid #4a3326; color: #887766; border-radius: 50px; padding: 11px; width: 100%; font-size: 0.82rem; cursor: pointer; }
+
+        /* ===== COLLECTION PAGE ===== */
+        .coll-card { background: #1a100a; border: 1px solid #3a2010; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+        .coll-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .coll-card-name { color: var(--gold); font-size: 0.95rem; font-weight: bold; margin-bottom: 2px; }
+        .coll-card-sub { color: #887766; font-size: 0.78rem; }
+        .coll-card-stars { color: #D4AF37; font-size: 0.85rem; }
+        .coll-card-note { color: #aaa; font-size: 0.8rem; margin-top: 6px; font-style: italic; }
+        .coll-card-date { color: #554433; font-size: 0.72rem; margin-top: 4px; }
+    </style>
+    <script>
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+            var targetPage = document.getElementById(pageId);
+            if (targetPage) targetPage.classList.add('active');
+            document.querySelectorAll('#global-navbar span').forEach(function(s) { s.classList.remove('active'); });
+            var navMap = { 'landing-page': 0, 'map-page': 1, 'list-page': 2, 'add-page': 3, 'partner-page': 4, 'qr-page': 5 };
+            var idx = navMap[pageId];
+            if (idx !== undefined) { var spans = document.querySelectorAll('#global-navbar span'); if (spans[idx]) spans[idx].classList.add('active'); }
+            if (pageId === 'map-page') { fixMapSize(); if (typeof window.loadMap === 'function') window.loadMap(); }
+            else { var indBtn = document.getElementById('indulas-btn'); if (indBtn) indBtn.style.display = 'none'; var navPanel = document.getElementById('nav-choice-panel'); if (navPanel) navPanel.classList.remove('active'); var boltPanel = document.getElementById('bolt-panel'); if (boltPanel) boltPanel.classList.remove('active'); }
+            if (pageId === 'list-page' && typeof window.loadList === 'function') { window.loadList(); setTimeout(function() { var c = document.getElementById('list-container'); if (c) c.scrollTop = 0; }, 50); }
+        }
+        function filterList() { if (typeof window._filterList === 'function') window._filterList(); }
+        function saveShop(useGPS) { if (typeof window._saveShop === 'function') window._saveShop(useGPS); else alert('Loading...'); }
+        function setFilter(f) { if (typeof window._setFilter === 'function') window._setFilter(f); }
+        function fixMapSize() { var mapEl = document.getElementById('map'); if (!mapEl) return; mapEl.style.height = (window.innerHeight - 64 - 54 - 27) + 'px'; }
+        window.addEventListener('resize', function() { if (document.getElementById('map-page').classList.contains('active')) { fixMapSize(); if (typeof gmap !== 'undefined' && gmap) google.maps.event.trigger(gmap, 'resize'); } });
+    </script>
+</head>
+<body>
+
+<!-- ===== 18+ DISCLAIMER ===== -->
+<div id="disclaimer-overlay">
+    <div id="disclaimer-box">
+        <div class="disc-icon">🚬</div>
+        <!-- Nyelv toggle a disclaimeren -->
+        <div style="display:flex;justify-content:center;gap:10px;margin-bottom:18px">
+            <button onclick="disclaimerLang('en')" id="disc-lang-en" style="background:var(--gold);color:var(--black);border:none;border-radius:20px;padding:6px 16px;font-weight:bold;cursor:pointer;font-size:0.85rem">🇬🇧 English</button>
+            <button onclick="disclaimerLang('hu')" id="disc-lang-hu" style="background:transparent;color:var(--gold);border:1px solid var(--gold);border-radius:20px;padding:6px 16px;font-weight:bold;cursor:pointer;font-size:0.85rem">🇭🇺 Magyar</button>
+        </div>
+        <h2 id="disc-title">18+ Content</h2>
+        <p id="disc-text">Cigar Hunter contains content related to tobacco products.<br><br>
+        By entering, you confirm that you are <strong style="color:var(--gold)">at least 18 years old</strong> and that the purchase and consumption of tobacco products is legal in your country.</p>
+        <button class="disc-confirm" id="disc-confirm-btn" onclick="disclaimerAccept()">✅ I am 18+ — Enter</button>
+        <button class="disc-deny" id="disc-deny-btn" onclick="disclaimerDeny()">✕ I am under 18 — Exit</button>
+    </div>
+</div>
+
+<!-- ===== PROFILE PANEL ===== -->
+<div id="profile-panel">
+    <div id="prof-icon-bar">
+        <button class="prof-icon-btn active" id="pib-account" onclick="window.switchProfTab('account')"><span>👤</span><span id="txt-pib-account" class="pib-label">Account</span></button>
+        <button class="prof-icon-btn" id="pib-credits" onclick="window.switchProfTab('credits')"><span>⚡</span><span id="txt-pib-credits" class="pib-label">Credits</span></button>
+        <button class="prof-icon-btn" id="pib-saved" onclick="window.switchProfTab('saved')"><span>🚬</span><span id="txt-pib-saved" class="pib-label">Saved</span></button>
+        <button class="prof-icon-btn" id="pib-stats" onclick="window.switchProfTab('stats')"><span>📊</span><span id="txt-pib-stats" class="pib-label">Stats</span></button>
+        <button id="prof-icon-close" onclick="window.closeProfile()">✕</button>
+    </div>
+    <div id="prof-content">
+        <div class="prof-section active" id="prof-tab-account">
+            <div class="prof-section-title" id="txt-prof-account">MY ACCOUNT</div>
+            <div class="prof-avatar" id="pa-avatar">👤</div>
+            <div class="prof-name" id="pa-name">—</div>
+            <div class="prof-email" id="pa-email"></div>
+            <div class="prof-credit-badge" id="pa-credits">⚡ 0 credits</div>
+            <button class="prof-logout-btn" onclick="window.profLogout()">Sign out</button>
+        </div>
+        <div class="prof-section" id="prof-tab-credits">
+            <div class="prof-section-title" id="txt-prof-credits">MY CREDITS</div>
+            <div class="kredit-big">
+                <div class="kredit-big-num" id="pk-num">0</div>
+                <div class="kredit-big-lbl">scans remaining</div>
+            </div>
+            <p style="color:#887766;font-size:0.82rem;line-height:1.6;margin-bottom:16px;text-align:center">1 coffee = 30 scans.<br>After payment, press the "Verify" button.</p>
+            <button class="kredit-kofi-btn" onclick="window.openKofi()">
+                <img src="https://storage.ko-fi.com/cdn/cup-border.png" style="width:20px;height:20px" alt="">
+                Support on Ko-fi
+            </button>
+            <button class="kredit-check-btn" onclick="window.checkKofiCreditPanel()">✓ Already paid — Verify</button>
+            <div id="pk-status" style="text-align:center;margin-top:10px;font-size:0.82rem;color:var(--gold);min-height:20px"></div>
+        </div>
+        <div class="prof-section" id="prof-tab-saved">
+            <div class="prof-section-title" id="txt-prof-cigars">MY CIGARS</div>
+            <div id="ps-list"><div style="text-align:center;padding:30px;color:#554433">Loading...</div></div>
+        </div>
+        <div class="prof-section" id="prof-tab-stats">
+            <div class="prof-section-title" id="txt-prof-stats">MY STATS</div>
+            <div class="stat-grid" id="pst-grid">
+                <div class="stat-card"><div class="stat-num" id="pst-total">0</div><div class="stat-lbl">Cigars scanned</div></div>
+                <div class="stat-card"><div class="stat-num" id="pst-countries">0</div><div class="stat-lbl">Countries</div></div>
+                <div class="stat-card"><div class="stat-num" id="pst-avg">—</div><div class="stat-lbl">Avg rating</div></div>
+                <div class="stat-card"><div class="stat-num" id="pst-top5">0</div><div class="stat-lbl">5-star cigars</div></div>
+            </div>
+            <div class="stat-top" id="pst-countries-top">
+                <div class="stat-top-title">🌍 TOP COUNTRIES</div>
+                <div id="pst-countries-list"></div>
+            </div>
+            <div class="stat-top" id="pst-brands-top">
+                <div class="stat-top-title">🏭 TOP BRANDS</div>
+                <div id="pst-brands-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== LOGIN OVERLAY ===== -->
+<div id="login-overlay">
+    <div id="login-box">
+        <div style="font-size:2.2rem;margin-bottom:10px">🔐</div>
+        <h2>Sign In</h2>
+        <p>AI Cigar Scanner requires sign-in. The first <strong style="color:var(--gold)">3 scans are free!</strong></p>
+        <button class="login-btn login-btn-google" onclick="window.loginWithGoogle()">
+            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            Continue with Google
+        </button>
+        <button class="login-btn login-btn-cancel" onclick="document.getElementById('login-overlay').classList.remove('active')"><span id="txt-login-cancel">Cancel</span></button>
+    </div>
+</div>
+
+<!-- ===== RATE OVERLAY ===== -->
+<div id="rate-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,6,4,0.97);z-index:8600;display:none;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#1a100a;border:2px solid var(--gold);border-radius:20px;padding:26px 22px;max-width:340px;width:100%">
+        <h3 id="rate-cigar-name" style="color:var(--gold);font-size:1rem;margin-bottom:6px;text-align:center"></h3>
+        <div style="color:#aa9988;font-size:0.82rem;text-align:center;margin-bottom:16px">How was it? Add a rating and a note!</div>
+        <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px">
+            <button onclick="window.setRating(1)" id="star-1" style="font-size:2rem;background:transparent;border:none;cursor:pointer;padding:4px;width:auto;color:#4a3326">★</button>
+            <button onclick="window.setRating(2)" id="star-2" style="font-size:2rem;background:transparent;border:none;cursor:pointer;padding:4px;width:auto;color:#4a3326">★</button>
+            <button onclick="window.setRating(3)" id="star-3" style="font-size:2rem;background:transparent;border:none;cursor:pointer;padding:4px;width:auto;color:#4a3326">★</button>
+            <button onclick="window.setRating(4)" id="star-4" style="font-size:2rem;background:transparent;border:none;cursor:pointer;padding:4px;width:auto;color:#4a3326">★</button>
+            <button onclick="window.setRating(5)" id="star-5" style="font-size:2rem;background:transparent;border:none;cursor:pointer;padding:4px;width:auto;color:#4a3326">★</button>
+        </div>
+        <textarea id="rate-note" rows="3" placeholder="e.g. Great on the terrace... Too strong for me... Top 3!" style="width:100%;padding:10px 12px;background:#0d0804;border:1px solid #4a3326;color:#fff;border-radius:10px;font-size:0.88rem;resize:none;outline:none;margin-bottom:14px;font-family:inherit"></textarea>
+        <button onclick="window.saveWithRating(false)" style="background:linear-gradient(135deg,#D4AF37,#8a6d0a);color:#000;border:none;border-radius:50px;padding:13px;width:100%;font-size:0.95rem;font-weight:bold;cursor:pointer;margin-bottom:8px">💾 Save</button>
+        <button onclick="window.saveWithRating(true)" style="background:transparent;border:1px solid #4a3326;color:#887766;border-radius:50px;padding:11px;width:100%;font-size:0.85rem;cursor:pointer">Skip — save without rating</button>
+    </div>
+</div>
+
+<!-- ===== KO-FI OVERLAY ===== -->
+<div id="kofi-overlay">
+    <div id="kofi-box">
+        <span class="kofi-icon">☕</span>
+        <h2>Out of credits!</h2>
+        <p>Your free scans are used up.</p>
+        <p class="kofi-highlight">Buy the developer a coffee<br>and get <strong>30 scans!</strong></p>
+        <p style="font-size:0.78rem;color:#887766;margin-bottom:16px">After payment click "Verify" — credits are added automatically.</p>
+        <button class="kofi-btn" onclick="window.openKofi()">
+            <img src="https://storage.ko-fi.com/cdn/cup-border.png" style="width:20px;height:20px" alt="">
+            Support on Ko-fi
+        </button>
+        <button class="kofi-check-btn" onclick="window.checkKofiCredit()">✓ Already paid — Verify</button>
+        <button class="kofi-cancel-btn" onclick="document.getElementById('kofi-overlay').classList.remove('active')">Cancel</button>
+    </div>
+</div>
+
+<!-- ===== AI RESULT PAGE ===== -->
+<div id="ai-result-page">
+    <div id="ai-result-header">
+        <button id="ai-result-back" onclick="window.closeResultPage()">← Back</button>
+        <div id="ai-result-title">Cigar identified</div>
+        <div style="width:70px"></div>
+    </div>
+    <div id="ai-result-body-page">
+        <div class="ai-cigar-name" id="res-nev"></div>
+        <div class="ai-cigar-sub" id="res-gyar-sub"></div>
+        <div class="ai-info-card">
+            <div class="ai-info-row" id="res-row-gyar" style="display:none">
+                <div class="ai-info-label">🏭 Maker</div>
+                <div class="ai-info-val" id="res-gyar"></div>
+            </div>
+            <div class="ai-info-row" id="res-row-orszag" style="display:none">
+                <div class="ai-info-label">🌍 Country</div>
+                <div class="ai-info-val" id="res-orszag"></div>
+            </div>
+            <div class="ai-info-row" id="res-row-eros" style="display:none">
+                <div class="ai-info-label" id="txt-scan-strength">💪 Strength</div>
+                <div class="ai-info-val">
+                    <div class="ai-strength-wrap">
+                        <div class="ai-strength-bar" id="res-strength-dots"></div>
+                        <div class="ai-strength-label" id="res-eros-text"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ai-desc-block" id="res-jellemzok" style="display:none"></div>
+        <div class="ai-where-block" id="res-where-block" style="display:none">
+            <div class="ai-where-label">📍 WHERE TO BUY</div>
+            <div class="ai-where-text" id="res-megtalalhato"></div>
+        </div>
+        <div class="ai-action-row" style="flex-wrap:wrap;gap:8px">
+            <button class="ai-save-btn" onclick="window.saveScannedCigar()" style="flex:1;min-width:140px">💾 Save</button>
+            <button class="ai-share-btn" onclick="window.shareResult()" style="flex:1;min-width:140px;background:linear-gradient(135deg,#D4AF37 0%,#8a6d0a 100%);color:#000;border:none;border-radius:50px;padding:14px;font-size:0.9rem;font-weight:bold;cursor:pointer">📤 Share</button>
+        </div>
+        <div style="margin-top:8px">
+            <button class="ai-back-btn" onclick="window.closeResultPage()" style="width:100%">← Camera</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== LANDING PAGE ===== -->
+<div id="landing-page" class="page active">
+    <header>
+        <div style="text-align:center">
+            <div class="logo-text" id="txt-app-title">CIGAR HUNTER</div>
+            <div class="logo-sub" id="txt-app-sub">European cigar shop map</div>
+        </div>
+        <button id="lang-toggle" onclick="toggleLang()">🇭🇺 HU</button>
+    </header>
+    <div class="hero">
+        <img src="https://firebasestorage.googleapis.com/v0/b/szivar-vadasz.firebasestorage.app/o/01.gif?alt=media&token=106e8d0b-22df-43f3-920b-685c2cd2710b" class="cigar-logo" alt="logo">
+        <h2 id="txt-hero-title">Welcome, Cigar Hunter!</h2>
+        <p id="txt-hero-sub">Find the best cigar shops near you across Europe. 🚬</p>
+        <div class="hero-buttons">
+            <button onclick="showPage('map-page')">📍 MAP VIEW</button>
+            <button onclick="showPage('list-page')" class="btn-outline">📜 SHOP LIST</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MAP PAGE ===== -->
+<div id="map-page" class="page">
+    <header><h1>📍 Cigar Shops</h1></header>
+    <div id="map"></div>
+    <div id="map-loading">
+        <div class="spinner"></div>
+        <p style="color:var(--gold);font-size:0.9rem">🗺️ Loading map...</p>
+    </div>
+    <button id="indulas-btn" onclick="navValasztoMegnyit()"><span id="txt-navigate">🧭 NAVIGATE!</span></button>
+    <div id="nav-choice-panel">
+        <div id="txt-nav-choose" style="color:var(--gold);font-size:0.85rem;text-align:center;margin-bottom:4px;font-weight:bold">🧭 Choose navigation app</div>
+        <button class="nav-choice-btn" id="btn-apple-maps" onclick="navMegnyit('apple')">🗺️ Apple Maps</button>
+        <button class="nav-choice-btn" id="btn-google-maps" onclick="navMegnyit('google')">🌍 Google Maps</button>
+        <button class="nav-choice-btn" id="btn-waze" onclick="navMegnyit('waze')">🚗 Waze</button>
+        <button class="nav-choice-btn" id="btn-nav-cancel" onclick="navValasztoZar()"><span id="txt-nav-cancel">✕ Cancel</span></button>
+    </div>
+    <div id="bolt-panel">
+        <div id="bolt-panel-close" onclick="document.getElementById('bolt-panel').classList.remove('active')">✕</div>
+        <div id="bolt-panel-handle"></div>
+        <div id="bolt-panel-nev"></div>
+        <div id="bolt-panel-cim"></div>
+        <div id="bolt-panel-badges"></div>
+        <div id="bolt-panel-leiras"></div>
+        <button id="bolt-panel-nav-btn"><span id="txt-bolt-navigate">🧭 NAVIGATE!</span></button>
+        <button id="humidor-report-btn" onclick="reportHumidor()"><span id="txt-report-btn">🏆 This shop has a humidor!</span></button>
+        <div id="humidor-report-thanks"><span id="txt-report-thanks">✅ Thanks! We'll review your report.</span></div>
+    </div>
+</div>
+
+<!-- ===== LIST PAGE ===== -->
+<div id="list-page" class="page">
+    <header><input type="text" id="searchInput" placeholder="🔍 Search shops / events..." oninput="filterList()" style="margin:0"></header>
+    <div id="filter-bar">
+        <button class="filter-btn active-filter" id="filter-all" onclick="setFilter('all')">🔓 All</button>
+        <button class="filter-btn" id="filter-humidor" onclick="setFilter('humidor')">🏆 Humidor</button>
+        <button class="filter-btn" id="filter-events" onclick="setFilter('events')">🎉 Events</button>
+    </div>
+    <div id="last-updated-bar" class="last-updated"></div>
+    <div id="list-container" class="content"></div>
+</div>
+
+<!-- ===== ADD PAGE ===== -->
+<div id="add-page" class="page">
+    <header><h1>➕ Add</h1></header>
+    <div style="display:flex;gap:0;background:#0a0604;border-bottom:1px solid #2a1a0a;flex-shrink:0">
+        <button type="button" id="add-tab-shop" onclick="switchAddTab('shop')" style="flex:1;padding:12px;background:var(--gold);color:var(--black);border:none;font-weight:bold;font-size:0.9rem;cursor:pointer">🏪 Shop</button>
+        <button type="button" id="add-tab-event" onclick="switchAddTab('event')" style="flex:1;padding:12px;background:transparent;color:#887766;border:none;font-weight:bold;font-size:0.9rem;cursor:pointer;border-left:1px solid #2a1a0a">🎉 Event</button>
+    </div>
+    <!-- SHOP FORM -->
+    <div id="add-form-shop" class="content">
+        <div style="margin-bottom:15px"><input type="text" id="shopName" placeholder="Shop name *"></div>
+        <div style="margin-bottom:15px"><input type="text" id="shopAddress" placeholder="Address (street, number, city) *"></div>
+        <div style="margin-bottom:15px"><textarea id="shopDesc" placeholder="Description (e.g. what cigars they sell)" rows="3"></textarea></div>
+        <div style="margin-bottom:15px">
+            <p style="color:#aa9988;font-size:0.85rem;margin-bottom:8px">Humidor rating:</p>
+            <div style="display:flex;gap:8px">
+                <button type="button" id="hum-pro" class="filter-btn" style="flex:1" onclick="setHumidor('pro')">🟢 Pro</button>
+                <button type="button" id="hum-alap" class="filter-btn" style="flex:1" onclick="setHumidor('alap')">🟡 Basic</button>
+                <button type="button" id="hum-no" class="filter-btn" style="flex:1" onclick="setHumidor('no')">🔴 None</button>
+            </div>
+        </div>
+        <button onclick="saveShop(false)" style="margin-bottom:10px">💾 SAVE BY ADDRESS</button>
+        <button onclick="saveShop(true)" class="btn-outline">📍 SAVE WITH GPS</button>
+        <p style="font-size:0.8rem;color:#aaa;margin-top:10px;text-align:center">Submitted shops are reviewed within 48 hours.</p>
+    </div>
+    <!-- EVENT FORM -->
+    <div id="add-form-event" class="content" style="display:none">
+        <div style="margin-bottom:15px"><input type="text" id="evTitle" placeholder="Event title *"></div>
+        <div style="margin-bottom:15px"><input type="text" id="evVenue" placeholder="Venue / location name *"></div>
+        <div style="margin-bottom:15px"><input type="text" id="evAddress" placeholder="Address (street, city)"></div>
+        <div style="margin-bottom:15px">
+            <p style="color:#aa9988;font-size:0.85rem;margin-bottom:6px">Date &amp; time *</p>
+            <input type="datetime-local" id="evDate" style="color-scheme:dark">
+        </div>
+        <div style="margin-bottom:15px"><textarea id="evDesc" placeholder="Description (tasting, brands, price...)" rows="3"></textarea></div>
+        <div style="margin-bottom:15px"><input type="url" id="evLink" placeholder="Website / ticket link (optional)"></div>
+        <button onclick="saveEvent()" style="margin-bottom:10px">🎉 SUBMIT EVENT</button>
+        <p style="font-size:0.8rem;color:#aaa;margin-top:10px;text-align:center">Events appear after review within 48 hours.</p>
+    </div>
+</div>
+
+<!-- ===== PARTNERS PAGE ===== -->
+<div id="partner-page" class="page">
+    <header><h1 id="txt-partner-header">🌐 Partners</h1></header>
+    <div class="content">
+        <div class="partner-section">
+            <h2>⭐ SUPPORTERS & SPONSORS</h2>
+            <a class="partner-card" href="https://ko-fi.com/szivarvadasz" target="_blank" style="border-color:#D4AF37">
+                <div class="partner-icon">⭐</div>
+                <div class="partner-info"><h3>Be the first sponsor!</h3><p>Click and write to us!</p></div>
+                <div>›</div>
+            </a>
+        </div>
+        <div class="partner-section">
+            <h2>❤️ SUPPORT THE APP</h2>
+            <a class="partner-card" href="https://ko-fi.com/szivarvadasz" target="_blank" style="border-color:#D4AF37">
+                <div class="partner-icon">☕</div>
+                <div class="partner-info"><h3>Buy the developer a cigar!</h3><p>The app is free, but development isn't 😄</p></div>
+                <div>›</div>
+            </a>
+            <div style="text-align:center;margin-top:10px">
+                <a href="https://ko-fi.com/szivarvadasz" target="_blank">
+                    <img src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" alt="Ko-fi support" style="height:40px;border-radius:8px">
+                </a>
+            </div>
+        </div>
+        <div class="partner-section">
+            <h2 id="txt-sv-section">🚬 SZIVAR VADÁSZ</h2>
+            <a class="partner-card" href="https://vadasz-apps.web.app" target="_blank" style="border-color:#D4AF37">
+                <div class="partner-icon">🚬</div>
+                <div class="partner-info"><h3 id="txt-sv-link1-title">Vadász Apps</h3><p id="txt-sv-link1-sub">All Hungarian hunter apps</p></div>
+                <div>›</div>
+            </a>
+            <a class="partner-card" href="https://vadasz-apps.web.app" target="_blank" style="border-color:#4a3326">
+                <div class="partner-icon">🔍</div>
+                <div class="partner-info"><h3 id="txt-sv-link2-title">AI Szivar Scanner</h3><p id="txt-sv-link2-sub">Identify cigars with AI (Hungarian)</p></div>
+                <div>›</div>
+            </a>
+        </div>
+        <div class="copyright-bar">
+            © 2026 Cigar Hunter. All rights reserved.<br>
+            Created by: Králik Zola | v1.0<br>
+            App content is protected by copyright.
+        </div>
+    </div>
+</div>
+
+<!-- ===== SCAN PAGE ===== -->
+<div id="qr-page" class="page">
+    <header><h1 id="txt-scan-header">🔍 AI Cigar Scanner</h1></header>
+    <div id="qr-wrap">
+        <input type="file" id="ai-file-input" accept="image/*" capture="environment" style="display:none" onchange="window.handleFileInput(this)">
+        <video id="qr-video" playsinline style="display:none"></video>
+        <canvas id="ai-canvas" style="display:none"></canvas>
+        <div id="camera-placeholder" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#000">
+            <div style="font-size:4rem">📷</div>
+            <div style="color:rgba(212,175,55,0.7);font-size:0.9rem;text-align:center;padding:0 30px">Point the camera<br>at the cigar band</div>
+        </div>
+        <div id="credit-badge"></div>
+        <div id="qr-status" style="position:absolute;bottom:96px;left:0;right:0;text-align:center;color:var(--gold);font-size:0.88rem;padding:0 20px"></div>
+        <div id="qr-btn-row">
+            <button class="scan-main-btn" id="btn-scan-main" onclick="window.startScan()">✨ IDENTIFY CIGAR (AI)</button>
+            <button class="scan-alt-btn" id="btn-login-status" onclick="window.handleLoginBtn()">🔐 Sign In</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== COLLECTION PAGE ===== -->
+<div id="collection-page" class="page">
+    <header><h1>🚬 My Collection</h1></header>
+    <div class="content">
+        <div id="coll-login-wall" style="display:none">
+            <div class="empty-state">
+                <div class="empty-icon">🔐</div>
+                <p style="color:#887766">Sign in to view your saved cigars</p>
+                <button onclick="document.getElementById('login-overlay').classList.add('active')" style="margin-top:16px;border-radius:50px;padding:13px 24px;width:auto">Sign In</button>
+            </div>
+        </div>
+        <div id="coll-list"></div>
+        <div id="coll-empty" style="display:none">
+            <div class="empty-state">
+                <div class="empty-icon">🚬</div>
+                <p style="color:#887766">No saved cigars yet.<br>Scan one to get started!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== NAVBAR ===== -->
+<div id="global-navbar">
+    <span onclick="showPage('landing-page')" class="active">🏠 Home</span>
+    <span onclick="showPage('map-page')">📍 Map</span>
+    <span onclick="showPage('list-page')">📜 List</span>
+    <span onclick="showPage('add-page')">➕ Add</span>
+    <span onclick="showPage('partner-page')">🌐 Partners</span>
+    <span onclick="showPage('qr-page')">🔍 Scan</span>
+</div>
+<div id="global-copyright">© 2026 Cigar Hunter | 🚬 18+</div>
+
+<button id="profile-fab" onclick="window.openProfile()">👤</button>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqCZBsFCKSnHm_NXAS2lcb6X860e1xMYk&libraries=places"></script>
+<script async src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script type="module">
+    import { initializeApp }                                          from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getFirestore, collection, getDocs, addDoc, doc,
+             getDoc, setDoc, updateDoc, increment }                   from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged, GoogleAuthProvider,
+             signInWithPopup, signOut }                               from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
+const app = initializeApp({
+    apiKey:            "AIzaSyAE0W0djgr3o4rv9hZqJpGHYNLKS-yzQrM",
+    authDomain:        "cigar-hunter.firebaseapp.com",
+    projectId:         "cigar-hunter",
+    storageBucket:     "cigar-hunter.firebasestorage.app",
+    messagingSenderId: "621582119436",
+    appId:             "1:621582119436:web:b9a7d21b42fe31f23f3429"
+});
+    const db   = getFirestore(app);
+    const auth = getAuth(app);
+
+    var gmap=null, markers=[], allShops=[], userLoc={lat:47.4979,lng:19.0402};
+    var navCelLat=null, navCelLng=null, navCelNev=null;
+    var userMarker=null;
+    var activeFilter='all';
+    var selectedHumidor='';
+    var shopClusterer=null;
+    var currentUser=null, userCredits=0;
+    var FREE_SCANS=3;
+    var GEMINI_KEY='AIzaSyBKb1MIFo8nTZbfS7URsfWZwBnTMtx_S6M';
+    var lastScannedResult=null, lastCapturedBlob=null;
+
+    // ============================================================
+    // AUTH
+    // ============================================================
+    onAuthStateChanged(auth, async function(user) {
+        currentUser = user;
+        if (user) { await ensureUserDoc(user); await refreshCredits(); }
+        updateScanUI();
+    });
+
+    async function ensureUserDoc(user) {
+        var ref = doc(db, 'users', user.uid);
+        var snap = await getDoc(ref);
+        if (!snap.exists()) {
+            await setDoc(ref, { email: user.email||'', displayName: user.displayName||'', credits: FREE_SCANS, totalScans: 0, createdAt: new Date().toISOString() });
+            userCredits = FREE_SCANS;
+        } else { userCredits = snap.data().credits || 0; }
+    }
+
+    async function refreshCredits() {
+        if (!currentUser) { userCredits=0; return; }
+        var snap = await getDoc(doc(db,'users',currentUser.uid));
+        if (snap.exists()) userCredits = snap.data().credits || 0;
+    }
+
+    function updateScanUI() {
+        var badge=document.getElementById('credit-badge'), loginBtn=document.getElementById('btn-login-status'), fab=document.getElementById('profile-fab');
+        if (currentUser) {
+            badge.textContent='⚡ '+userCredits+' credits'; badge.style.display='block';
+            loginBtn.style.display='none';
+            if (fab) fab.classList.add('visible');
+            var paName=document.getElementById('pa-name'), paCred=document.getElementById('pa-credits'), pkNum=document.getElementById('pk-num');
+            if (paName) paName.textContent=currentUser.displayName||currentUser.email||'Hunter';
+            if (paCred) paCred.textContent='⚡ '+userCredits+' credits';
+            if (pkNum)  pkNum.textContent=userCredits;
+        } else {
+            badge.style.display='none'; loginBtn.style.display='block'; loginBtn.textContent=currentLang==='hu'?'🔐 Bejelentkezés':'🔐 Sign In';
+            if (fab) fab.classList.remove('visible');
+        }
+    }
+
+    window.handleLoginBtn = function() {
+        if (currentUser) { if (confirm('Sign out?')) signOut(auth).then(updateScanUI); }
+        else document.getElementById('login-overlay').classList.add('active');
+    };
+
+    window.loginWithGoogle = async function() {
+        try { await signInWithPopup(auth, new GoogleAuthProvider()); document.getElementById('login-overlay').classList.remove('active'); }
+        catch(e) { alert('Google sign-in failed: '+e.message); }
+    };
+
+    // ============================================================
+    // PROFILE PANEL
+    // ============================================================
+    var profTabLoaded = { account:false, credits:false, saved:false, stats:false };
+
+    window.openProfile = function() {
+        document.getElementById('profile-panel').classList.add('active');
+        window.switchProfTab('account');
+    };
+    window.closeProfile = function() { document.getElementById('profile-panel').classList.remove('active'); };
+    window.profLogout = function() { if (confirm('Sign out?')) { signOut(auth).then(function(){ updateScanUI(); window.closeProfile(); }); } };
+
+    window.switchProfTab = function(tab) {
+        document.querySelectorAll('.prof-section').forEach(function(s){ s.classList.remove('active'); });
+        document.querySelectorAll('.prof-icon-btn').forEach(function(b){ b.classList.remove('active'); });
+        document.getElementById('prof-tab-'+tab).classList.add('active');
+        var pib=document.getElementById('pib-'+tab); if (pib) pib.classList.add('active');
+        if (tab==='saved' && !profTabLoaded.saved) loadSavedCigars();
+        if (tab==='stats' && !profTabLoaded.stats) loadStats();
+    };
+
+    async function loadSavedCigars() {
+        var list=document.getElementById('ps-list');
+        if (!currentUser) { list.innerHTML='<div style="text-align:center;padding:30px;color:#554433">Sign in to view your cigars</div>'; return; }
+        list.innerHTML='<div style="text-align:center;padding:20px;color:#887766">Loading...</div>';
+        try {
+            var snap=await getDocs(collection(db,'users/'+currentUser.uid+'/savedCigars'));
+            var cigars=[]; snap.forEach(function(d){ cigars.push(Object.assign({id:d.id},d.data())); });
+            cigars.sort(function(a,b){ return (b.datum||'').localeCompare(a.datum||''); });
+            if (!cigars.length) { list.innerHTML='<div style="text-align:center;padding:30px;color:#554433">No saved cigars yet</div>'; return; }
+            list.innerHTML=cigars.map(function(c){
+                var stars=c.rating?'★'.repeat(c.rating)+'☆'.repeat(5-c.rating):'';
+                var d=c.datum?new Date(c.datum).toLocaleDateString('en-GB'):'';
+                return '<div class="coll-card"><div class="coll-card-top"><div><div class="coll-card-name">'+
+                    (c.nev||'Unknown')+'</div><div class="coll-card-sub">'+(c.gyar||'')+(c.orszag?' · '+c.orszag:'')+'</div></div>'+
+                    '<div class="coll-card-stars">'+stars+'</div></div>'+
+                    (c.note?'<div class="coll-card-note">'+c.note+'</div>':'')+
+                    '<div class="coll-card-date">'+d+'</div></div>';
+            }).join('');
+            profTabLoaded.saved=true;
+        } catch(e) { list.innerHTML='<div style="color:#f87171;padding:20px">❌ '+e.message+'</div>'; }
+    }
+
+    async function loadStats() {
+        if (!currentUser) return;
+        try {
+            var snap=await getDocs(collection(db,'users/'+currentUser.uid+'/savedCigars'));
+            var cigars=[]; snap.forEach(function(d){ cigars.push(d.data()); });
+            var total=cigars.length, rated=cigars.filter(function(c){return c.rating>0;}), avg=rated.length?( rated.reduce(function(s,c){return s+c.rating;},0)/rated.length).toFixed(1):'-', top5=cigars.filter(function(c){return c.rating===5;}).length;
+            var countryMap={}, brandMap={};
+            cigars.forEach(function(c){ if(c.orszag) countryMap[c.orszag]=(countryMap[c.orszag]||0)+1; if(c.gyar) brandMap[c.gyar]=(brandMap[c.gyar]||0)+1; });
+            document.getElementById('pst-total').textContent=total;
+            document.getElementById('pst-countries').textContent=Object.keys(countryMap).length;
+            document.getElementById('pst-avg').textContent=avg;
+            document.getElementById('pst-top5').textContent=top5;
+            var topC=Object.entries(countryMap).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+            document.getElementById('pst-countries-list').innerHTML=topC.map(function(x){ return '<div class="stat-top-item"><span>'+x[0]+'</span><span style="color:var(--gold)">'+x[1]+'</span></div>'; }).join('');
+            var topB=Object.entries(brandMap).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+            document.getElementById('pst-brands-list').innerHTML=topB.map(function(x){ return '<div class="stat-top-item"><span>'+x[0]+'</span><span style="color:var(--gold)">'+x[1]+'</span></div>'; }).join('');
+            profTabLoaded.stats=true;
+        } catch(e) {}
+    }
+
+    window.checkKofiCreditPanel = async function() {
+        if (!currentUser) return;
+        var prev=userCredits, status=document.getElementById('pk-status');
+        status.textContent='⏳ Checking...';
+        var attempts=0;
+        var poll=async function(){
+            attempts++; await refreshCredits(); updateScanUI();
+            if (userCredits>prev) { status.textContent='✅ '+userCredits+' credits added!'; return; }
+            if (attempts<6) { status.textContent='⏳ Checking... ('+attempts+'/6)'; setTimeout(poll,5000); }
+            else { status.textContent='⏳ Not received yet. Try again in 1 minute.'; }
+        };
+        setTimeout(poll,3000);
+    };
+
+    // ============================================================
+    // SCAN
+    // ============================================================
+    window.startScan = function() {
+        if (!currentUser) { document.getElementById('login-overlay').classList.add('active'); return; }
+        if (userCredits<=0) { document.getElementById('kofi-overlay').classList.add('active'); refreshCredits().then(function(){ updateScanUI(); if(userCredits>0) document.getElementById('kofi-overlay').classList.remove('active'); }); return; }
+        document.getElementById('ai-file-input').click();
+        refreshCredits().then(updateScanUI);
+    };
+
+    window.handleFileInput = async function(input) {
+        if (!input.files||!input.files[0]) return;
+        var file=input.files[0]; lastCapturedBlob=file; input.value='';
+        var status=document.getElementById('qr-status');
+        status.textContent='📸 Loading image...';
+        var reader=new FileReader();
+        reader.onload=async function(e){
+            var img=new Image();
+            img.onload=async function(){
+                var canvas=document.getElementById('ai-canvas'), maxW=800, scale=Math.min(1,maxW/img.width);
+                canvas.width=Math.round(img.width*scale); canvas.height=Math.round(img.height*scale);
+                canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+                var imageData=canvas.toDataURL('image/jpeg',0.75).split(',')[1];
+                document.getElementById('camera-placeholder').style.backgroundImage='url('+e.target.result+')';
+                document.getElementById('camera-placeholder').style.backgroundSize='cover';
+                document.getElementById('camera-placeholder').style.backgroundPosition='center';
+                document.getElementById('camera-placeholder').innerHTML='';
+                await callGemini(imageData);
+            };
+            img.src=e.target.result;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    async function callGemini(imageData) {
+        var status=document.getElementById('qr-status');
+        status.innerHTML='🤖 AI identifying...<br><span style="font-size:0.78rem;color:#887766">This takes a few seconds</span>';
+        try {
+            var resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+GEMINI_KEY,{
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({
+                    contents:[{parts:[
+                        { text: (currentLang==='hu' ?
+                        'Te egy expert szivar sommelier AI vagy. Azonosítsd a képen látható szivart és válaszolj CSAK egy nyers JSON objektummal - semmi magyarázat, semmi gondolkodás, semmi markdown, semmi backtick, semmi kódblokk. Csak a JSON. Formátum: {"nev":"pontos márka és típusnév","gyar":"gyártó cég neve","orszag":"származási ország","eros":"erősség magyarul pl. Közepes-Erős","erosSzam":3,"jellemzok":"2-3 mondat a szivarról magyarul","megtalalhato":"Hol kapható Európában: sorolj fel 2-4 konkrét boltot vagy weboldalt ahol ez a szivar valószínűleg kapható. Kubai szivaroknál említsd a hivatalos Habanos viszonteladókat. Nicaraguai/Dominikai prémium szivaroknál szivarszaküzleteket. Ha a márka nehezen kapható Európában, írd: Ritkán kapható Európában - keresés online: [márkanév] szivar bolt"}. Az erosSzam 1-5 egész szám legyen. Ha nem azonosítható, az nev legyen: Ismeretlen szivar.'
+                        :
+                        'You are an expert cigar sommelier AI. Identify the cigar in the image and respond ONLY with a single raw JSON object - no explanation, no thinking, no markdown, no backticks, no code block. Just the JSON. Format: {"nev":"exact brand and type name","gyar":"manufacturer company","orszag":"country of origin","eros":"strength in English e.g. Medium-Full","erosSzam":3,"jellemzok":"2-3 sentences describing this cigar in English","megtalalhato":"Where to buy in Europe: list 2-4 specific shops or websites where this cigar is likely available. For Cuban cigars mention official Habanos retailers. For Nicaraguan/Dominican premium cigars mention specialist tobacconists. If the brand is hard to find in Europe, write: Rare in Europe - search online: [brand name] cigar shop Europe"}. erosSzam must be 1-5 integer. If unidentifiable, set nev to: Unknown cigar.'
+                        ) },
+                        { inline_data:{ mime_type:'image/jpeg', data:imageData } }
+                    ]}],
+                    safetySettings:[
+                        {category:'HARM_CATEGORY_DANGEROUS_CONTENT',threshold:'BLOCK_NONE'},
+                        {category:'HARM_CATEGORY_HARASSMENT',threshold:'BLOCK_NONE'},
+                        {category:'HARM_CATEGORY_HATE_SPEECH',threshold:'BLOCK_NONE'},
+                        {category:'HARM_CATEGORY_SEXUALLY_EXPLICIT',threshold:'BLOCK_NONE'}
+                    ],
+                    generationConfig:{temperature:0.1,maxOutputTokens:500,thinkingConfig:{thinkingBudget:0}}
+                })
+            });
+            if (!resp.ok) { var errText=await resp.text(); throw new Error('HTTP '+resp.status+': '+errText.substring(0,120)); }
+            var data=await resp.json();
+            if (!data.candidates||!data.candidates.length) { status.textContent='❌ AI could not respond: '+(data.promptFeedback&&data.promptFeedback.blockReason||'empty response'); return; }
+            var raw=(data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0].text)||'';
+            var clean=raw.replace(/```json/g,'').replace(/```/g,'').trim();
+            var jsonStart=clean.indexOf('{'); if(jsonStart>0) clean=clean.substring(jsonStart);
+            var res; try { res=JSON.parse(clean); } catch(e){ status.textContent='❌ Could not identify. Try a clearer, closer photo!'; return; }
+            await deductCredit();
+            lastScannedResult=res; showResultPage(res); status.textContent='✅ Identified!';
+        } catch(e) {
+            if (e.message&&e.message.indexOf('429')!==-1) status.textContent='❌ API quota exceeded. Try again later!';
+            else status.textContent='❌ Error: '+e.message;
+        }
+    }
+
+    async function deductCredit() {
+        if (!currentUser) return;
+        try { await updateDoc(doc(db,'users',currentUser.uid),{credits:increment(-1),totalScans:increment(1)}); userCredits=Math.max(0,userCredits-1); updateScanUI(); }
+        catch(e) {}
+    }
+
+    function showResultPage(res) {
+        document.getElementById('res-nev').textContent=res.nev||'Unknown cigar';
+        var sub=[]; if(res.gyar) sub.push(res.gyar); if(res.orszag) sub.push(res.orszag);
+        document.getElementById('res-gyar-sub').textContent=sub.join(' · ');
+        if(res.gyar){document.getElementById('res-gyar').textContent=res.gyar;document.getElementById('res-row-gyar').style.display='flex';}
+        if(res.orszag){document.getElementById('res-orszag').textContent=res.orszag;document.getElementById('res-row-orszag').style.display='flex';}
+        if(res.eros||res.erosSzam){
+            var num=parseInt(res.erosSzam)||3, dotsEl=document.getElementById('res-strength-dots'); dotsEl.innerHTML='';
+            for(var i=1;i<=5;i++){var dot=document.createElement('div');dot.className='ai-strength-dot';dot.style.background=i<=num?(num<=2?'#4ade80':num===3?'#fbbf24':'#f87171'):'#2a1a0a';if(i>num)dot.style.border='1px solid #4a3326';dotsEl.appendChild(dot);}
+            document.getElementById('res-eros-text').textContent=res.eros||''; document.getElementById('res-row-eros').style.display='flex';
+        }
+        if(res.jellemzok){document.getElementById('res-jellemzok').textContent=res.jellemzok;document.getElementById('res-jellemzok').style.display='block';}
+        if(res.megtalalhato){document.getElementById('res-megtalalhato').textContent=res.megtalalhato;document.getElementById('res-where-block').style.display='block';}
+        document.getElementById('ai-result-page').classList.add('active');
+    }
+
+    window.closeResultPage = function() {
+        document.getElementById('ai-result-page').classList.remove('active');
+        ['res-row-gyar','res-row-orszag','res-row-eros'].forEach(function(id){document.getElementById(id).style.display='none';});
+        document.getElementById('res-jellemzok').style.display='none';
+        document.getElementById('res-where-block').style.display='none';
+    };
+
+    var currentRating=0;
+    window.saveScannedCigar = function() {
+        if (!lastScannedResult||!currentUser){alert('Sign in to save!');return;}
+        currentRating=0;
+        document.getElementById('rate-cigar-name').textContent=lastScannedResult.nev||'Rate this cigar';
+        document.getElementById('rate-note').value='';
+        for(var i=1;i<=5;i++) document.getElementById('star-'+i).style.color='#4a3326';
+        document.getElementById('rate-overlay').style.display='flex';
+    };
+    window.setRating = function(n){currentRating=n;for(var i=1;i<=5;i++) document.getElementById('star-'+i).style.color=i<=n?'#D4AF37':'#4a3326';};
+    window.saveWithRating = async function(skip){
+        document.getElementById('rate-overlay').style.display='none';
+        var note=skip?'':(document.getElementById('rate-note').value.trim()), rating=skip?0:currentRating;
+        try {
+            await addDoc(collection(db,'users/'+currentUser.uid+'/savedCigars'),{
+                nev:lastScannedResult.nev||'',gyar:lastScannedResult.gyar||'',orszag:lastScannedResult.orszag||'',
+                eros:lastScannedResult.eros||'',erosSzam:lastScannedResult.erosSzam||3,jellemzok:lastScannedResult.jellemzok||'',
+                rating:rating,note:note,datum:new Date().toISOString()
+            });
+            profTabLoaded.saved=false; profTabLoaded.stats=false;
+            var status=document.getElementById('qr-status');
+            if(status) status.textContent='✅ Saved'+(rating?' ('+'★'.repeat(rating)+')':'')+' !';
+            window.closeResultPage();
+        } catch(e){alert('❌ Save error: '+e.message);}
+    };
+
+    window.openKofi = function(){ window.open('https://ko-fi.com/szivarvadasz','_blank'); };
+    window.checkKofiCredit = async function(){
+        if(!currentUser){alert('Please sign in first!');return;}
+        document.getElementById('kofi-overlay').classList.remove('active');
+        var status=document.getElementById('qr-status'), prev=userCredits, attempts=0;
+        status.innerHTML='⏳ Waiting for Ko-fi confirmation...<br><span style="font-size:0.78rem;color:#887766">This may take up to 30 seconds</span>';
+        var poll=async function(){
+            attempts++; await refreshCredits(); updateScanUI();
+            if(userCredits>prev){status.textContent='✅ '+userCredits+' credits added!';return;}
+            if(attempts<6){status.innerHTML='⏳ Checking... ('+attempts+'/6)<br><span style="font-size:0.78rem;color:#887766">Ko-fi notification on its way</span>';setTimeout(poll,5000);}
+            else{status.innerHTML='⏳ Not received yet.<br><span style="font-size:0.78rem;color:#887766">Try again in 1 minute, or contact us!</span>';}
+        };
+        setTimeout(poll,3000);
+    };
+
+    // ============================================================
+    // SHARE
+    // ============================================================
+    window.shareResult = async function() {
+        if (!lastScannedResult) return;
+        var nev=lastScannedResult.nev||'Unknown cigar', gyar=lastScannedResult.gyar||'', orszag=lastScannedResult.orszag||'', eros=lastScannedResult.eros||'';
+        var erosSzam=parseInt(lastScannedResult.erosSzam)||3, dots=['○','○','○','○','○'];
+        for(var i=0;i<erosSzam;i++) dots[i]='●';
+        var shareText='🚬 I identified this cigar with Cigar Hunter!\n\n'
+            +'📛 '+nev+'\n'
+            +(gyar?'🏭 Maker: '+gyar+'\n':'')
+            +(orszag?'🌍 Country: '+orszag+'\n':'')
+            +(eros?'💪 Strength: '+eros+' ['+dots.join('')+']\n':'')
+            +'\n#CigarHunter #cigar #cigars';
+        if (navigator.share) {
+            try {
+                var shareData={title:'Cigar Hunter - '+nev,text:shareText};
+                if(lastCapturedBlob&&navigator.canShare){var imgFile=new File([lastCapturedBlob],'cigar.jpg',{type:'image/jpeg'});if(navigator.canShare({files:[imgFile]})) shareData.files=[imgFile];}
+                await navigator.share(shareData); return;
+            } catch(e){if(e.name==='AbortError') return;}
+        }
+        try{await navigator.clipboard.writeText(shareText);}catch(e){}
+        var box=document.createElement('div');
+        box.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,6,4,0.97);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+        var inner=document.createElement('div');
+        inner.style.cssText='background:#1a100a;border:2px solid var(--gold);border-radius:20px;padding:24px 20px;max-width:340px;width:100%';
+        inner.innerHTML='<div style="font-size:2rem;text-align:center;margin-bottom:10px">📤</div>'
+            +'<h3 style="color:var(--gold);text-align:center;margin-bottom:12px;font-size:1rem">Share</h3>'
+            +'<div style="background:#0d0804;border-radius:10px;padding:12px;margin-bottom:14px;font-size:0.82rem;color:#ccc;line-height:1.6">'+shareText.replace(/\n/g,'<br>')+'</div>'
+            +'<p style="color:#4ade80;font-size:0.82rem;text-align:center;margin-bottom:12px">✅ Text copied to clipboard!</p>';
+        var closeBtn=document.createElement('button');
+        closeBtn.textContent='Close'; closeBtn.style.cssText='background:transparent;border:1px solid #4a3326;color:#887766;border-radius:50px;padding:11px;width:100%;font-size:0.85rem;cursor:pointer;';
+        closeBtn.onclick=function(){box.remove();};
+        inner.appendChild(closeBtn); box.appendChild(inner); document.body.appendChild(box);
+    };
+
+    // ============================================================
+    // MAP
+    // ============================================================
+    var currentPanelShop = null;
+
+    window.showBoltPanel = function(nev,cim,leiras,humidor,megerositve,lat,lng,source,shopId){
+        document.getElementById('bolt-panel-nev').textContent=nev;
+        document.getElementById('bolt-panel-cim').textContent=cim;
+        document.getElementById('bolt-panel-leiras').textContent=leiras||'';
+        var badges=document.getElementById('bolt-panel-badges'); badges.innerHTML='';
+        if(humidor==='pro') badges.innerHTML+='<span class="badge badge-humidor-pro">🟢 Pro humidor</span>';
+        else if(humidor==='alap') badges.innerHTML+='<span class="badge badge-humidor-alap">🟡 Basic humidor</span>';
+        else badges.innerHTML+='<span class="badge badge-humidor-no">🔴 No humidor</span>';
+        if(megerositve) badges.innerHTML+='<span class="badge badge-megeros">✨ Verified</span>';
+        navCelLat=lat; navCelLng=lng; navCelNev=nev;
+        document.getElementById('bolt-panel-nav-btn').onclick=function(){navValasztoMegnyit();};
+        document.getElementById('nav-choice-panel').classList.remove('active');
+        document.getElementById('indulas-btn').style.display='none';
+        // Report gomb: csak ha nincs humidor még
+        var reportBtn = document.getElementById('humidor-report-btn');
+        var reportThanks = document.getElementById('humidor-report-thanks');
+        reportThanks.style.display = 'none';
+        reportBtn.style.display = (!humidor || humidor==='' || humidor==='False' || humidor===false) ? 'block' : 'none';
+        currentPanelShop = {nev:nev, cim:cim, lat:lat, lng:lng, source:source||'', id:shopId||''};
+        document.getElementById('bolt-panel').classList.add('active');
+    };
+
+    window.loadMap = function() {
+        if(typeof google==='undefined'||!google.maps){setTimeout(window.loadMap,300);return;}
+        if(gmap){fixMapSize();google.maps.event.trigger(gmap,'resize');gmap.setCenter(userLoc);document.getElementById('map-loading').style.display='none';return;}
+        if(navigator.geolocation){
+            navigator.geolocation.getCurrentPosition(
+                function(pos){userLoc={lat:pos.coords.latitude,lng:pos.coords.longitude};buildMap();},
+                function(){buildMap();},{timeout:6000}
+            );
+        } else buildMap();
+    };
+
+    function buildMap() {
+        fixMapSize(); document.getElementById('map-loading').style.display='none';
+        gmap=new google.maps.Map(document.getElementById('map'),{
+            center:userLoc,zoom:13,fullscreenControl:false,mapTypeControl:false,streetViewControl:false,zoomControl:true,
+            styles:[
+                {elementType:"geometry",stylers:[{color:"#242f3e"}]},{elementType:"labels.text.stroke",stylers:[{color:"#242f3e"}]},
+                {elementType:"labels.text.fill",stylers:[{color:"#746855"}]},{featureType:"road",elementType:"geometry",stylers:[{color:"#38414e"}]},
+                {featureType:"road",elementType:"labels.text.fill",stylers:[{color:"#9ca5b3"}]},{featureType:"water",elementType:"geometry",stylers:[{color:"#17263c"}]},
+                {featureType:"poi",stylers:[{visibility:"off"}]},{featureType:"transit",stylers:[{visibility:"off"}]}
+            ]
+        });
+        userMarker=new google.maps.Marker({position:userLoc,map:gmap,icon:{path:google.maps.SymbolPath.FORWARD_CLOSED_ARROW,scale:6,fillColor:"#4285F4",fillOpacity:1,strokeColor:"#fff",strokeWeight:2,rotation:0},title:'You are here'});
+        gmap.addListener('click',function(){document.getElementById('bolt-panel').classList.remove('active');document.getElementById('indulas-btn').style.display='none';document.getElementById('nav-choice-panel').classList.remove('active');});
+        gmap.addListener('idle', function(){ applyZoomFilter(); });
+        loadShops();
+    }
+
+    async function loadShops() {
+        allShops = [];
+
+        // 1. Saját cigarshops kollekció
+        try {
+            var snap = await getDocs(collection(db,'cigarshops'));
+            snap.forEach(function(d){ allShops.push(Object.assign({id:d.id},d.data())); });
+        } catch(e){ console.log('cigarshops load error:', e); }
+
+        // 2. Szivar Vadász humidoros adatbázis (párhuzamosan)
+        try {
+            // Szivar Vadász - ÖSSZES bolt, lapozással (pageToken)
+            var svBaseUrl = 'https://firestore.googleapis.com/v1/projects/szivar-vadasz/databases/szivarvadasz/documents/szivarozok?pageSize=300&key=AIzaSyCqCZBsFCKSnHm_NXAS2lcb6X860e1xMYk';
+            var svNextToken = null;
+            var svPage = 0;
+            do {
+                var svUrl = svBaseUrl + (svNextToken ? '&pageToken='+svNextToken : '');
+                var svResp = await fetch(svUrl);
+                var svData = await svResp.json();
+                svNextToken = svData.nextPageToken || null;
+                svPage++;
+                (svData.documents||[]).forEach(function(d){
+                    var f=d.fields||{}, id=d.name.split('/').pop();
+                    var lat=parseFloat((f.lat&&(f.lat.doubleValue||f.lat.integerValue))||0);
+                    var lng=parseFloat((f.lng&&(f.lng.doubleValue||f.lng.integerValue))||0);
+                    if(!lat||!lng) return;
+                    if(allShops.find(function(s){return s.id==='sv_'+id;})) return;
+                    var humidor=(f.humidor&&f.humidor.stringValue)||'';
+                    allShops.push({
+                        id:'sv_'+id,
+                        nev:(f.nev&&f.nev.stringValue)||'Cigar Shop',
+                        cim:(f.cim&&f.cim.stringValue)||'',
+                        leiras:(f.leiras&&f.leiras.stringValue)||'',
+                        lat:lat, lng:lng,
+                        humidor:humidor,
+                        megerositve:(f.megerositve&&f.megerositve.booleanValue)||false,
+                        source:'szivar_vadasz'
+                    });
+                });
+            } while(svNextToken && svPage < 10);
+        } catch(svErr){ console.log('SV import skip:', svErr); }
+
+        // 3. OSM/Overpass - MINDIG betöltjük, 200km-es körzetben (Magyar + határvidék)
+        await loadOSMShops();
+    }
+
+    async function loadOSMShops() {
+        var lat=userLoc.lat, lng=userLoc.lng;
+        // 200km radius: lefedi Magyarország + szlovák, osztrák, román, horvát határvidék
+        var query='[out:json][timeout:30];(node["shop"="tobacco"](around:200000,'+lat+','+lng+');node["shop"="cigar"](around:200000,'+lat+','+lng+');way["shop"="tobacco"](around:200000,'+lat+','+lng+');way["shop"="cigar"](around:200000,'+lat+','+lng+'););out center 300;';
+        try {
+            var tryMirror = async function(url) {
+                var r = await fetch(url, {method:'POST', body:query});
+                if(!r.ok) throw new Error('HTTP '+r.status);
+                return r.json();
+            };
+            var data;
+            try { data = await tryMirror('https://overpass-api.de/api/interpreter'); }
+            catch(e1) {
+                try { data = await tryMirror('https://overpass.kumi.systems/api/interpreter'); }
+                catch(e2) { data = await tryMirror('https://maps.mail.ru/osm/tools/overpass/api/interpreter'); }
+            }
+            var existingIds = {};
+            allShops.forEach(function(s){ existingIds[s.id]=true; });
+            (data.elements||[]).forEach(function(el){
+                var osmId='osm_'+el.id;
+                if(existingIds[osmId]) return;
+                var lt=el.lat||(el.center&&el.center.lat)||0;
+                var ln=el.lon||(el.center&&el.center.lon)||0;
+                if(!lt||!ln) return;
+                allShops.push({id:osmId,nev:(el.tags&&el.tags.name)||'Cigar/Tobacco Shop',cim:buildAddress(el.tags||{}),lat:lt,lng:ln,humidor:'',source:'osm'});
+            });
+        } catch(e){ console.log('OSM load failed:', e); }
+        renderMarkers(allShops);
+        renderList(allShops);
+    }
+
+    function buildAddress(tags) {
+        var parts=[]; if(tags['addr:street']) parts.push(tags['addr:street']+(tags['addr:housenumber']?' '+tags['addr:housenumber']:'')); if(tags['addr:city']) parts.push(tags['addr:city']); return parts.join(', ')||'Address unknown';
+    }
+
+    function renderMarkers(shops) {
+        markers.forEach(function(m){m.setMap(null);}); markers=[];
+        if(shopClusterer){shopClusterer.clearMarkers();}
+        shops.forEach(function(s){
+            if(!s.lat||!s.lng) return;
+            var m=new google.maps.Marker({position:{lat:parseFloat(s.lat),lng:parseFloat(s.lng)},map:gmap,title:s.nev,icon:{url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#D4AF37" stroke="#0a0604" stroke-width="2"/><text x="16" y="22" font-size="14" text-anchor="middle">🚬</text></svg>'),scaledSize:new google.maps.Size(32,32)}});
+            m.addListener('click',(function(shop){ return function(){ window.showBoltPanel(shop.nev,shop.cim,shop.leiras||'',shop.humidor,shop.megerositve,shop.lat,shop.lng,shop.source,shop.id); gmap.panTo({lat:parseFloat(shop.lat),lng:parseFloat(shop.lng)}); }; })(s));
+            markers.push(m);
+        });
+        if(typeof markerClusterer!=='undefined') shopClusterer=new markerClusterer.MarkerClusterer({markers:markers,map:gmap});
+    }
+
+    // ============================================================
+    // LIST
+    // ============================================================
+    var allEvents = [];
+
+    window.loadList = function() {
+        if(activeFilter==='events') { loadEvents(); return; }
+        if(allShops.length) { renderList(allShops); return; }
+        getDocs(collection(db,'cigarshops')).then(function(snap){
+            allShops=[]; snap.forEach(function(d){allShops.push(Object.assign({id:d.id},d.data()));});
+            renderList(allShops);
+        }).catch(function(){});
+    };
+
+    function loadEvents() {
+        var container = document.getElementById('list-container');
+        var bar = document.getElementById('last-updated-bar');
+        container.innerHTML = '<div class="empty-state"><div class="spinner"></div><p style="color:var(--gold);margin-top:12px">Loading events...</p></div>';
+        getDocs(collection(db,'events')).then(function(snap){
+            allEvents = [];
+            snap.forEach(function(d){ allEvents.push(Object.assign({id:d.id}, d.data())); });
+            renderEvents(allEvents);
+        }).catch(function(e){
+            container.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><p>Failed to load events</p></div>';
+        });
+    }
+
+    function renderEvents(events) {
+        var q = (document.getElementById('searchInput')||{}).value||''; q = q.toLowerCase();
+        var now = new Date();
+        var filtered = events.filter(function(e){
+            if(!e.megerositve) return false; // csak jóváhagyottak
+            var matchQ = !q || (e.title||'').toLowerCase().includes(q) || (e.venue||'').toLowerCase().includes(q) || (e.cim||'').toLowerCase().includes(q);
+            return matchQ;
+        });
+        // Dátum szerint rendezés: legközelebbi előre, múlt események a végére
+        filtered.sort(function(a,b){
+            var da = a.datum ? new Date(a.datum) : new Date(0);
+            var db2 = b.datum ? new Date(b.datum) : new Date(0);
+            var aFuture = da >= now, bFuture = db2 >= now;
+            if(aFuture && !bFuture) return -1;
+            if(!aFuture && bFuture) return 1;
+            return aFuture ? da-db2 : db2-da;
+        });
+        var container = document.getElementById('list-container');
+        var bar = document.getElementById('last-updated-bar');
+        if(!filtered.length){
+            container.innerHTML = '<div class="empty-state"><div class="empty-icon">🎉</div><p>No events yet.<br><span style="font-size:0.82rem;color:#554433">Be the first to submit one!</span></p></div>';
+            bar.textContent = '0 events';
+            return;
+        }
+        bar.textContent = filtered.length + ' event' + (filtered.length!==1?'s':'');
+        var html = '';
+        filtered.forEach(function(ev){
+            var d = ev.datum ? new Date(ev.datum) : null;
+            var isPast = d && d < now;
+            var dateStr = d ? d.toLocaleDateString('en-GB',{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '-';
+            var distStr = (ev.lat&&ev.lng) ? '<span style="color:#554433;font-size:0.68rem"> · 📍'+formatDist(haversine(userLoc.lat,userLoc.lng,parseFloat(ev.lat),parseFloat(ev.lng)))+'</span>' : '';
+            var linkBtn = ev.link ? '<a href="'+ev.link+'" target="_blank" style="display:inline-block;margin-top:8px;padding:5px 14px;border:1px solid var(--gold);border-radius:20px;color:var(--gold);font-size:0.78rem;text-decoration:none">🔗 More info</a>' : '';
+            var pastStyle = isPast ? 'opacity:0.55' : '';
+            var pastBadge = isPast ? '<span style="background:#2a1a0a;color:#554433;font-size:0.68rem;padding:2px 8px;border-radius:10px;margin-left:6px">Past</span>' : '<span style="background:#14532d;color:#4ade80;font-size:0.68rem;padding:2px 8px;border-radius:10px;margin-left:6px">Upcoming</span>';
+            html += '<div class="cigar-card" style="align-items:flex-start;'+pastStyle+'">'
+                + '<div style="font-size:1.8rem;flex-shrink:0">🎉</div>'
+                + '<div class="cigar-details" style="flex:1">'
+                + '<h3 style="color:var(--gold)">'+(ev.title||'Event')+'</h3>'
+                + '<p style="font-weight:bold;color:#ccc">'+(ev.venue||'')+'</p>'
+                + '<p style="color:#887766;font-size:0.78rem">'+(ev.cim||'')+distStr+'</p>'
+                + '<p style="color:#D4AF37;font-size:0.78rem;margin-top:4px">📅 '+dateStr+pastBadge+'</p>'
+                + (ev.leiras ? '<p style="color:#aaa;font-size:0.78rem;margin-top:4px">'+ev.leiras+'</p>' : '')
+                + linkBtn
+                + '</div>'
+                + (ev.lat&&ev.lng ? '<button class="nav-btn" onclick="navToShop('+ev.lat+','+ev.lng+',\''+String(ev.venue||'').replace(/['\'"]/g,'')+'\')">🧭</button>' : '')
+                + '</div>';
+        });
+        container.innerHTML = html;
+    }
+
+    // Haversine távolság (km)
+    function haversine(lat1,lng1,lat2,lng2) {
+        var R=6371, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
+        var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+        return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    }
+
+    // Ország detektálás koordináta alapján
+    function getCountry(lat,lng) {
+        lat=parseFloat(lat); lng=parseFloat(lng);
+        if(lat>=45.7&&lat<=48.6&&lng>=16.1&&lng<=22.9) return 'HU';
+        if(lat>=47.7&&lat<=49.6&&lng>=16.8&&lng<=22.6) return 'SK';
+        if(lat>=46.4&&lat<=49.0&&lng>=9.5&&lng<=17.2)  return 'AT';
+        if(lat>=43.6&&lat<=48.3&&lng>=20.3&&lng<=29.7) return 'RO';
+        if(lat>=42.4&&lat<=46.6&&lng>=13.4&&lng<=19.5) return 'HR';
+        if(lat>=45.4&&lat<=46.9&&lng>=13.4&&lng<=16.6) return 'SI';
+        if(lat>=44.4&&lat<=52.4&&lng>=22.1&&lng<=40.2) return 'UA';
+        if(lat>=49.0&&lat<=55.0&&lng>=14.0&&lng<=24.5) return 'PL';
+        if(lat>=45.0&&lat<=48.0&&lng>=22.0&&lng<=27.0) return 'RS';
+        return 'OTHER';
+    }
+
+    var COUNTRY_LABEL = {
+        HU:'🇭🇺 Magyarország', SK:'🇸🇰 Szlovákia', AT:'🇦🇹 Ausztria',
+        RO:'🇷🇴 Románia', HR:'🇭🇷 Horvátország', SI:'🇸🇮 Szlovénia',
+        UA:'🇺🇦 Ukrajna', PL:'🇵🇱 Lengyelország', RS:'🇷🇸 Szerbia', OTHER:'🌍 Egyéb'
+    };
+    var COUNTRY_ORDER = ['HU','SK','AT','RO','HR','SI','UA','PL','RS','OTHER'];
+
+    function formatDist(km) {
+        if(km<1) return Math.round(km*1000)+'m';
+        return km.toFixed(1)+'km';
+    }
+
+    function renderList(shops) {
+        var q=(document.getElementById('searchInput')||{}).value||''; q=q.toLowerCase();
+        var filtered=shops.filter(function(s){
+            var ok=!q||(s.nev||'').toLowerCase().includes(q)||(s.cim||'').toLowerCase().includes(q);
+            if(!ok) return false;
+            if(activeFilter==='humidor') return s.humidor==='pro'||s.humidor==='alap';
+            if(activeFilter==='events') return false; // events tab külön kezeli
+            return true;
+        });
+        var container=document.getElementById('list-container');
+        if(!filtered.length){container.innerHTML='<div class="empty-state"><div class="empty-icon">🚬</div><p>No shops found</p></div>';return;}
+
+        // Távolság kiszámítása + ország hozzárendelése
+        filtered.forEach(function(s){
+            s._dist = (s.lat&&s.lng) ? haversine(userLoc.lat,userLoc.lng,parseFloat(s.lat),parseFloat(s.lng)) : 99999;
+            s._country = (s.lat&&s.lng) ? getCountry(s.lat,s.lng) : 'OTHER';
+        });
+
+        // Csoportosítás ország szerint, azon belül távolság szerint rendezve
+        var groups = {};
+        filtered.forEach(function(s){
+            if(!groups[s._country]) groups[s._country]=[];
+            groups[s._country].push(s);
+        });
+        COUNTRY_ORDER.forEach(function(c){ if(groups[c]) groups[c].sort(function(a,b){return a._dist-b._dist;}); });
+
+        var totalCount = filtered.length;
+        document.getElementById('last-updated-bar').textContent = totalCount+' shops';
+
+        var html = '';
+        COUNTRY_ORDER.forEach(function(countryCode){
+            var list = groups[countryCode];
+            if(!list||!list.length) return;
+            html += '<div class="country-section-header"><span>'+COUNTRY_LABEL[countryCode]+'</span><span class="country-count">'+list.length+' bolt</span></div>';
+            list.forEach(function(s){
+                var hBadge = s.humidor==='pro'  ? '<span class="humidor-badge pro">🟢 Pro humidor</span>'
+                           : s.humidor==='alap' ? '<span class="humidor-badge alap">🟡 Basic humidor</span>'
+                           : '';
+                var vBadge = s.megerositve ? '<span class="humidor-badge verified">✨ Verified</span>' : '';
+                var distStr = s._dist<99999 ? '<div class="dist-badge">📍 '+formatDist(s._dist)+'</div>' : '';
+                var safeName = (s.nev||'').replace(/'/g,'').replace(/"/g,'');
+                html += '<div class="cigar-card"><div class="cigar-icon">🚬</div><div class="cigar-details"><h3>'+(s.nev||'')+'</h3><p>'+(s.cim||'')+'</p><div style="display:flex;gap:4px;flex-wrap:wrap">'+hBadge+vBadge+'</div>'+distStr+'</div><button class="nav-btn" onclick="navToShop('+s.lat+','+s.lng+',\''+safeName+'\')">🧭</button></div>';
+            });
+        });
+        container.innerHTML = html;
+    }
+
+    window._filterList = function(){ if(activeFilter==='events') renderEvents(allEvents); else renderList(allShops); };
+    window._setFilter = function(f){ activeFilter=f; document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active-filter');}); var el=document.getElementById('filter-'+f); if(el) el.classList.add('active-filter'); if(f==='events'){ loadEvents(); } else { renderList(allShops); } };
+
+    window.navToShop = function(lat,lng,nev){ navCelLat=lat;navCelLng=lng;navCelNev=nev; showPage('map-page'); setTimeout(function(){window.showBoltPanel(nev,'','',' ',' ',lat,lng);},400); };
+
+    // ============================================================
+    // NAVIGATION
+    // ============================================================
+    window.navValasztoMegnyit = function(){ document.getElementById('nav-choice-panel').classList.add('active'); };
+    window.navValasztoZar = function(){ document.getElementById('nav-choice-panel').classList.remove('active'); };
+    window.navMegnyit = function(app){
+        if(!navCelLat||!navCelLng) return; navValasztoZar();
+        var urls={apple:'maps://maps.apple.com/?daddr='+navCelLat+','+navCelLng,google:'https://www.google.com/maps/dir/?api=1&destination='+navCelLat+','+navCelLng,waze:'https://waze.com/ul?ll='+navCelLat+','+navCelLng+'&navigate=yes'};
+        window.open(urls[app],'_blank');
+    };
+
+    // ============================================================
+    // ADD TAB VÁLTÓ
+    // ============================================================
+    window.switchAddTab = function(tab) {
+        var isShop = tab==='shop';
+        document.getElementById('add-form-shop').style.display  = isShop ? 'block' : 'none';
+        document.getElementById('add-form-event').style.display = isShop ? 'none'  : 'block';
+        var ts=document.getElementById('add-tab-shop'), te=document.getElementById('add-tab-event');
+        ts.style.background=isShop?'var(--gold)':'transparent'; ts.style.color=isShop?'var(--black)':'#887766';
+        te.style.background=isShop?'transparent':'var(--gold)'; te.style.color=isShop?'#887766':'var(--black)';
+    };
+
+    // ============================================================
+    // ADD SHOP
+    // ============================================================
+    var selectedHumidorVal='';
+    window.setHumidor = function(h){
+        selectedHumidorVal=h;
+        ['pro','alap','no'].forEach(function(k){var b=document.getElementById('hum-'+k);if(b)b.classList.remove('active-filter');});
+        document.getElementById('hum-'+h).classList.add('active-filter');
+    };
+    window._saveShop = function(useGPS){
+        var name=document.getElementById('shopName').value.trim(), addr=document.getElementById('shopAddress').value.trim(), desc=document.getElementById('shopDesc').value.trim();
+        if(!name){alert('Please fill in the shop name!');return;}
+        if(!useGPS && !addr){alert('Please fill in the address!');return;}
+        function saveData(lat,lng,finalAddr){
+            addDoc(collection(db,'cigarshops'),{nev:name,cim:finalAddr||addr||'',leiras:desc,lat:lat,lng:lng,humidor:selectedHumidorVal||'',source:'user_submit',datum:new Date().toISOString(),megerositve:false})
+            .then(function(){alert('✅ Saved! Will appear after review.');showPage('map-page');})
+            .catch(function(e){alert('❌ '+e.message);});
+        }
+        if(useGPS){
+            navigator.geolocation.getCurrentPosition(function(pos){
+                var lat=pos.coords.latitude, lng=pos.coords.longitude;
+                // Ha van cím beírva, azt használjuk; ha nincs, reverse geocode
+                if(addr){
+                    saveData(lat,lng,addr);
+                } else {
+                    var geocoder=new google.maps.Geocoder();
+                    geocoder.geocode({location:{lat:lat,lng:lng}},function(results,status){
+                        var resolvedAddr=(status==='OK'&&results[0])?results[0].formatted_address:'';
+                        saveData(lat,lng,resolvedAddr);
+                    });
+                }
+            },function(){alert('❌ GPS error. Please try again or enter address manually.');});
+        } else {
+            var geocoder=new google.maps.Geocoder();
+            geocoder.geocode({address:addr},function(results,status){
+                if(status==='OK'&&results[0]){var loc=results[0].geometry.location;saveData(loc.lat(),loc.lng(),addr);}
+                else{saveData(null,null,addr);alert('✅ Saved by address (no coordinates found).');}
+            });
+        }
+    };
+
+    // ============================================================
+    // COMMUNITY HUMIDOR REPORT
+    // ============================================================
+    window.reportHumidor = function() {
+        if(!currentPanelShop) return;
+        var btn = document.getElementById('humidor-report-btn');
+        var thanks = document.getElementById('humidor-report-thanks');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sending...';
+        // Dupla bejelentés ellenőrzése (localStorage)
+        var reportKey = 'reported_' + (currentPanelShop.id || (currentPanelShop.lat+'_'+currentPanelShop.lng));
+        try {
+            if(localStorage.getItem(reportKey)) {
+                thanks.textContent = currentLang==='hu' ? '✅ Már bejelentve köszönjük!' : '✅ Already reported, thanks!';
+                thanks.style.display = 'block';
+                btn.style.display = 'none';
+                return;
+            }
+        } catch(e){}
+
+        addDoc(collection(db,'humidor_reports'), {
+            nev:   currentPanelShop.nev,
+            cim:   currentPanelShop.cim,
+            lat:   currentPanelShop.lat,
+            lng:   currentPanelShop.lng,
+            source: currentPanelShop.source,
+            shopId: currentPanelShop.id,
+            userId: currentUser ? currentUser.uid : 'anonymous',
+            datum:  new Date().toISOString(),
+            reviewed: false
+        }).then(function() {
+            try { localStorage.setItem(reportKey, '1'); } catch(e){}
+            btn.style.display = 'none';
+            thanks.textContent = currentLang==='hu' ? '✅ Köszönjük! Hamarosan ellenőrizzük.' : '✅ Thanks! We\'ll review your report.';
+            thanks.style.display = 'block';
+            // Ha 3+ report van erre a boltra -> auto alap humidor
+            checkAutoHumidor(currentPanelShop);
+        }).catch(function(e){
+            btn.disabled = false;
+            btn.textContent = currentLang==='hu' ? '🏆 Ez a bolt humidoros!' : '🏆 This shop has a humidor!';
+            alert('Error: ' + e.message);
+        });
+    };
+
+    function checkAutoHumidor(shop) {
+        // Lekérjük hány report van erre a boltra
+        var q2 = query(collection(db,'humidor_reports'),
+            where('lat','==',shop.lat), where('lng','==',shop.lng));
+        getDocs(q2).then(function(snap){
+            if(snap.size >= 3 && shop.source !== 'osm') {
+                // Auto upgrade: alap humidor
+                // Csak Firestore boltokra (nem OSM) - OSM-et nem tudjuk módosítani
+            }
+            console.log('Reports for this shop:', snap.size);
+        }).catch(function(){});
+    }
+
+    // ============================================================
+    // SAVE EVENT
+    // ============================================================
+    window.saveEvent = function() {
+        var title=document.getElementById('evTitle').value.trim();
+        var venue=document.getElementById('evVenue').value.trim();
+        var addr=document.getElementById('evAddress').value.trim();
+        var date=document.getElementById('evDate').value;
+        var desc=document.getElementById('evDesc').value.trim();
+        var link=document.getElementById('evLink').value.trim();
+        if(!title){alert('Please fill in the event title!');return;}
+        if(!venue){alert('Please fill in the venue!');return;}
+        if(!date){alert('Please select a date!');return;}
+        function doSave(lat,lng,finalAddr){
+            addDoc(collection(db,'events'),{
+                title:title, venue:venue, cim:finalAddr||addr||'',
+                datum:date, leiras:desc, link:link,
+                lat:lat||null, lng:lng||null,
+                source:'user_submit', feltoltes:new Date().toISOString(), megerositve:false
+            }).then(function(){
+                alert('✅ Event submitted! Will appear after review.');
+                ['evTitle','evVenue','evAddress','evDesc','evLink'].forEach(function(id){document.getElementById(id).value='';});
+                document.getElementById('evDate').value='';
+                showPage('map-page');
+            }).catch(function(e){alert('❌ '+e.message);});
+        }
+        if(addr){
+            var geocoder=new google.maps.Geocoder();
+            geocoder.geocode({address:addr},function(results,status){
+                if(status==='OK'&&results[0]){var loc=results[0].geometry.location;doSave(loc.lat(),loc.lng(),addr);}
+                else doSave(null,null,addr);
+            });
+        } else doSave(null,null,'');
+    };
+
+    // ============================================================
+    // TÉRKÉP ZOOM → MARKER SZŰRÉS (20km körzetben)
+    // ============================================================
+    var zoomFilterActive = false;
+    function applyZoomFilter() {
+        if(!gmap||!markers.length) return;
+        var zoom = gmap.getZoom();
+        var center = gmap.getCenter();
+        var cLat = center.lat(), cLng = center.lng();
+        // Zoom 11+ = kb. 20km-es látótáv → szűrünk
+        var doFilter = zoom >= 11;
+        var radius = 20; // km
+        markers.forEach(function(m, i) {
+            if(!doFilter) { m.setVisible(true); return; }
+            var s = allShops[i];
+            if(!s||!s.lat||!s.lng) { m.setVisible(false); return; }
+            var d = haversine(cLat, cLng, parseFloat(s.lat), parseFloat(s.lng));
+            m.setVisible(d <= radius);
+        });
+        // Clusterer frissítése
+        if(shopClusterer) {
+            shopClusterer.clearMarkers();
+            var visible = markers.filter(function(m){ return m.getVisible(); });
+            shopClusterer.addMarkers(visible);
+        }
+    }
+
+    // ============================================================
+    // NYELV VÁLTÓ (EN / HU)
+    // ============================================================
+    var currentLang = 'en';
+    var LANG = {
+        en: {
+            appTitle:    'CIGAR HUNTER',
+            appSub:      'European cigar shop map',
+            heroTitle:   'Welcome, Cigar Hunter!',
+            heroSub:     'Find the best cigar shops near you across Europe. 🚬',
+            navHome:     '🏠 Home', navMap: '📍 Map', navList: '📜 List',
+            navAdd:      '➕ Add', navPartners: '🌐 Partners', navScan: '🔍 Scan',
+            mapHeader:   '📍 Cigar Shops',
+            searchPh:    '🔍 Search shops / events...',
+            filterAll:   '🔓 All', filterHumidor: '🏆 Humidor', filterEvents: '🎉 Events',
+            addHeader:   '➕ Add',
+            tabShop:     '🏪 Shop', tabEvent:  '🎉 Event',
+            shopNamePh:  'Shop name *', shopAddrPh: 'Address (street, number, city) *',
+            shopDescPh:  'Description (e.g. what cigars they sell)',
+            humLabel:    'Humidor rating:',
+            btnSaveAddr: '💾 SAVE BY ADDRESS', btnSaveGPS: '📍 SAVE WITH GPS',
+            shopNote:    'Submitted shops are reviewed within 48 hours.',
+            evTitlePh:   'Event title *', evVenuePh: 'Venue / location name *',
+            evAddrPh:    'Address (street, city)', evDateLabel: 'Date & time *',
+            evDescPh:    'Description (tasting, brands, price...)',
+            evLinkPh:    'Website / ticket link (optional)',
+            btnSubmitEv: '🎉 SUBMIT EVENT',
+            evNote:      'Events appear after review within 48 hours.',
+            scanHeader:  '🔍 AI Cigar Scanner',
+            copyright:   '© 2026 Cigar Hunter | 🚬 18+',
+            langBtn:     '🇭🇺 HU',
+            partnerHeader: '🌐 Partners',
+            svSection:   '🚬 SZIVAR VADÁSZ',
+            svLink1:     'Vadász Apps', svLink1Sub: 'All Hungarian hunter apps',
+            svLink2:     'AI Szivar Scanner', svLink2Sub: 'Identify cigars with AI (Hungarian)',
+            scanHeader2: '🔍 AI Cigar Scanner',
+            scanBtn:     '✨ IDENTIFY CIGAR (AI)',
+            profAccount: 'MY ACCOUNT', profCredits: 'MY CREDITS',
+            profCigars:  'MY CIGARS', profStats: 'MY STATS',
+            signIn:      '🔐 Sign In', signOut: 'Sign out',
+            loginTitle:  'Sign In', loginSub: 'AI Cigar Scanner requires sign-in. The first <strong style="color:var(--gold)">3 scans are free!</strong>',
+            collEmpty:   'No saved cigars yet.<br>Scan one to get started!',
+            navChoose:   '🧭 Choose navigation app', navCancel: '✕ Cancel', navigate: '🧭 NAVIGATE!',
+            pibAccount:  'Account', pibCredits: 'Credits', pibSaved: 'Saved', pibStats: 'Stats',
+            loginCancel: 'Cancel',
+            credits:     'credits', scansLeft: 'scans remaining',
+            reportBtn:   '🏆 This shop has a humidor!', reportThanks: '✅ Thanks! We\'ll review your report.',
+            scanStrength:'💪 Strength', scanWhere: '🌍 Where to buy'
+        },
+        hu: {
+            appTitle:    'SZIVAR VADÁSZ',
+            appSub:      'Európai szivaros bolt térkép',
+            heroTitle:   'Üdv, Szivar Vadász!',
+            heroSub:     'Találd meg a legjobb szivaros boltokat Európában! 🚬',
+            navHome:     '🏠 Főoldal', navMap: '📍 Térkép', navList: '📜 Lista',
+            navAdd:      '➕ Hozzáad', navPartners: '🌐 Partnerek', navScan: '🔍 Scan',
+            mapHeader:   '📍 Szivaros Boltok',
+            searchPh:    '🔍 Bolt / esemény keresés...',
+            filterAll:   '🔓 Mind', filterHumidor: '🏆 Humidor', filterEvents: '🎉 Események',
+            addHeader:   '➕ Hozzáadás',
+            tabShop:     '🏪 Bolt', tabEvent: '🎉 Esemény',
+            shopNamePh:  'Bolt neve *', shopAddrPh: 'Cím (utca, házszám, város) *',
+            shopDescPh:  'Leírás (pl. milyen szivarokat árulnak)',
+            humLabel:    'Humidor értékelés:',
+            btnSaveAddr: '💾 MENTÉS CÍM ALAPJÁN', btnSaveGPS: '📍 MENTÉS GPS-SEL',
+            shopNote:    'A beküldött boltok 48 órán belül kerülnek jóváhagyásra.',
+            evTitlePh:   'Esemény neve *', evVenuePh: 'Helyszín neve *',
+            evAddrPh:    'Cím (utca, város)', evDateLabel: 'Dátum és idő *',
+            evDescPh:    'Leírás (kóstoló, márkák, ár...)',
+            evLinkPh:    'Weboldal / jegy link (opcionális)',
+            btnSubmitEv: '🎉 ESEMÉNY BEKÜLDÉSE',
+            evNote:      'Az események 48 órán belül kerülnek jóváhagyásra.',
+            scanHeader:  '🔍 AI Szivar Azonosító',
+            copyright:   '© 2026 Cigar Hunter | 🚬 18+',
+            langBtn:     '🇬🇧 EN',
+            partnerHeader: '🌐 Partnerek',
+            svSection:   '🚬 SZIVAR VADÁSZ',
+            svLink1:     'Vadász Apps', svLink1Sub: 'Magyar vadász appok',
+            svLink2:     'AI Szivar Scanner', svLink2Sub: 'Szivar azonosítás AI-val (magyar)',
+            scanHeader2: '🔍 AI Szivar Azonosító',
+            scanBtn:     '✨ SZIVAR AZONOSÍTÁS (AI)',
+            profAccount: 'FIÓKOM', profCredits: 'KREDITJEIM',
+            profCigars:  'SZIVARJAIM', profStats: 'STATISZTIKA',
+            signIn:      '🔐 Bejelentkezés', signOut: 'Kijelentkezés',
+            loginTitle:  'Bejelentkezés', loginSub: 'Az AI Szivar Scanner bejelentkezést igényel. Az első <strong style="color:var(--gold)">3 scan ingyenes!</strong>',
+            collEmpty:   'Még nincs mentett szivar.<br>Scannelj egyet!',
+            navChoose:   '🧭 Válassz navigációs appot', navCancel: '✕ Mégsem', navigate: '🧭 INDULÁS!',
+            pibAccount:  'Fiókom', pibCredits: 'Kredit', pibSaved: 'Szavar', pibStats: 'Stat',
+            loginCancel: 'Mégsem',
+            credits:     'kredit', scansLeft: 'scan maradt',
+            reportBtn:   '🏆 Ez a bolt humidoros!', reportThanks: '✅ Köszönjük! Hamarosan ellenőrizzük.',
+            scanStrength:'💪 Erősség', scanWhere: '🌍 Hol kapható'
+        }
+    };
+
+    window.toggleLang = function() {
+        currentLang = currentLang==='en' ? 'hu' : 'en';
+        applyLang(currentLang);
+    };
+
+    function applyLang(lang) {
+        var L = LANG[lang];
+        // Header / hero
+        var el;
+        if((el=document.getElementById('txt-app-title')))   el.textContent = L.appTitle;
+        if((el=document.getElementById('txt-app-sub')))     el.textContent = L.appSub;
+        if((el=document.getElementById('txt-hero-title')))  el.textContent = L.heroTitle;
+        if((el=document.getElementById('txt-hero-sub')))    el.textContent = L.heroSub;
+        if((el=document.getElementById('lang-toggle')))     el.textContent = L.langBtn;
+        // Navbar
+        var spans = document.querySelectorAll('#global-navbar span');
+        var navKeys = ['navHome','navMap','navList','navAdd','navPartners','navScan'];
+        spans.forEach(function(s,i){ if(navKeys[i]) s.textContent = L[navKeys[i]]; });
+        // Map header
+        var mapH = document.querySelector('#map-page header h1');
+        if(mapH) mapH.textContent = L.mapHeader;
+        // Search
+        if((el=document.getElementById('searchInput'))) el.placeholder = L.searchPh;
+        // Filter buttons
+        if((el=document.getElementById('filter-all')))    el.textContent = L.filterAll;
+        if((el=document.getElementById('filter-humidor')))el.textContent = L.filterHumidor;
+        if((el=document.getElementById('filter-events'))) el.textContent = L.filterEvents;
+        // Add page
+        var addH = document.querySelector('#add-page header h1');
+        if(addH) addH.textContent = L.addHeader;
+        if((el=document.getElementById('add-tab-shop')))  el.textContent = L.tabShop;
+        if((el=document.getElementById('add-tab-event'))) el.textContent = L.tabEvent;
+        if((el=document.getElementById('shopName')))      el.placeholder = L.shopNamePh;
+        if((el=document.getElementById('shopAddress')))   el.placeholder = L.shopAddrPh;
+        if((el=document.getElementById('shopDesc')))      el.placeholder = L.shopDescPh;
+        if((el=document.getElementById('evTitle')))       el.placeholder = L.evTitlePh;
+        if((el=document.getElementById('evVenue')))       el.placeholder = L.evVenuePh;
+        if((el=document.getElementById('evAddress')))     el.placeholder = L.evAddrPh;
+        if((el=document.getElementById('evDesc')))        el.placeholder = L.evDescPh;
+        if((el=document.getElementById('evLink')))        el.placeholder = L.evLinkPh;
+        // Scan header
+        var scanH = document.querySelector('#qr-page header h1');
+        if(scanH) scanH.textContent = L.scanHeader;
+        // Copyright
+        if((el=document.getElementById('global-copyright'))) el.textContent = L.copyright;
+        // Lista újrarenderelés ha nyitva van
+        if(document.getElementById('list-page').classList.contains('active')) {
+            if(activeFilter==='events') renderEvents(allEvents);
+            else renderList(allShops);
+        }
+        // Partner page
+        if((el=document.getElementById('txt-partner-header'))) el.textContent = L.partnerHeader;
+        if((el=document.getElementById('txt-sv-section')))     el.textContent = L.svSection;
+        if((el=document.getElementById('txt-sv-link1-title'))) el.textContent = L.svLink1;
+        if((el=document.getElementById('txt-sv-link1-sub')))   el.textContent = L.svLink1Sub;
+        if((el=document.getElementById('txt-sv-link2-title'))) el.textContent = L.svLink2;
+        if((el=document.getElementById('txt-sv-link2-sub')))   el.textContent = L.svLink2Sub;
+        // Scan page
+        if((el=document.getElementById('txt-scan-header')))    el.textContent = L.scanHeader2;
+        if((el=document.getElementById('btn-scan-main')))      el.textContent = L.scanBtn;
+        // Profile szekciók
+        if((el=document.getElementById('txt-prof-account')))   el.textContent = L.profAccount;
+        if((el=document.getElementById('txt-prof-credits')))   el.textContent = L.profCredits;
+        if((el=document.getElementById('txt-prof-cigars')))    el.textContent = L.profCigars;
+        if((el=document.getElementById('txt-prof-stats')))     el.textContent = L.profStats;
+        // Login overlay
+        if((el=document.getElementById('login-box'))) {
+            var lh=el.querySelector('h2'); if(lh) lh.textContent=L.loginTitle;
+            var lp=el.querySelector('p'); if(lp) lp.innerHTML=L.loginSub;
+        }
+        // Profil logout gomb
+        var logoutBtn=document.querySelector('.prof-logout-btn'); if(logoutBtn) logoutBtn.textContent=L.signOut;
+        // Collection empty state
+        var collEmptyEl=document.querySelector('#coll-list + #coll-empty p, #coll-empty p');
+        if(collEmptyEl) collEmptyEl.innerHTML=L.collEmpty;
+        // Navbar prof tab gomb szövegek
+        var profTabs=document.querySelectorAll('.prof-icon-btn');
+        var profTabKeys=[['👤','profAccount'],['⚡','profCredits'],['🚬','profCigars'],['📊','profStats']];
+        profTabs.forEach(function(btn,i){ if(profTabKeys[i]) btn.lastChild.textContent=profTabKeys[i][0]; });
+
+        // Navigate gombok
+        if((el=document.getElementById('txt-navigate')))      el.textContent = L.navigate;
+        if((el=document.getElementById('txt-bolt-navigate'))) el.textContent = L.navigate;
+        // Scan result feliratok
+        if((el=document.getElementById('txt-scan-strength'))) el.textContent = L.scanStrength;
+        if((el=document.getElementById('txt-scan-where')))    el.textContent = L.scanWhere;
+        // Report gomb
+        if((el=document.getElementById('txt-report-btn')))    el.textContent = L.reportBtn;
+        if((el=document.getElementById('txt-report-thanks'))) el.textContent = L.reportThanks;
+        // Nav choice panel
+        if((el=document.getElementById('txt-nav-choose')))   el.textContent = L.navChoose;
+        if((el=document.getElementById('txt-nav-cancel')))   el.textContent = L.navCancel;
+        // Login cancel
+        if((el=document.getElementById('txt-login-cancel'))) el.textContent = L.loginCancel;
+        // Prof icon bar szövegek
+        if((el=document.getElementById('txt-pib-account')))  el.textContent = L.pibAccount;
+        if((el=document.getElementById('txt-pib-credits')))  el.textContent = L.pibCredits;
+        if((el=document.getElementById('txt-pib-saved')))    el.textContent = L.pibSaved;
+        if((el=document.getElementById('txt-pib-stats')))    el.textContent = L.pibStats;
+        // Kredit badge szöveg (ha be van lépve)
+        var credBadge=document.getElementById('credit-badge');
+        if(credBadge&&credBadge.style.display!=='none') credBadge.textContent='⚡ '+userCredits+' '+L.credits;
+        var paCred=document.getElementById('pa-credits');
+        if(paCred) paCred.textContent='⚡ '+userCredits+' '+L.credits;
+
+        // LocalStorage mentés
+        try { localStorage.setItem('ch_lang', lang); } catch(e){}
+    }
+
+    var DISC_TEXT = {
+        en: {
+            title: '18+ Content',
+            text: 'Cigar Hunter contains content related to tobacco products.<br><br>By entering, you confirm that you are <strong style="color:var(--gold)">at least 18 years old</strong> and that the purchase and consumption of tobacco products is legal in your country.',
+            confirm: '✅ I am 18+ — Enter',
+            deny: '✕ I am under 18 — Exit'
+        },
+        hu: {
+            title: '18+ Tartalom',
+            text: 'A Cigar Hunter dohánytermékekkel kapcsolatos tartalmat tartalmaz.<br><br>A belépéssel megerősíted, hogy <strong style="color:var(--gold)">elmúltál 18 éves</strong> és a dohánytermékek vásárlása és fogyasztása törvényes az országodban.',
+            confirm: '✅ 18+ vagyok — Belépés',
+            deny: '✕ 18 év alatti vagyok — Kilépés'
+        }
+    };
+
+    window.disclaimerLang = function(lang) {
+        currentLang = lang;
+        var D = DISC_TEXT[lang];
+        var el;
+        if((el=document.getElementById('disc-title')))       el.textContent = D.title;
+        if((el=document.getElementById('disc-text')))        el.innerHTML   = D.text;
+        if((el=document.getElementById('disc-confirm-btn'))) el.textContent = D.confirm;
+        if((el=document.getElementById('disc-deny-btn')))    el.textContent = D.deny;
+        // Gomb stílusok váltása
+        var enBtn = document.getElementById('disc-lang-en');
+        var huBtn = document.getElementById('disc-lang-hu');
+        if(lang === 'hu') {
+            enBtn.style.background = 'transparent'; enBtn.style.color = 'var(--gold)'; enBtn.style.border = '1px solid var(--gold)';
+            huBtn.style.background = 'var(--gold)';  huBtn.style.color = 'var(--black)'; huBtn.style.border = 'none';
+        } else {
+            enBtn.style.background = 'var(--gold)';  enBtn.style.color = 'var(--black)'; enBtn.style.border = 'none';
+            huBtn.style.background = 'transparent'; huBtn.style.color = 'var(--gold)'; huBtn.style.border = '1px solid var(--gold)';
+        }
+        // Az app többi részét is váltja
+        applyLang(lang);
+        try { localStorage.setItem('ch_lang', lang); } catch(e){}
+    };
+
+    function disclaimerCheck() {
+        try {
+            if(sessionStorage.getItem('ch_18ok')==='1') {
+                document.getElementById('disclaimer-overlay').style.display='none';
+            }
+        } catch(e) {
+            document.getElementById('disclaimer-overlay').style.display='none';
+        }
+    }
+    window.disclaimerAccept = function() {
+        try { sessionStorage.setItem('ch_18ok','1'); } catch(e){}
+        document.getElementById('disclaimer-overlay').style.display='none';
+    };
+    window.disclaimerDeny = function() {
+        window.location.href = 'https://www.google.com';
+    };
+    disclaimerCheck();
+
+    // Mentett nyelv visszaállítása - DISC_TEXT és disclaimerLang már definiálva van
+    try {
+        var savedLang = localStorage.getItem('ch_lang');
+        if(savedLang==='hu') { disclaimerLang('hu'); }
+        else { disclaimerLang('en'); }
+    } catch(e){ disclaimerLang('en'); }
+
+    var y=new Date().getFullYear();
+    document.querySelectorAll('.copy-year').forEach(function(el){el.textContent=y;});
+</script>
+</body>
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js')
+            .then(function(reg) { console.log('SW registered:', reg.scope); })
+            .catch(function(e) { console.log('SW error:', e); });
+    });
+}
+</script>
+</html>

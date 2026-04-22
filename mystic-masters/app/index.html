@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<meta name="theme-color" content="#0B0B0F"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Mystic Masters"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icons/icon-192.png"/>
+<title>Mystic Masters</title>
+<style>
+:root {
+  --black:#0B0B0F; --gold:#D4AF37; --gold-dim:#9a7d20;
+  --white:#F0EDE6; --gray:#8888aa; --card-bg:#13131A;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --fs-xs:13px; --fs-sm:15px; --fs-md:17px; --fs-lg:20px; --fs-xl:26px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{height:100%;height:-webkit-fill-available;}
+body{
+  height:100%;height:-webkit-fill-available;
+  background:var(--black);color:var(--white);font-family:'Georgia',serif;
+  overflow:hidden;position:fixed;width:100%;top:0;left:0;
+  touch-action:none;user-select:none;-webkit-user-select:none;
+}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;max-width:480px;margin:0 auto;background:var(--black);}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--black);transition:opacity .35s ease,transform .35s ease;}
+.screen.hidden{opacity:0;pointer-events:none;transform:translateY(16px);}
+
+/* Stars */
+.splash-stars{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.star{position:absolute;background:var(--gold);border-radius:50%;animation:twinkle var(--dur,3s) var(--delay,0s) infinite;}
+@keyframes twinkle{0%{opacity:.1;transform:scale(.8)}50%{opacity:1;transform:scale(1.7);box-shadow:0 0 6px var(--gold)}100%{opacity:.1;transform:scale(.8)}}
+
+/* Splash */
+#splash{align-items:center;justify-content:center;gap:28px;}
+.seal-wrap{position:relative;width:140px;height:140px;display:flex;align-items:center;justify-content:center;}
+.seal{width:140px;height:140px;animation:seal-pulse 2.5s ease-in-out infinite;}
+.seal-ring{position:absolute;inset:-14px;border:1px solid var(--gold-dim);border-radius:50%;animation:ring-spin 10s linear infinite;opacity:.6;}
+.seal-ring2{position:absolute;inset:-26px;border:1px dashed var(--gold-dim);border-radius:50%;animation:ring-spin 18s linear infinite reverse;opacity:.3;}
+@keyframes seal-pulse{0%,100%{filter:drop-shadow(0 0 10px var(--gold)) drop-shadow(0 0 30px #7a5f0040);transform:scale(1)}50%{filter:drop-shadow(0 0 30px var(--gold)) drop-shadow(0 0 70px #D4AF3760);transform:scale(1.06)}}
+@keyframes ring-spin{to{transform:rotate(360deg)}}
+.splash-title{font-size:var(--fs-xl);color:var(--gold);letter-spacing:5px;text-align:center;}
+.splash-sub{font-size:var(--fs-xs);color:var(--gray);letter-spacing:3px;text-align:center;font-style:italic;}
+.splash-btn{margin-top:16px;background:transparent;border:1px solid var(--gold);color:var(--gold);padding:14px 48px;border-radius:30px;font-size:var(--fs-md);font-family:'Georgia',serif;letter-spacing:3px;cursor:pointer;animation:btn-glow 2s ease-in-out infinite;touch-action:manipulation;}
+@keyframes btn-glow{0%,100%{box-shadow:0 0 8px #D4AF3740}50%{box-shadow:0 0 28px #D4AF3790}}
+
+/* Preview */
+#preview{align-items:stretch;overflow:hidden;}
+#preview .splash-stars{z-index:0;}
+.preview-inner{position:relative;z-index:1;display:flex;flex-direction:column;flex:1;overflow:hidden;}
+.preview-header{padding:calc(var(--safe-top) + 24px) 20px 0;text-align:center;flex-shrink:0;}
+.preview-title{font-size:var(--fs-lg);color:var(--gold);letter-spacing:3px;margin-bottom:6px;}
+.preview-sub{font-size:var(--fs-xs);color:var(--gray);font-style:italic;margin-bottom:20px;}
+.preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 16px;flex:1;align-content:center;}
+.preview-card{background:var(--card-bg);border:1px solid #2a2a1a;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:border-color .2s,transform .15s;aspect-ratio:1;touch-action:manipulation;}
+.preview-card:active{border-color:var(--gold);transform:scale(.93);}
+.preview-card .p-icon{font-size:30px;}
+.preview-card .p-label{font-size:12px;color:var(--gold);text-align:center;letter-spacing:.5px;line-height:1.3;padding:0 4px;}
+.preview-hint{font-size:var(--fs-xs);color:var(--gray);font-style:italic;text-align:center;padding:14px 20px calc(var(--safe-bottom)+14px);flex-shrink:0;}
+
+/* LangLogin */
+#langlogin{align-items:center;justify-content:center;gap:26px;padding:40px 32px;}
+#langlogin .splash-stars{z-index:0;}
+.ll-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:26px;width:100%;}
+.ll-logo{font-size:56px;animation:seal-pulse 2.5s ease-in-out infinite;}
+.ll-title{font-size:var(--fs-xl);color:var(--gold);letter-spacing:4px;text-align:center;}
+.ll-sub{font-size:var(--fs-sm);color:var(--gray);text-align:center;font-style:italic;line-height:1.7;}
+.lang-row{display:flex;gap:14px;width:100%;}
+.btn-lang{flex:1;background:none;border:1px solid var(--gold-dim);color:var(--gold);padding:13px 0;border-radius:14px;font-size:var(--fs-md);cursor:pointer;transition:background .2s,border-color .2s;font-family:'Georgia',serif;letter-spacing:1px;touch-action:manipulation;}
+.btn-lang.active{background:#1a1505;border-color:var(--gold);}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:12px;background:#fff;color:#333;border:none;padding:15px 28px;border-radius:30px;font-size:var(--fs-md);cursor:pointer;width:100%;transition:opacity .2s;font-family:sans-serif;touch-action:manipulation;}
+.btn-google:active{opacity:.75;}
+.btn-google img{width:22px;height:22px;}
+
+/* Topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:calc(var(--safe-top)+14px) 18px 14px;background:var(--black);border-bottom:1px solid #1e1e1e;flex-shrink:0;}
+.topbar-title{font-size:var(--fs-sm);color:var(--gold);letter-spacing:2px;}
+.topbar-credits{font-size:var(--fs-sm);color:var(--gold);background:#1a1505;border:1px solid var(--gold-dim);padding:5px 12px;border-radius:20px;}
+.topbar-back{background:none;border:none;color:var(--gold);font-size:22px;cursor:pointer;padding:4px 8px;touch-action:manipulation;}
+.topbar-lang{background:none;border:1px solid var(--gold-dim);color:var(--gold);font-size:var(--fs-xs);padding:5px 10px;border-radius:12px;cursor:pointer;touch-action:manipulation;}
+
+/* Scroll */
+.scroll-content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:18px 18px calc(var(--safe-bottom)+88px);}
+
+/* Bottom nav */
+.bottom-nav{display:flex;justify-content:space-around;align-items:center;padding:10px 0 calc(var(--safe-bottom)+10px);background:var(--black);border-top:1px solid #1e1e1e;flex-shrink:0;}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;color:var(--gray);font-size:var(--fs-xs);cursor:pointer;padding:4px 16px;transition:color .2s;touch-action:manipulation;}
+.nav-btn.active,.nav-btn:active{color:var(--gold);}
+.nav-btn span:first-child{font-size:24px;}
+
+/* Dashboard grid */
+#dashboard .scroll-content{display:flex;flex-direction:column;align-items:center;padding:12px 16px calc(var(--safe-bottom)+88px);}
+.dash-sigil{font-size:44px;margin-bottom:12px;animation:seal-pulse 3s ease-in-out infinite;}
+.module-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;}
+.module-card{background:var(--card-bg);border:1px solid #2a2a1a;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:border-color .2s,transform .15s;aspect-ratio:1;touch-action:manipulation;}
+.module-card:active{border-color:var(--gold);transform:scale(.93);}
+.module-card .icon{font-size:30px;}
+.module-card .label{font-size:12px;color:var(--gold);text-align:center;letter-spacing:.5px;line-height:1.4;padding:0 4px;}
+
+/* Cards */
+.gold-card{background:var(--card-bg);border:1px solid var(--gold-dim);border-radius:18px;padding:20px;margin-bottom:14px;}
+.gold-card h3{color:var(--gold);font-size:var(--fs-sm);letter-spacing:2px;margin-bottom:14px;}
+.gold-card p{color:var(--white);font-size:var(--fs-sm);line-height:1.7;}
+.field-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #1e1e1e;font-size:var(--fs-sm);}
+.field-row:last-child{border-bottom:none;}
+.field-label{color:var(--gray);}
+.field-value{color:var(--white);font-weight:bold;}
+
+/* Buttons */
+.btn-gold{background:var(--gold);color:var(--black);border:none;padding:16px 28px;border-radius:30px;font-size:var(--fs-md);font-family:'Georgia',serif;letter-spacing:1px;cursor:pointer;width:100%;transition:opacity .2s;font-weight:bold;touch-action:manipulation;}
+.btn-gold:active{opacity:.78;}
+.btn-outline{background:none;color:var(--gold);border:1px solid var(--gold);padding:14px 24px;border-radius:30px;font-size:var(--fs-sm);font-family:'Georgia',serif;letter-spacing:1px;cursor:pointer;width:100%;transition:background .2s;touch-action:manipulation;}
+.btn-outline:active{background:#1a1505;}
+.btn-sm{padding:8px 18px;font-size:var(--fs-xs);width:auto;}
+
+/* Profile */
+.profile-avatar{width:72px;height:72px;border-radius:50%;border:2px solid var(--gold);object-fit:cover;flex-shrink:0;}
+.profile-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.profile-name{font-size:var(--fs-lg);color:var(--gold);}
+.profile-archetype{font-size:var(--fs-xs);color:var(--gray);letter-spacing:1px;margin-top:4px;}
+.badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.badge{background:var(--card-bg);border:1px solid #2a2a1a;border-radius:12px;padding:14px 8px;text-align:center;font-size:var(--fs-xs);color:var(--gray);}
+.badge.earned{border-color:var(--gold-dim);color:var(--gold);}
+.badge .badge-icon{font-size:24px;display:block;margin-bottom:6px;}
+
+/* Palm */
+.camera-wrap{position:relative;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:3/4;touch-action:none;}
+.camera-wrap video{width:100%;height:100%;object-fit:cover;display:block;}
+.scan-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.scan-frame{width:72%;aspect-ratio:1;border:2px solid var(--gold);border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.45),inset 0 0 24px rgba(212,175,55,.12);}
+
+/* Palm result fullscreen */
+#palm-result-screen{background:var(--black);z-index:10;}
+.palm-result-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 22px;gap:22px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;}
+.palm-result-icon{font-size:56px;animation:seal-pulse 3s ease-in-out infinite;}
+.palm-result-title{font-size:var(--fs-lg);color:var(--gold);letter-spacing:2px;text-align:center;}
+.palm-result-text{font-size:var(--fs-md);line-height:1.85;color:var(--white);font-style:italic;text-align:center;background:var(--card-bg);border:1px solid var(--gold-dim);border-radius:18px;padding:24px;width:100%;}
+
+/* Flexible result box */
+.scan-result{background:var(--card-bg);border:1px solid var(--gold-dim);border-radius:14px;padding:18px;margin-top:14px;font-size:var(--fs-sm);line-height:1.85;color:var(--white);width:100%;}
+
+/* Numerology */
+.num-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+.num-card{background:var(--card-bg);border:1px solid var(--gold-dim);border-radius:16px;padding:20px;text-align:center;}
+.num-card .num-big{font-size:52px;color:var(--gold);line-height:1;}
+.num-card .num-label{font-size:10px;color:var(--gray);margin-top:8px;letter-spacing:1px;}
+.num-card .num-name{font-size:var(--fs-xs);color:var(--white);margin-top:5px;}
+
+/* Timeline */
+.timeline{position:relative;padding-left:34px;}
+.timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--gold),transparent);}
+.timeline-item{position:relative;margin-bottom:28px;}
+.timeline-item::before{content:'✦';position:absolute;left:-28px;color:var(--gold);font-size:15px;top:1px;}
+.timeline-age{font-size:var(--fs-xs);color:var(--gold);letter-spacing:1px;}
+.timeline-title{font-size:var(--fs-md);color:var(--white);margin:5px 0;}
+.timeline-desc{font-size:var(--fs-sm);color:var(--gray);line-height:1.6;}
+
+/* Insight */
+.insight-card{background:linear-gradient(135deg,#1a1505,#0d0d1a);border:1px solid var(--gold);border-radius:22px;padding:32px 22px;text-align:center;position:relative;overflow:hidden;}
+.insight-card::before{content:'';position:absolute;inset:-1px;background:linear-gradient(135deg,var(--gold),transparent,var(--gold));border-radius:22px;opacity:.12;pointer-events:none;}
+.insight-icon{font-size:40px;margin-bottom:18px;}
+.insight-text{font-size:var(--fs-md);line-height:1.85;color:var(--white);font-style:italic;}
+.insight-date{font-size:var(--fs-xs);color:var(--gray);margin-top:18px;letter-spacing:1px;}
+
+/* Archetype */
+.archetype-big{text-align:center;padding:32px 20px;}
+.archetype-icon{font-size:76px;animation:seal-pulse 3s ease-in-out infinite;margin-bottom:18px;}
+.archetype-name{font-size:var(--fs-xl);color:var(--gold);letter-spacing:3px;margin-bottom:8px;}
+.archetype-sub{font-size:var(--fs-sm);color:var(--gray);font-style:italic;}
+
+/* Zodiac */
+.zodiac-card{text-align:center;padding:24px;}
+.zodiac-sign{font-size:68px;margin-bottom:14px;}
+.zodiac-name{font-size:var(--fs-lg);color:var(--gold);letter-spacing:2px;margin-bottom:6px;}
+.zodiac-dates{font-size:var(--fs-xs);color:var(--gray);margin-bottom:18px;}
+.trait-pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px;}
+.trait-pill{background:#1a1505;border:1px solid var(--gold-dim);color:var(--gold);font-size:var(--fs-xs);padding:5px 14px;border-radius:20px;}
+
+/* Hermetic */
+.hermetic-card{background:linear-gradient(135deg,#0d0d1a,#1a0d00);border:1px solid var(--gold);border-radius:20px;padding:28px 20px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden;}
+.hermetic-card::before{content:'';position:absolute;inset:-1px;background:conic-gradient(from 0deg,var(--gold),transparent 30%,var(--gold) 60%,transparent 90%,var(--gold));border-radius:20px;opacity:.12;animation:ring-spin 8s linear infinite;pointer-events:none;}
+.hermetic-title{font-size:var(--fs-lg);color:var(--gold);letter-spacing:3px;margin-bottom:8px;}
+.hermetic-sub{font-size:var(--fs-xs);color:var(--gray);font-style:italic;margin-bottom:20px;}
+.hermetic-principles{display:flex;flex-direction:column;gap:10px;text-align:left;}
+.principle-item{background:#0d0d15;border-left:2px solid var(--gold-dim);padding:10px 14px;border-radius:0 10px 10px 0;font-size:var(--fs-xs);color:var(--gray);}
+.principle-item strong{color:var(--gold);display:block;margin-bottom:3px;}
+
+/* Input */
+.input-group{margin-bottom:18px;}
+.input-label{font-size:var(--fs-sm);color:var(--gold);letter-spacing:1px;margin-bottom:8px;display:block;}
+.input-field{width:100%;background:var(--card-bg);border:1px solid #333;border-radius:12px;padding:14px 16px;color:var(--white);font-size:var(--fs-md);font-family:'Georgia',serif;outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.input-field:focus{border-color:var(--gold-dim);}
+
+/* Loading */
+.loading{display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px;color:var(--gray);font-size:var(--fs-sm);font-style:italic;}
+.spinner{width:38px;height:38px;border:2px solid #222;border-top-color:var(--gold);border-radius:50%;animation:spin .85s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Credit info */
+.credit-info{text-align:center;color:var(--gray);font-size:var(--fs-sm);margin-bottom:16px;}
+.credit-info strong{color:var(--gold);}
+
+/* Analysis Gold Card */
+.analysis-gold-card{background:var(--card-bg);border:2px solid var(--gold);border-radius:18px;padding:18px 18px 14px;margin-bottom:14px;position:relative;overflow:hidden;}
+.analysis-gold-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(212,175,55,.07),transparent 60%);pointer-events:none;}
+.analysis-gold-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--gold-dim);}
+.analysis-gold-icon{font-size:26px;flex-shrink:0;}
+.analysis-gold-title{font-size:var(--fs-sm);color:var(--gold);letter-spacing:2px;font-weight:bold;}
+.analysis-gold-body{font-size:var(--fs-sm);line-height:1.8;color:var(--white);font-style:italic;}
+
+/* Dash mini analysis card */
+.dash-analysis-card{background:var(--card-bg);border:1px solid var(--gold);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;}
+.dash-analysis-card .da-icon{font-size:22px;flex-shrink:0;margin-top:2px;}
+.dash-analysis-card .da-content{}
+.dash-analysis-card .da-title{font-size:11px;color:var(--gold);letter-spacing:1.5px;margin-bottom:5px;}
+.dash-analysis-card .da-text{font-size:12px;color:var(--white);line-height:1.65;font-style:italic;}
+
+/* Share button */
+.btn-share{display:flex;align-items:center;justify-content:center;gap:8px;background:none;border:1px solid var(--gold-dim);color:var(--gold);padding:10px 20px;border-radius:20px;font-size:var(--fs-xs);font-family:'Georgia',serif;letter-spacing:1px;cursor:pointer;transition:background .2s,border-color .2s;touch-action:manipulation;width:100%;margin-top:10px;}
+.btn-share:active{background:#1a1505;border-color:var(--gold);}
+.btn-share .share-icon{font-size:16px;}
+
+/* Tarot */
+.tarot-area{display:flex;justify-content:center;gap:14px;margin:20px 0;}
+.tarot-card-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;}
+.tarot-card{width:100%;aspect-ratio:2/3;border-radius:14px;cursor:pointer;position:relative;transform-style:preserve-3d;transition:transform .6s ease;touch-action:manipulation;}
+.tarot-card.flipped{transform:rotateY(180deg);}
+.tarot-front,.tarot-back{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+.tarot-back{background:linear-gradient(135deg,#1a0d00,#0d0d1a);border:2px solid var(--gold-dim);font-size:32px;}
+.tarot-back::before{content:'✦';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:40px;color:var(--gold-dim);opacity:.3;}
+.tarot-front{background:linear-gradient(135deg,#13131A,#1a1505);border:2px solid var(--gold);transform:rotateY(180deg);padding:10px;gap:6px;}
+.tarot-front .t-icon{font-size:36px;}
+.tarot-front .t-name{font-size:10px;color:var(--gold);text-align:center;letter-spacing:1px;line-height:1.3;}
+.tarot-pos{font-size:10px;color:var(--gray);letter-spacing:1px;text-align:center;}
+.tarot-reading{margin-top:6px;}
+
+/* Birth chart */
+.planet-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.planet-card{background:var(--card-bg);border:1px solid #2a2a1a;border-radius:14px;padding:14px;text-align:center;}
+.planet-card .p-sym{font-size:28px;margin-bottom:4px;}
+.planet-card .p-name{font-size:10px;color:var(--gold);letter-spacing:1px;}
+.planet-card .p-sign{font-size:13px;color:var(--white);margin-top:3px;}
+.planet-card .p-house{font-size:10px;color:var(--gray);margin-top:2px;}
+.asc-big{text-align:center;padding:24px 16px;background:linear-gradient(135deg,#0d0d1a,#1a0d00);border:1px solid var(--gold);border-radius:18px;margin-bottom:14px;}
+.asc-symbol{font-size:64px;margin-bottom:10px;animation:seal-pulse 3s ease-in-out infinite;}
+.asc-label{font-size:11px;color:var(--gray);letter-spacing:2px;margin-bottom:4px;}
+.asc-name{font-size:22px;color:var(--gold);letter-spacing:2px;}
+.asc-desc{font-size:13px;color:var(--gray);font-style:italic;margin-top:6px;}
+
+/* Biorhythm */
+.bio-svg-wrap{background:var(--card-bg);border:1px solid var(--gold-dim);border-radius:16px;padding:14px;margin-bottom:14px;overflow:hidden;}
+.bio-legend{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:14px;}
+.bio-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--gray);}
+.bio-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.bio-values{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px;}
+.bio-val{background:var(--card-bg);border:1px solid #2a2a1a;border-radius:12px;padding:12px 6px;text-align:center;}
+.bio-val .bv-icon{font-size:18px;margin-bottom:4px;}
+.bio-val .bv-pct{font-size:16px;font-weight:bold;color:var(--gold);}
+.bio-val .bv-label{font-size:9px;color:var(--gray);letter-spacing:.5px;margin-top:2px;}
+.bio-date-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px;}
+.bio-date-btn{background:none;border:1px solid var(--gold-dim);color:var(--gold);width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;}
+.bio-date-lbl{font-size:var(--fs-sm);color:var(--white);min-width:120px;text-align:center;}
+#toast{position:fixed;bottom:calc(var(--safe-bottom) + 96px);left:50%;transform:translateX(-50%);background:var(--gold);color:var(--black);padding:11px 22px;border-radius:20px;font-size:var(--fs-sm);font-weight:bold;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999;white-space:nowrap;max-width:90vw;}
+#toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div id="app">
+
+<!-- SPLASH -->
+<div class="screen" id="splash">
+  <div class="splash-stars" id="stars"></div>
+  <div class="seal-wrap">
+    <div class="seal-ring2"></div>
+    <div class="seal-ring"></div>
+    <svg class="seal" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="60" r="55" stroke="#D4AF37" stroke-width="1.5" stroke-dasharray="5 3"/>
+      <circle cx="60" cy="60" r="44" stroke="#D4AF37" stroke-width="0.5" opacity="0.6"/>
+      <polygon points="60,18 68.5,44 96,44 73.5,59.5 82,85.5 60,70 38,85.5 46.5,59.5 24,44 51.5,44" fill="none" stroke="#D4AF37" stroke-width="1.5" stroke-linejoin="round"/>
+      <circle cx="60" cy="60" r="7" fill="#D4AF37"/>
+      <text x="60" y="113" text-anchor="middle" font-size="6.5" fill="#D4AF37" letter-spacing="3.5" font-family="Georgia">MYSTIC MASTERS</text>
+    </svg>
+  </div>
+  <div class="splash-title">MYSTIC MASTERS</div>
+  <div class="splash-sub">Ancient Wisdom · AI Insight</div>
+  <button class="splash-btn" id="splash-enter-btn">✦ BELÉPÉS</button>
+</div>
+
+<!-- PREVIEW -->
+<div class="screen hidden" id="preview">
+  <div class="splash-stars" id="stars2"></div>
+  <div class="preview-inner">
+    <div class="preview-header">
+      <div class="preview-title">✦ MYSTIC MASTERS</div>
+      <div class="preview-sub" id="preview-sub">Fedezd fel, mire vársz...</div>
+    </div>
+    <div class="preview-grid">
+      <div class="preview-card" onclick="triggerLogin()"><div class="p-icon">🔮</div><div class="p-label" data-hu="Cheiro AI" data-en="Cheiro AI">Cheiro AI</div></div>
+      <div class="preview-card" onclick="triggerLogin()"><div class="p-icon">🔢</div><div class="p-label" data-hu="Numerológia" data-en="Numerology">Numerológia</div></div>
+      <div class="preview-card" onclick="triggerLogin()"><div class="p-icon">♈</div><div class="p-label" data-hu="Csillagjegy" data-en="Zodiac">Csillagjegy</div></div>
+      <div class="preview-card" onclick="triggerLogin()"><div class="p-icon">🐉</div><div class="p-label" data-hu="Kínai horosz." data-en="Chinese Zodiac">Kínai horosz.</div></div>
+      <div class="preview-card" onclick="triggerLogin()"><div class="p-icon">🜁</div><div class="p-label" data-hu="Archetípus" data-en="Archetype">Archetípus</div></div>
+      <div class="preview-card" onclick="triggerLogin()"><div class="p-icon">⏳</div><div class="p-label" data-hu="Idővonal" data-en="Timeline">Idővonal</div></div>
+      <div class="preview-card" onclick="triggerLogin()"><div class="p-icon">🌟</div><div class="p-label" data-hu="Napi üzenet" data-en="Daily Insight">Napi üzenet</div></div>
+      <div class="preview-card" onclick="triggerLogin()"><div class="p-icon">🔯</div><div class="p-label" data-hu="Hermetikus" data-en="Hermetic">Hermetikus</div></div>
+      <div class="preview-card" onclick="triggerLogin()"><div class="p-icon">🌌</div><div class="p-label" data-hu="Születési térkép" data-en="Birth Chart">Születési térkép</div></div>
+      <div class="preview-card" onclick="triggerLogin()"><div class="p-icon">🃏</div><div class="p-label" data-hu="Tarot" data-en="Tarot">Tarot</div></div>
+      <div class="preview-card" onclick="triggerLogin()"><div class="p-icon">📊</div><div class="p-label" data-hu="Bioritmus" data-en="Biorhythm">Bioritmus</div></div>
+      <div class="preview-card" onclick="triggerLogin()"><div class="p-icon">👤</div><div class="p-label" data-hu="Profil" data-en="Profile">Profil</div></div>
+    </div>
+    <div class="preview-hint" id="preview-hint">Kattints bármelyikre a belépéshez</div>
+  </div>
+</div>
+
+<!-- LANG + LOGIN -->
+<div class="screen hidden" id="langlogin">
+  <div class="splash-stars" id="stars3"></div>
+  <div class="ll-inner">
+    <div class="ll-logo">🔮</div>
+    <div class="ll-title">MYSTIC MASTERS</div>
+    <div class="ll-sub" id="ll-sub">Válassz nyelvet és lépj be</div>
+    <div class="lang-row">
+      <button class="btn-lang active" id="btn-hu" onclick="setLang('hu')">🇭🇺 Magyar</button>
+      <button class="btn-lang" id="btn-en" onclick="setLang('en')">🇬🇧 English</button>
+    </div>
+    <button class="btn-google" id="btn-google-login">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"/>
+      <span id="login-btn-text">Belépés Google-lal</span>
+    </button>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div class="screen hidden" id="setup">
+  <div class="topbar">
+    <div class="topbar-title" data-hu="Misztikus Profil" data-en="Mystic Profile">Misztikus Profil</div>
+    <button class="topbar-lang" onclick="toggleLang()">🌐</button>
+  </div>
+  <div class="scroll-content">
+    <div class="gold-card" style="margin-bottom:20px;">
+      <p style="color:var(--gray)" data-hu="Add meg adataid. Csak te látod — az AI ezek alapján elemez." data-en="Enter your details. Only you see them — AI reads from these.">Add meg adataid. Csak te látod — az AI ezek alapján elemez.</p>
+    </div>
+    <div class="input-group"><label class="input-label" data-hu="Teljes neved" data-en="Full Name">Teljes neved</label><input class="input-field" id="setup-name" type="text" autocomplete="off"/></div>
+    <div class="input-group"><label class="input-label" data-hu="Születési dátum" data-en="Date of Birth">Születési dátum</label><input class="input-field" id="setup-dob" type="date"/></div>
+    <div class="input-group"><label class="input-label" data-hu="Születési óra (0–23)" data-en="Birth Hour (0–23)">Születési óra (0–23)</label><input class="input-field" id="setup-hour" type="number" min="0" max="23"/></div>
+    <div class="input-group"><label class="input-label" data-hu="Születési perc (0–59)" data-en="Birth Minute (0–59)">Születési perc (0–59)</label><input class="input-field" id="setup-min" type="number" min="0" max="59"/></div>
+    <div class="input-group"><label class="input-label" data-hu="Születési helyed" data-en="Place of Birth">Születési helyed</label><input class="input-field" id="setup-place" type="text" autocomplete="off"/></div>
+    <button class="btn-gold" id="btn-save-profile">✦ <span data-hu="Profil mentése" data-en="Save Profile">Profil mentése</span></button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="screen hidden" id="dashboard">
+  <div class="topbar">
+    <div class="topbar-title">✦ MYSTIC MASTERS</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="topbar-lang" onclick="toggleLang()">🌐</button>
+      <div class="topbar-credits" id="dashboard-credits">✦ 10</div>
+    </div>
+  </div>
+  <div class="scroll-content">
+    <div class="dash-sigil">✦</div>
+    <div class="module-grid">
+      <div class="module-card" onclick="showScreen('palm')"><div class="icon">🔮</div><div class="label" data-hu="Cheiro AI" data-en="Cheiro AI">Cheiro AI</div></div>
+      <div class="module-card" onclick="showScreen('numerology')"><div class="icon">🔢</div><div class="label" data-hu="Numerológia" data-en="Numerology">Numerológia</div></div>
+      <div class="module-card" onclick="showScreen('zodiac')"><div class="icon">♈</div><div class="label" data-hu="Csillagjegy" data-en="Zodiac">Csillagjegy</div></div>
+      <div class="module-card" onclick="showScreen('chinese')"><div class="icon">🐉</div><div class="label" data-hu="Kínai horosz." data-en="Chinese Zodiac">Kínai horosz.</div></div>
+      <div class="module-card" onclick="showScreen('archetype')"><div class="icon">🜁</div><div class="label" data-hu="Archetípus" data-en="Archetype">Archetípus</div></div>
+      <div class="module-card" onclick="showScreen('timeline')"><div class="icon">⏳</div><div class="label" data-hu="Idővonal" data-en="Timeline">Idővonal</div></div>
+      <div class="module-card" onclick="showScreen('insight')"><div class="icon">🌟</div><div class="label" data-hu="Napi üzenet" data-en="Daily Insight">Napi üzenet</div></div>
+      <div class="module-card" onclick="showScreen('birthchart')"><div class="icon">🌌</div><div class="label" data-hu="Születési térkép" data-en="Birth Chart">Születési térkép</div></div>
+      <div class="module-card" onclick="showScreen('tarot')"><div class="icon">🃏</div><div class="label" data-hu="Tarot" data-en="Tarot">Tarot</div></div>
+      <div class="module-card" onclick="showScreen('biorhythm')"><div class="icon">📊</div><div class="label" data-hu="Bioritmus" data-en="Biorhythm">Bioritmus</div></div>
+      <div class="module-card" onclick="showScreen('profile')"><div class="icon">👤</div><div class="label" data-hu="Profil" data-en="Profile">Profil</div></div>
+    </div>
+    <!-- ALL ANALYSES CARD -->
+    <div id="dash-analyses-preview" style="margin-top:18px;display:none;">
+      <div style="font-size:11px;color:var(--gray);letter-spacing:2px;text-align:center;margin-bottom:10px;" data-hu="LEGUTÓBBI ELEMZÉSEK" data-en="RECENT ANALYSES">LEGUTÓBBI ELEMZÉSEK</div>
+      <div id="dash-analyses-cards"></div>
+    </div>
+    <!-- HERMETIC GRAND SUMMARY - ALWAYS LAST -->
+    <div style="margin-top:18px;">
+      <div style="font-size:11px;color:var(--gold-dim);letter-spacing:2px;text-align:center;margin-bottom:12px;" data-hu="✦ NAGY ÖSSZEGZÉS" data-en="✦ GRAND SUMMARY">✦ NAGY ÖSSZEGZÉS</div>
+      <div class="hermetic-card" style="cursor:pointer;" onclick="showScreen('hermetic')">
+        <div class="hermetic-title" style="font-size:16px;">🔯 <span data-hu="Hermetikus Összegzés" data-en="Hermetic Summary">Hermetikus Összegzés</span></div>
+        <div class="hermetic-sub" data-hu="A 7 Hermész Princípium tükrében" data-en="Through the 7 Hermetic Principles">A 7 Hermész Princípium tükrében</div>
+        <div id="dash-hermetic-preview" style="display:none;font-size:13px;color:var(--white);line-height:1.7;margin-top:12px;font-style:italic;text-align:left;"></div>
+        <div id="dash-hermetic-btn" style="margin-top:14px;">
+          <span style="font-size:12px;color:var(--gold);letter-spacing:1px;" data-hu="→ Kattints az elemzéshez" data-en="→ Tap for reading">→ Kattints az elemzéshez</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="showScreen('dashboard')"><span>🏠</span><span data-hu="Főoldal" data-en="Home">Főoldal</span></button>
+    <button class="nav-btn" onclick="showScreen('profile')"><span>👤</span><span data-hu="Profil" data-en="Profile">Profil</span></button>
+    <button class="nav-btn" onclick="showScreen('insight')"><span>🌟</span><span data-hu="Ma" data-en="Today">Ma</span></button>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div class="screen hidden" id="profile">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('dashboard')">←</button>
+    <div class="topbar-title" data-hu="Profil" data-en="Profile">Profil</div>
+    <button class="topbar-lang" onclick="toggleLang()">🌐</button>
+  </div>
+  <div class="scroll-content">
+    <div class="gold-card">
+      <div class="profile-header">
+        <img class="profile-avatar" id="profile-avatar" src="icons/icon-192.png" alt="avatar"/>
+        <div>
+          <div class="profile-name" id="profile-name">–</div>
+          <div class="profile-archetype" id="profile-archetype">✦ The Seeker</div>
+        </div>
+      </div>
+      <div class="field-row"><span class="field-label" data-hu="Születési dátum" data-en="Date of Birth">Születési dátum</span><span class="field-value" id="profile-dob">–</span></div>
+      <div class="field-row"><span class="field-label" data-hu="Születési hely" data-en="Place of Birth">Születési hely</span><span class="field-value" id="profile-place">–</span></div>
+      <div class="field-row"><span class="field-label" data-hu="Életút szám" data-en="Life Path">Életút szám</span><span class="field-value" id="profile-num">–</span></div>
+      <div class="field-row"><span class="field-label" data-hu="Csillagjegy" data-en="Zodiac">Csillagjegy</span><span class="field-value" id="profile-zodiac">–</span></div>
+      <div class="field-row"><span class="field-label" data-hu="Kreditek" data-en="Credits">Kreditek</span><span class="field-value" id="profile-credits">–</span></div>
+    </div>
+    <div class="gold-card">
+      <h3 data-hu="Jutalmak" data-en="Achievements">Jutalmak</h3>
+      <div class="badge-grid" id="badge-grid"></div>
+    </div>
+    <button class="btn-outline" onclick="editProfile()" style="margin-bottom:12px;"><span data-hu="Profil szerkesztése" data-en="Edit Profile">Profil szerkesztése</span></button>
+    <button class="btn-outline" onclick="doSignOut()"><span data-hu="Kijelentkezés" data-en="Sign Out">Kijelentkezés</span></button>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showScreen('dashboard')"><span>🏠</span><span data-hu="Főoldal" data-en="Home">Főoldal</span></button>
+    <button class="nav-btn active"><span>👤</span><span data-hu="Profil" data-en="Profile">Profil</span></button>
+    <button class="nav-btn" onclick="showScreen('insight')"><span>🌟</span><span data-hu="Ma" data-en="Today">Ma</span></button>
+  </div>
+</div>
+
+<!-- PALM SCAN -->
+<div class="screen hidden" id="palm">
+  <div class="topbar">
+    <button class="topbar-back" onclick="stopCamera();showScreen('dashboard')">←</button>
+    <div class="topbar-title">🔮 Cheiro AI</div>
+    <div class="topbar-credits" id="palm-credits">✦ –</div>
+  </div>
+  <div class="scroll-content">
+    <div class="credit-info"><span data-hu="Egy scan = " data-en="One scan = ">Egy scan = </span><strong>3 ✦</strong></div>
+    <div class="camera-wrap">
+      <video id="palm-video" autoplay playsinline muted></video>
+      <canvas id="palm-canvas" style="display:none;"></canvas>
+      <div class="scan-overlay"><div class="scan-frame"></div></div>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:10px;">
+      <button class="btn-gold" onclick="doScan()" style="flex:1">🔮 <span data-hu="Scan tenyér" data-en="Scan Palm">Scan tenyér</span></button>
+      <label class="btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;touch-action:manipulation;">
+        📷 <span data-hu="Fotó" data-en="Photo">Fotó</span>
+        <input type="file" accept="image/*" style="display:none" id="palm-file-input" onchange="handlePalmFile(event)"/>
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- PALM RESULT -->
+<div class="screen hidden" id="palm-result-screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('dashboard')">←</button>
+    <div class="topbar-title">🔮 <span data-hu="Tenyér Elemzés" data-en="Palm Reading">Tenyér Elemzés</span></div>
+  </div>
+  <div class="palm-result-body" id="palm-result-body">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<!-- ALL ANALYSES SUMMARY SCREEN -->
+<div class="screen hidden" id="all-analyses">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('dashboard')">←</button>
+    <div class="topbar-title">✦ <span data-hu="Összes Elemzés" data-en="All Analyses">Összes Elemzés</span></div>
+  </div>
+  <div class="scroll-content" id="all-analyses-content">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<!-- NUMEROLOGY -->
+<div class="screen hidden" id="numerology">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('dashboard')">←</button>
+    <div class="topbar-title">🔢 <span data-hu="Numerológia" data-en="Numerology">Numerológia</span></div>
+    <div class="topbar-credits" id="num-credits">✦ –</div>
+  </div>
+  <div class="scroll-content">
+    <div class="credit-info"><span data-hu="Elemzés = " data-en="Reading = ">Elemzés = </span><strong>2 ✦</strong></div>
+    <div class="num-cards">
+      <div class="num-card"><div class="num-big" id="pyth-num">–</div><div class="num-label">PYTHAGORAS</div><div class="num-name" data-hu="Életút" data-en="Life Path">Életút</div></div>
+      <div class="num-card"><div class="num-big" id="chald-num">–</div><div class="num-label">CHALDEAN</div><div class="num-name" data-hu="Lélek rezgés" data-en="Soul Vibration">Lélek rezgés</div></div>
+    </div>
+    <button class="btn-gold" onclick="doNumerology()"><span data-hu="✦ Elemzés kérése" data-en="✦ Request Reading">✦ Elemzés kérése</span></button>
+    <div id="num-result" style="display:none;margin-top:14px;">
+      <div class="analysis-gold-card">
+        <div class="analysis-gold-header">
+          <div class="analysis-gold-icon">🔢</div>
+          <div class="analysis-gold-title" data-hu="NUMEROLÓGIA ELEMZÉS" data-en="NUMEROLOGY READING">NUMEROLÓGIA ELEMZÉS</div>
+        </div>
+        <div class="analysis-gold-body" id="num-result-text"></div>
+        <button class="btn-share" onclick="shareAnalysis('num')"><span class="share-icon">📤</span><span data-hu="Megosztás" data-en="Share">Megosztás</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ZODIAC -->
+<div class="screen hidden" id="zodiac">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('dashboard')">←</button>
+    <div class="topbar-title">♈ <span data-hu="Csillagjegy" data-en="Western Zodiac">Csillagjegy</span></div>
+    <div class="topbar-credits" id="zod-credits">✦ –</div>
+  </div>
+  <div class="scroll-content">
+    <div class="credit-info"><span data-hu="Elemzés = " data-en="Reading = ">Elemzés = </span><strong>1 ✦</strong></div>
+    <div class="gold-card zodiac-card">
+      <div class="zodiac-sign" id="zod-sign">♈</div>
+      <div class="zodiac-name" id="zod-name">–</div>
+      <div class="zodiac-dates" id="zod-dates">–</div>
+      <div class="trait-pills" id="zod-traits"></div>
+    </div>
+    <button class="btn-gold" onclick="doZodiac()"><span data-hu="✦ AI elemzés" data-en="✦ AI Reading">✦ AI elemzés</span></button>
+    <div id="zod-result" style="display:none;margin-top:14px;">
+      <div class="analysis-gold-card">
+        <div class="analysis-gold-header">
+          <div class="analysis-gold-icon" id="zod-result-icon">♈</div>
+          <div class="analysis-gold-title" data-hu="CSILLAGJEGY ELEMZÉS" data-en="ZODIAC READING">CSILLAGJEGY ELEMZÉS</div>
+        </div>
+        <div class="analysis-gold-body" id="zod-result-text"></div>
+        <button class="btn-share" onclick="shareAnalysis('zod')"><span class="share-icon">📤</span><span data-hu="Megosztás" data-en="Share">Megosztás</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHINESE -->
+<div class="screen hidden" id="chinese">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('dashboard')">←</button>
+    <div class="topbar-title">🐉 <span data-hu="Kínai horoszkóp" data-en="Chinese Zodiac">Kínai horoszkóp</span></div>
+    <div class="topbar-credits" id="chin-credits">✦ –</div>
+  </div>
+  <div class="scroll-content">
+    <div class="credit-info"><span data-hu="Elemzés = " data-en="Reading = ">Elemzés = </span><strong>1 ✦</strong></div>
+    <div class="gold-card zodiac-card">
+      <div class="zodiac-sign" id="chin-sign">🐉</div>
+      <div class="zodiac-name" id="chin-name">–</div>
+      <div class="zodiac-dates" id="chin-dates">–</div>
+      <div class="trait-pills" id="chin-traits"></div>
+    </div>
+    <button class="btn-gold" onclick="doChinese()"><span data-hu="✦ AI elemzés" data-en="✦ AI Reading">✦ AI elemzés</span></button>
+    <div id="chin-result" style="display:none;margin-top:14px;">
+      <div class="analysis-gold-card">
+        <div class="analysis-gold-header">
+          <div class="analysis-gold-icon" id="chin-result-icon">🐉</div>
+          <div class="analysis-gold-title" data-hu="KÍNAI HOROSZKÓP ELEMZÉS" data-en="CHINESE ZODIAC READING">KÍNAI HOROSZKÓP ELEMZÉS</div>
+        </div>
+        <div class="analysis-gold-body" id="chin-result-text"></div>
+        <button class="btn-share" onclick="shareAnalysis('chin')"><span class="share-icon">📤</span><span data-hu="Megosztás" data-en="Share">Megosztás</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ARCHETYPE -->
+<div class="screen hidden" id="archetype">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('dashboard')">←</button>
+    <div class="topbar-title">🜁 <span data-hu="Archetípus" data-en="Archetype">Archetípus</span></div>
+  </div>
+  <div class="scroll-content">
+    <div class="archetype-big">
+      <div class="archetype-icon" id="arch-icon">🜁</div>
+      <div class="archetype-name" id="arch-name">–</div>
+      <div class="archetype-sub" id="arch-sub">–</div>
+    </div>
+    <button class="btn-gold" onclick="doArchetype()"><span data-hu="✦ Archetípus meghatározása" data-en="✦ Determine Archetype">✦ Archetípus meghatározása</span></button>
+    <div id="arch-result" style="display:none;margin-top:14px;">
+      <div class="analysis-gold-card">
+        <div class="analysis-gold-header">
+          <div class="analysis-gold-icon" id="arch-result-icon">🜁</div>
+          <div class="analysis-gold-title" data-hu="ARCHETÍPUS ELEMZÉS" data-en="ARCHETYPE READING">ARCHETÍPUS ELEMZÉS</div>
+        </div>
+        <div class="analysis-gold-body" id="arch-result-text"></div>
+        <button class="btn-share" onclick="shareAnalysis('arch')"><span class="share-icon">📤</span><span data-hu="Megosztás" data-en="Share">Megosztás</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="screen hidden" id="timeline">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('dashboard')">←</button>
+    <div class="topbar-title">⏳ <span data-hu="Misztikus idővonal" data-en="Mystic Timeline">Misztikus idővonal</span></div>
+  </div>
+  <div class="scroll-content">
+    <div class="gold-card" style="margin-bottom:16px;"><p style="color:var(--gray)" data-hu="Életciklusaid és misztikus fordulópontjaid." data-en="Your life cycles and mystic turning points.">Életciklusaid és misztikus fordulópontjaid.</p></div>
+    <div class="timeline" id="timeline-content"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+</div>
+
+<!-- INSIGHT -->
+<div class="screen hidden" id="insight">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('dashboard')">←</button>
+    <div class="topbar-title">🌟 <span data-hu="Napi üzenet" data-en="Daily Insight">Napi üzenet</span></div>
+  </div>
+  <div class="scroll-content">
+    <div class="insight-card" id="insight-card"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+</div>
+
+<!-- HERMETIC -->
+<div class="screen hidden" id="hermetic">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('dashboard')">←</button>
+    <div class="topbar-title">🔯 <span data-hu="Hermetikus Összegzés" data-en="Hermetic Summary">Hermetikus Összegzés</span></div>
+  </div>
+  <div class="scroll-content">
+    <div class="hermetic-card">
+      <div class="hermetic-title">🔯 AS ABOVE, SO BELOW</div>
+      <div class="hermetic-sub" data-hu="A 7 Hermész Princípium tükrében" data-en="Through the 7 Hermetic Principles">A 7 Hermész Princípium tükrében</div>
+      <div class="hermetic-principles">
+        <div class="principle-item"><strong>I. Mentalizmus</strong><span data-hu="A Minden Elme" data-en="The All is Mind">A Minden Elme</span></div>
+        <div class="principle-item"><strong>II. Megfelelés</strong><span data-hu="Ahogy fent, úgy lent" data-en="As above, so below">Ahogy fent, úgy lent</span></div>
+        <div class="principle-item"><strong>III. Rezgés</strong><span data-hu="Minden rezeg" data-en="Everything vibrates">Minden rezeg</span></div>
+        <div class="principle-item"><strong>IV. Polaritás</strong><span data-hu="Minden ellentét egységes" data-en="All opposites are one">Minden ellentét egységes</span></div>
+        <div class="principle-item"><strong>V. Ritmus</strong><span data-hu="A hullámzás törvénye" data-en="The law of rhythm">A hullámzás törvénye</span></div>
+        <div class="principle-item"><strong>VI. Ok és Okozat</strong><span data-hu="Semmi sem véletlen" data-en="Nothing is coincidence">Semmi sem véletlen</span></div>
+        <div class="principle-item"><strong>VII. Nemek</strong><span data-hu="Minden dologban van férfi és nő" data-en="Gender is in everything">Minden dologban van férfi és nő</span></div>
+      </div>
+    </div>
+    <button class="btn-gold" onclick="doHermetic()"><span data-hu="✦ Nagy Összegzés kérése" data-en="✦ Request Grand Summary">✦ Nagy Összegzés kérése</span></button>
+    <div id="hermetic-result" style="display:none;margin-top:14px;">
+      <div class="analysis-gold-card" style="border-color:var(--gold);background:linear-gradient(135deg,#0d0d1a,#1a0d00);">
+        <div class="analysis-gold-header">
+          <div class="analysis-gold-icon">🔯</div>
+          <div class="analysis-gold-title" data-hu="HERMETIKUS NAGY ÖSSZEGZÉS" data-en="HERMETIC GRAND SUMMARY">HERMETIKUS NAGY ÖSSZEGZÉS</div>
+        </div>
+        <div class="analysis-gold-body" id="hermetic-result-text"></div>
+        <button class="btn-share" onclick="shareAnalysis('hermetic')"><span class="share-icon">📤</span><span data-hu="Megosztás" data-en="Share">Megosztás</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BIRTH CHART -->
+<div class="screen hidden" id="birthchart">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('dashboard')">←</button>
+    <div class="topbar-title">🌌 <span data-hu="Születési Térkép" data-en="Birth Chart">Születési Térkép</span></div>
+    <div class="topbar-credits" id="bc-credits">✦ –</div>
+  </div>
+  <div class="scroll-content">
+    <div class="credit-info"><span data-hu="Ultra elemzés = " data-en="Ultra reading = ">Ultra elemzés = </span><strong>4 ✦</strong></div>
+    <div id="bc-asc-wrap" class="asc-big">
+      <div class="asc-symbol" id="bc-asc-symbol">🌌</div>
+      <div class="asc-label" data-hu="ASCENDÁNS" data-en="ASCENDANT">ASCENDÁNS</div>
+      <div class="asc-name" id="bc-asc-name">–</div>
+      <div class="asc-desc" id="bc-asc-desc" data-hu="Add meg születési adataid a profilban" data-en="Add birth data in your profile">Add meg születési adataid a profilban</div>
+    </div>
+    <div class="planet-grid" id="bc-planets"></div>
+    <button class="btn-gold" onclick="doBirthChart()"><span data-hu="✦ Ultra Elemzés + Kybalion" data-en="✦ Ultra Reading + Kybalion">✦ Ultra Elemzés + Kybalion</span></button>
+    <div id="bc-result" style="display:none;margin-top:14px;">
+      <div class="analysis-gold-card" style="background:linear-gradient(135deg,#0a0a1a,#0d1a0d);">
+        <div class="analysis-gold-header">
+          <div class="analysis-gold-icon">🌌</div>
+          <div class="analysis-gold-title" data-hu="SZÜLETÉSI TÉRKÉP ELEMZÉS" data-en="BIRTH CHART READING">SZÜLETÉSI TÉRKÉP ELEMZÉS</div>
+        </div>
+        <div class="analysis-gold-body" id="bc-result-text"></div>
+        <button class="btn-share" onclick="shareAnalysis('bc')"><span class="share-icon">📤</span><span data-hu="Megosztás" data-en="Share">Megosztás</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAROT -->
+<div class="screen hidden" id="tarot">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('dashboard')">←</button>
+    <div class="topbar-title">🃏 <span data-hu="Tarot Olvasat" data-en="Tarot Reading">Tarot Olvasat</span></div>
+    <div class="topbar-credits" id="tarot-credits">✦ –</div>
+  </div>
+  <div class="scroll-content">
+    <div class="credit-info"><span data-hu="3 kártyás olvasat = " data-en="3-card reading = ">3 kártyás olvasat = </span><strong>2 ✦</strong></div>
+    <div class="gold-card" style="text-align:center;margin-bottom:14px;">
+      <p style="color:var(--gray);font-style:italic;font-size:14px;" data-hu="Összpontosíts egy kérdésre, majd húzd meg a kártyákat..." data-en="Focus on a question, then draw the cards...">Összpontosíts egy kérdésre, majd húzd meg a kártyákat...</p>
+    </div>
+    <div class="tarot-area" id="tarot-cards-area">
+      <div class="tarot-card-wrap"><div class="tarot-card" id="tarot-c0" onclick="flipTarot(0)"><div class="tarot-back">🔮</div><div class="tarot-front"><div class="t-icon" id="ti-0">⭐</div><div class="t-name" id="tn-0">–</div></div></div><div class="tarot-pos" data-hu="Múlt" data-en="Past">Múlt</div></div>
+      <div class="tarot-card-wrap"><div class="tarot-card" id="tarot-c1" onclick="flipTarot(1)"><div class="tarot-back">🔮</div><div class="tarot-front"><div class="t-icon" id="ti-1">☀️</div><div class="t-name" id="tn-1">–</div></div></div><div class="tarot-pos" data-hu="Jelen" data-en="Present">Jelen</div></div>
+      <div class="tarot-card-wrap"><div class="tarot-card" id="tarot-c2" onclick="flipTarot(2)"><div class="tarot-back">🔮</div><div class="tarot-front"><div class="t-icon" id="ti-2">🌙</div><div class="t-name" id="tn-2">–</div></div></div><div class="tarot-pos" data-hu="Jövő" data-en="Future">Jövő</div></div>
+    </div>
+    <button class="btn-gold" id="tarot-draw-btn" onclick="doTarot()"><span data-hu="✦ Kártyák húzása" data-en="✦ Draw Cards">✦ Kártyák húzása</span></button>
+    <div id="tarot-result" style="display:none;margin-top:14px;">
+      <div class="analysis-gold-card" style="background:linear-gradient(135deg,#1a0010,#0d0d1a);">
+        <div class="analysis-gold-header">
+          <div class="analysis-gold-icon">🃏</div>
+          <div class="analysis-gold-title" data-hu="TAROT OLVASAT" data-en="TAROT READING">TAROT OLVASAT</div>
+        </div>
+        <div class="analysis-gold-body" id="tarot-result-text"></div>
+        <button class="btn-share" onclick="shareAnalysis('tarot')"><span class="share-icon">📤</span><span data-hu="Megosztás" data-en="Share">Megosztás</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BIORHYTHM -->
+<div class="screen hidden" id="biorhythm">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('dashboard')">←</button>
+    <div class="topbar-title">📊 <span data-hu="Bioritmus" data-en="Biorhythm">Bioritmus</span></div>
+  </div>
+  <div class="scroll-content">
+    <div class="bio-date-row">
+      <button class="bio-date-btn" onclick="moveBioDate(-1)">‹</button>
+      <div class="bio-date-lbl" id="bio-date-lbl">–</div>
+      <button class="bio-date-btn" onclick="moveBioDate(1)">›</button>
+    </div>
+    <div class="bio-values" id="bio-values"></div>
+    <div class="bio-svg-wrap"><svg id="bio-svg" width="100%" height="200" viewBox="0 0 340 200"></svg></div>
+    <div class="bio-legend" id="bio-legend"></div>
+    <button class="btn-gold" onclick="doBioAI()"><span data-hu="✦ AI Értelmezés" data-en="✦ AI Interpretation">✦ AI Értelmezés</span></button>
+    <div id="bio-result" style="display:none;margin-top:14px;">
+      <div class="analysis-gold-card">
+        <div class="analysis-gold-header">
+          <div class="analysis-gold-icon">📊</div>
+          <div class="analysis-gold-title" data-hu="BIORITMUS ELEMZÉS" data-en="BIORHYTHM READING">BIORITMUS ELEMZÉS</div>
+        </div>
+        <div class="analysis-gold-body" id="bio-result-text"></div>
+        <button class="btn-share" onclick="shareAnalysis('bio')"><span class="share-icon">📤</span><span data-hu="Megosztás" data-en="Share">Megosztás</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module">
+import { initializeApp }    from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut as fbSignOut }
+  from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc }
+  from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js';
+
+const FB={apiKey:"AIzaSyB92tW-Un3imyCfWjIACr8syOFm1uLWQJ4",authDomain:"mystic-masters.firebaseapp.com",projectId:"mystic-masters",storageBucket:"mystic-masters.firebasestorage.app",messagingSenderId:"1062778009567",appId:"1:1062778009567:web:4b74c3b6471bef6521766a"};
+const GEMINI_KEY='AIzaSyDOZcpZ_2GYOOlLhSvHuaNXf6KoyvfHyZc';
+const GEMINI_URL=`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent`;
+
+const fbApp=initializeApp(FB);
+const auth=getAuth(fbApp);
+const db=getFirestore(fbApp);
+
+let currentUser=null, userProfile=null, cameraStream=null;
+let currentLang=localStorage.getItem('mm-lang')||'hu';
+
+window.setLang=setLang; window.toggleLang=toggleLang; window.showScreen=showScreen;
+window.triggerLogin=triggerLogin; window.doSignOut=doSignOut; window.editProfile=editProfile;
+window.doScan=doScan; window.handlePalmFile=handlePalmFile; window.doNumerology=doNumerology;
+window.doZodiac=doZodiac; window.doChinese=doChinese; window.doArchetype=doArchetype;
+window.doHermetic=doHermetic; window.stopCamera=stopCamera;
+window.doBirthChart=doBirthChart; window.doTarot=doTarot; window.flipTarot=flipTarot;
+window.doBioAI=doBioAI; window.moveBioDate=moveBioDate;
+
+// ── LANG ──
+function setLang(l){
+  currentLang=l;
+  localStorage.setItem('mm-lang',l);
+  document.getElementById('btn-hu').classList.toggle('active',l==='hu');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  document.getElementById('login-btn-text').textContent=l==='hu'?'Belépés Google-lal':'Sign in with Google';
+  document.getElementById('preview-sub').textContent=l==='hu'?'Fedezd fel, mire vársz...':'Discover what awaits...';
+  document.getElementById('preview-hint').textContent=l==='hu'?'Kattints bármelyikre a belépéshez':'Tap any to sign in';
+  document.getElementById('ll-sub').textContent=l==='hu'?'Válassz nyelvet és lépj be':'Choose language and sign in';
+  document.querySelectorAll('[data-hu]').forEach(el=>{el.textContent=l==='hu'?el.dataset.hu:el.dataset.en;});
+}
+function toggleLang(){setLang(currentLang==='hu'?'en':'hu');}
+function t(hu,en){return currentLang==='hu'?hu:en;}
+
+// ── TOAST ──
+function showToast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+// ── STARS ──
+function makeStars(id,n){
+  const c=document.getElementById(id); if(!c)return;
+  for(let i=0;i<n;i++){
+    const s=document.createElement('div'); s.className='star';
+    const sz=Math.random()<.25?3:2;
+    s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${sz}px;height:${sz}px;--dur:${1.5+Math.random()*3}s;--delay:${Math.random()*4}s;`;
+    c.appendChild(s);
+  }
+}
+makeStars('stars',55); makeStars('stars2',35); makeStars('stars3',35);
+
+// ── SPLASH ──
+document.getElementById('splash-enter-btn').addEventListener('click',()=>showScreen('preview'));
+function triggerLogin(){showScreen('langlogin');}
+
+// ── SCREENS ──
+function showScreen(id){
+  if(id!=='palm') stopCamera();
+  if(id==='palm') startCamera();
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('hidden',s.id!==id));
+  setLang(currentLang);
+  updateCreditDisplays();
+  if(id==='profile')   renderProfile();
+  if(id==='insight')   loadInsight();
+  if(id==='timeline')  loadTimeline();
+  if(id==='archetype'){loadArchetype();restoreSavedAnalyses();}
+  if(id==='zodiac')   {loadZodiac();   restoreSavedAnalyses();}
+  if(id==='chinese')  {loadChinese();  restoreSavedAnalyses();}
+  if(id==='numerology'){loadNumerology();restoreSavedAnalyses();}
+  if(id==='hermetic')  restoreSavedAnalyses();
+  if(id==='dashboard') updateDashAnalyses();
+  if(id==='birthchart'){loadBirthChart();restoreSavedAnalyses();}
+  if(id==='tarot')     {loadTarot();restoreSavedAnalyses();}
+  if(id==='biorhythm') loadBiorhythm();
+}
+
+// ── AUTH ──
+document.getElementById('btn-google-login').addEventListener('click',async()=>{
+  const isAndroid=/Android/i.test(navigator.userAgent);
+  try{
+    if(isAndroid){await signInWithRedirect(auth,new GoogleAuthProvider());}
+    else{await signInWithPopup(auth,new GoogleAuthProvider());}
+  }catch(e){console.error(e);showToast(t('Hiba a belépésnél','Login error'));}
+});
+// Handle redirect result on page load (Android)
+getRedirectResult(auth).then(result=>{
+  if(result?.user) console.log('Redirect login OK:', result.user.email);
+}).catch(e=>console.error('Redirect error:',e));
+onAuthStateChanged(auth,async user=>{
+  if(user){
+    currentUser=user;
+    await loadUserProfile();
+    showScreen(!userProfile||!userProfile.dob?'setup':'dashboard');
+  } else {
+    currentUser=null; userProfile=null;
+    const active=document.querySelector('.screen:not(.hidden)');
+    if(!active||['dashboard','setup','profile'].includes(active.id)) showScreen('splash');
+  }
+});
+async function doSignOut(){await fbSignOut(auth);showScreen('splash');}
+
+// ── PROFILE DATA ──
+async function loadUserProfile(){
+  if(!currentUser)return;
+  const snap=await getDoc(doc(db,'users',currentUser.uid));
+  userProfile=snap.exists()?snap.data():{credits:10,palmScans:0,numReadings:0,badges:[]};
+  if(!snap.exists()) await setDoc(doc(db,'users',currentUser.uid),userProfile);
+}
+async function saveUserProfile(data){
+  if(!currentUser)return;
+  userProfile={...userProfile,...data};
+  await setDoc(doc(db,'users',currentUser.uid),userProfile,{merge:true});
+}
+document.getElementById('btn-save-profile').addEventListener('click',async()=>{
+  const name=document.getElementById('setup-name').value.trim();
+  const dob=document.getElementById('setup-dob').value;
+  if(!name||!dob){showToast(t('Töltsd ki a kötelező mezőket!','Fill in required fields!'));return;}
+  await saveUserProfile({name,dob,hour:document.getElementById('setup-hour').value,min:document.getElementById('setup-min').value,place:document.getElementById('setup-place').value.trim()});
+  showToast(t('Profil elmentve! ✦','Profile saved! ✦'));
+  showScreen('dashboard');
+});
+function editProfile(){
+  if(userProfile){
+    document.getElementById('setup-name').value=userProfile.name||'';
+    document.getElementById('setup-dob').value=userProfile.dob||'';
+    document.getElementById('setup-hour').value=userProfile.hour||'';
+    document.getElementById('setup-min').value=userProfile.min||'';
+    document.getElementById('setup-place').value=userProfile.place||'';
+  }
+  showScreen('setup');
+}
+function renderProfile(){
+  if(!userProfile||!currentUser)return;
+  document.getElementById('profile-name').textContent=userProfile.name||currentUser.displayName||'–';
+  document.getElementById('profile-dob').textContent=userProfile.dob||'–';
+  document.getElementById('profile-place').textContent=userProfile.place||'–';
+  document.getElementById('profile-credits').textContent=(userProfile.credits||0)+' ✦';
+  if(currentUser.photoURL) document.getElementById('profile-avatar').src=currentUser.photoURL;
+  if(userProfile.dob){
+    document.getElementById('profile-num').textContent=calcLifePath(userProfile.dob);
+    const z=getWesternZodiac(userProfile.dob);
+    document.getElementById('profile-zodiac').textContent=(currentLang==='hu'?z.sign:z.en)+' '+z.emoji;
+  }
+  const a=getArchetype();
+  document.getElementById('profile-archetype').textContent='✦ '+(currentLang==='hu'?a.hu:a.name);
+  document.getElementById('badge-grid').innerHTML=[
+    {icon:'⭐',hu:'Első lépés',en:'First Step',ok:()=>true},
+    {icon:'🔮',hu:'3 Palm Scan',en:'3 Palm Scans',ok:()=>(userProfile.palmScans||0)>=3},
+    {icon:'🔢',hu:'3 Numerológia',en:'3 Numerology',ok:()=>(userProfile.numReadings||0)>=3},
+  ].map(b=>`<div class="badge ${b.ok()?'earned':''}"><span class="badge-icon">${b.icon}</span>${currentLang==='hu'?b.hu:b.en}</div>`).join('');
+}
+
+// ── CREDITS ──
+function updateCreditDisplays(){
+  const c=userProfile?.credits??0;
+  ['dashboard-credits','palm-credits','num-credits','zod-credits','chin-credits'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='✦ '+c;});
+}
+async function spendCredits(n){
+  if((userProfile?.credits||0)<n){showToast(t('Nincs elég kredited! 💎','Not enough credits! 💎'));return false;}
+  await saveUserProfile({credits:(userProfile.credits||0)-n});
+  updateCreditDisplays();return true;
+}
+
+// ── NUMEROLOGY ──
+function calcLifePath(dob){
+  let s=dob.replace(/-/g,'').split('').map(Number).reduce((a,b)=>a+b,0);
+  while(s>9&&s!==11&&s!==22&&s!==33)s=String(s).split('').map(Number).reduce((a,b)=>a+b,0);
+  return s;
+}
+function calcChaldean(name){
+  const m={a:1,i:1,j:1,q:1,y:1,b:2,k:2,r:2,c:3,g:3,l:3,s:3,d:4,m:4,t:4,e:5,h:5,n:5,x:5,u:6,v:6,w:6,o:7,z:7,f:8,p:8};
+  let s=name.toLowerCase().replace(/[^a-z]/g,'').split('').map(c=>m[c]||0).reduce((a,b)=>a+b,0);
+  while(s>9&&s!==11&&s!==22)s=String(s).split('').map(Number).reduce((a,b)=>a+b,0);
+  return s;
+}
+function loadNumerology(){
+  if(!userProfile?.dob)return;
+  document.getElementById('pyth-num').textContent=calcLifePath(userProfile.dob);
+  document.getElementById('chald-num').textContent=calcChaldean(userProfile.name||'');
+}
+async function doNumerology(){
+  if(!userProfile?.dob){showToast(t('Először töltsd ki a profilod!','Fill in your profile first!'));return;}
+  if(!await spendCredits(2))return;
+  const lp=calcLifePath(userProfile.dob),ch=calcChaldean(userProfile.name||'');
+  await saveUserProfile({numReadings:(userProfile.numReadings||0)+1});
+  const el=document.getElementById('num-result');
+  const elText=document.getElementById('num-result-text');
+  el.style.display='block';
+  elText.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const lang=currentLang==='hu'?'Hungarian':'English';
+  const text=await callGemini(`You are a master numerologist. Pythagorean Life Path: ${lp}, Chaldean Soul Vibration: ${ch}. Give a mystical, personal reading combining both. 4-5 sentences. Speak directly to the person. Respond in ${lang}.`);
+  elText.textContent=text;
+  localStorage.setItem(`mm-analysis-num-${currentUser?.uid}`,JSON.stringify({icon:'🔢',titleHu:'Numerológia',titleEn:'Numerology',text,ts:Date.now()}));
+  updateDashAnalyses();
+}
+
+// ── ZODIAC ──
+const ZD=[
+  {sign:'Bak',en:'Capricorn',emoji:'♑',start:[12,22],end:[1,19],traits:['Kitartó','Ambiciózus','Felelős']},
+  {sign:'Vízöntő',en:'Aquarius',emoji:'♒',start:[1,20],end:[2,18],traits:['Eredeti','Független','Humanista']},
+  {sign:'Halak',en:'Pisces',emoji:'♓',start:[2,19],end:[3,20],traits:['Intuitív','Érzelmes','Kreatív']},
+  {sign:'Kos',en:'Aries',emoji:'♈',start:[3,21],end:[4,19],traits:['Bátor','Energikus','Vezető']},
+  {sign:'Bika',en:'Taurus',emoji:'♉',start:[4,20],end:[5,20],traits:['Megbízható','Türelmes','Szenzitív']},
+  {sign:'Ikrek',en:'Gemini',emoji:'♊',start:[5,21],end:[6,20],traits:['Sokoldalú','Kíváncsi','Szellemes']},
+  {sign:'Rák',en:'Cancer',emoji:'♋',start:[6,21],end:[7,22],traits:['Gondoskodó','Érzelmes','Intuitív']},
+  {sign:'Oroszlán',en:'Leo',emoji:'♌',start:[7,23],end:[8,22],traits:['Karizmatikus','Nagylelkű','Büszke']},
+  {sign:'Szűz',en:'Virgo',emoji:'♍',start:[8,23],end:[9,22],traits:['Elemző','Praktikus','Precíz']},
+  {sign:'Mérleg',en:'Libra',emoji:'♎',start:[9,23],end:[10,22],traits:['Diplomatikus','Igazságos','Harmónia']},
+  {sign:'Skorpió',en:'Scorpio',emoji:'♏',start:[10,23],end:[11,21],traits:['Intenzív','Meghatározott','Misztikus']},
+  {sign:'Nyilas',en:'Sagittarius',emoji:'♐',start:[11,22],end:[12,21],traits:['Optimista','Kalandvágyó','Szabad']},
+];
+function getWesternZodiac(dob){
+  const d=new Date(dob),m=d.getMonth()+1,day=d.getDate();
+  for(const z of ZD)if((m===z.start[0]&&day>=z.start[1])||(m===z.end[0]&&day<=z.end[1]))return z;
+  return ZD[0];
+}
+function loadZodiac(){
+  if(!userProfile?.dob)return;
+  const z=getWesternZodiac(userProfile.dob);
+  document.getElementById('zod-sign').textContent=z.emoji;
+  document.getElementById('zod-name').textContent=currentLang==='hu'?z.sign:z.en;
+  document.getElementById('zod-dates').textContent=`${z.start[1]}/${z.start[0]} – ${z.end[1]}/${z.end[0]}`;
+  document.getElementById('zod-traits').innerHTML=z.traits.map(tr=>`<div class="trait-pill">${tr}</div>`).join('');
+}
+async function doZodiac(){
+  if(!userProfile?.dob){showToast(t('Először töltsd ki a profilod!','Fill in your profile first!'));return;}
+  if(!await spendCredits(1))return;
+  const z=getWesternZodiac(userProfile.dob);
+  const el=document.getElementById('zod-result');
+  const elText=document.getElementById('zod-result-text');
+  const elIcon=document.getElementById('zod-result-icon');
+  if(elIcon)elIcon.textContent=z.emoji;
+  el.style.display='block';
+  elText.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const lang=currentLang==='hu'?'Hungarian':'English';
+  const text=await callGemini(`You are a mystical astrologer. Personalized reading for ${lang==='Hungarian'?z.sign:z.en} (${z.emoji}). Personality, destiny, cosmic energies. 4 sentences. Speak directly to the person. Respond in ${lang}.`);
+  elText.textContent=text;
+  localStorage.setItem(`mm-analysis-zod-${currentUser?.uid}`,JSON.stringify({icon:z.emoji,titleHu:'Csillagjegy',titleEn:'Zodiac',text,ts:Date.now()}));
+  updateDashAnalyses();
+}
+
+// ── CHINESE ──
+const CH=[
+  {year:2020,sign:'Patkány',en:'Rat',emoji:'🐀',element:'Fém',traits:['Okos','Alkalmazkodó','Gyors']},
+  {year:2021,sign:'Ökör',en:'Ox',emoji:'🐂',element:'Fém',traits:['Szorgalmas','Megbízható','Erős']},
+  {year:2022,sign:'Tigris',en:'Tiger',emoji:'🐯',element:'Víz',traits:['Bátor','Magabiztos','Karizmatikus']},
+  {year:2023,sign:'Nyúl',en:'Rabbit',emoji:'🐰',element:'Víz',traits:['Kedves','Elegáns','Szerencsés']},
+  {year:2024,sign:'Sárkány',en:'Dragon',emoji:'🐉',element:'Fa',traits:['Erőteljes','Szerencsés','Karizmatikus']},
+  {year:2025,sign:'Kígyó',en:'Snake',emoji:'🐍',element:'Fa',traits:['Bölcs','Intuitív','Misztikus']},
+  {year:2026,sign:'Ló',en:'Horse',emoji:'🐴',element:'Tűz',traits:['Szabad','Energikus','Kalandvágyó']},
+  {year:2027,sign:'Kecske',en:'Goat',emoji:'🐐',element:'Tűz',traits:['Kreatív','Érzékeny','Kedves']},
+  {year:2028,sign:'Majom',en:'Monkey',emoji:'🐒',element:'Föld',traits:['Szellemes','Leleményes','Játékos']},
+  {year:2029,sign:'Kakas',en:'Rooster',emoji:'🐓',element:'Föld',traits:['Magabiztos','Becsületes','Szervezett']},
+  {year:2030,sign:'Kutya',en:'Dog',emoji:'🐕',element:'Fém',traits:['Hűséges','Megbízható','Védelmező']},
+  {year:2031,sign:'Disznó',en:'Pig',emoji:'🐷',element:'Fém',traits:['Jólelkű','Bőkezű','Becsületes']},
+];
+function getChineseZodiac(dob){return CH[((new Date(dob).getFullYear()-2020)%12+12)%12];}
+function loadChinese(){
+  if(!userProfile?.dob)return;
+  const z=getChineseZodiac(userProfile.dob);
+  document.getElementById('chin-sign').textContent=z.emoji;
+  document.getElementById('chin-name').textContent=currentLang==='hu'?z.sign:z.en;
+  document.getElementById('chin-dates').textContent=z.element+(currentLang==='hu'?' elem':' element');
+  document.getElementById('chin-traits').innerHTML=z.traits.map(tr=>`<div class="trait-pill">${tr}</div>`).join('');
+}
+async function doChinese(){
+  if(!userProfile?.dob){showToast(t('Először töltsd ki a profilod!','Fill in your profile first!'));return;}
+  if(!await spendCredits(1))return;
+  const z=getChineseZodiac(userProfile.dob);
+  const el=document.getElementById('chin-result');
+  const elText=document.getElementById('chin-result-text');
+  const elIcon=document.getElementById('chin-result-icon');
+  if(elIcon)elIcon.textContent=z.emoji;
+  el.style.display='block';
+  elText.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const lang=currentLang==='hu'?'Hungarian':'English';
+  const text=await callGemini(`You are a Chinese astrology master. Reading for ${lang==='Hungarian'?z.sign:z.en} (${z.emoji}), ${z.element} element. Personality, destiny, wisdom. 4 sentences. Speak directly. Respond in ${lang}.`);
+  elText.textContent=text;
+  localStorage.setItem(`mm-analysis-chin-${currentUser?.uid}`,JSON.stringify({icon:z.emoji,titleHu:'Kínai horoszkóp',titleEn:'Chinese Zodiac',text,ts:Date.now()}));
+  updateDashAnalyses();
+}
+
+// ── ARCHETYPE ──
+const ARCH=[
+  {name:'The Seeker',hu:'A Kereső',icon:'🜁',desc:'Always searching for deeper truth and meaning.'},
+  {name:'The Alchemist',hu:'Az Alkimista',icon:'🜂',desc:'Transforms experiences into wisdom and growth.'},
+  {name:'The Oracle',hu:'Az Oráklum',icon:'🔮',desc:'Deeply intuitive, sees beyond the veil of reality.'},
+  {name:'The Pathfinder',hu:'A Nyomkereső',icon:'⭐',desc:'A natural leader who charts new territories.'},
+];
+function getArchetype(){if(!userProfile?.dob)return ARCH[0];return ARCH[calcLifePath(userProfile.dob)%4];}
+function loadArchetype(){
+  const a=getArchetype();
+  document.getElementById('arch-icon').textContent=a.icon;
+  document.getElementById('arch-name').textContent=currentLang==='hu'?a.hu:a.name;
+  document.getElementById('arch-sub').textContent=a.desc;
+}
+async function doArchetype(){
+  if(!userProfile?.dob){showToast(t('Először töltsd ki a profilod!','Fill in your profile first!'));return;}
+  const a=getArchetype(),lp=calcLifePath(userProfile.dob),z=getWesternZodiac(userProfile.dob),cz=getChineseZodiac(userProfile.dob);
+  const el=document.getElementById('arch-result');
+  const elText=document.getElementById('arch-result-text');
+  const elIcon=document.getElementById('arch-result-icon');
+  if(elIcon)elIcon.textContent=a.icon;
+  el.style.display='block';
+  elText.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const lang=currentLang==='hu'?'Hungarian':'English';
+  const text=await callGemini(`You are a mystical guide. Archetype: "${lang==='Hungarian'?a.hu:a.name}". Life Path: ${lp}, Western Zodiac: ${z.en}, Chinese Zodiac: ${cz.en}. Powerful personalized reading combining all. 5 sentences. Speak directly. Respond in ${lang}.`);
+  elText.textContent=text;
+  localStorage.setItem(`mm-analysis-arch-${currentUser?.uid}`,JSON.stringify({icon:a.icon,titleHu:'Archetípus',titleEn:'Archetype',text,ts:Date.now()}));
+  updateDashAnalyses();
+}
+
+// ── TIMELINE ──
+async function loadTimeline(){
+  if(!userProfile?.dob){document.getElementById('timeline-content').innerHTML=`<p style="color:var(--gray)">${t('Töltsd ki a profilod.','Fill in your profile.')}</p>`;return;}
+  const birthYear=new Date(userProfile.dob).getFullYear();
+  const age=new Date().getFullYear()-birthYear;
+  const cacheKey=`mm-tl-${currentUser?.uid}-${currentLang}`;
+  const cached=sessionStorage.getItem(cacheKey);
+  if(cached){renderTimeline(JSON.parse(cached));return;}
+  document.getElementById('timeline-content').innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const raw=await callGemini(`Mystical numerologist. Born ${birthYear}, now age ${age}. Create 6 life cycle turning points based on 9-year cycles and master numbers. JSON only: [{"age":number,"title":"...","desc":"..."}]. Respond in ${currentLang==='hu'?'Hungarian':'English'}.`);
+  try{const items=JSON.parse(raw.replace(/```json|```/g,'').trim());sessionStorage.setItem(cacheKey,JSON.stringify(items));renderTimeline(items);}
+  catch{document.getElementById('timeline-content').textContent=raw;}
+}
+function renderTimeline(items){
+  document.getElementById('timeline-content').innerHTML=items.map(item=>`
+    <div class="timeline-item">
+      <div class="timeline-age">${t('Kor','Age')} ${item.age}</div>
+      <div class="timeline-title">${item.title}</div>
+      <div class="timeline-desc">${item.desc}</div>
+    </div>`).join('');
+}
+
+// ── DAILY INSIGHT ──
+async function loadInsight(){
+  const today=new Date().toISOString().split('T')[0];
+  const key=`mm-ins-${today}-${currentLang}`;
+  const cached=localStorage.getItem(key);
+  const card=document.getElementById('insight-card');
+  if(cached){card.innerHTML=`<div class="insight-icon">🌟</div><div class="insight-text">${cached}</div><div class="insight-date">${today}</div>`;return;}
+  card.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const a=getArchetype();
+  const text=await callGemini(`Mystical oracle. Today: ${today}. Daily mystic insight for archetype "${currentLang==='hu'?a.hu:a.name}". 2-3 sentences. Poetic, uplifting, personal. Respond in ${currentLang==='hu'?'Hungarian':'English'}.`);
+  localStorage.setItem(key,text);
+  card.innerHTML=`<div class="insight-icon">🌟</div><div class="insight-text">${text}</div><div class="insight-date">${today}</div>`;
+}
+
+// ── HERMETIC ──
+async function doHermetic(){
+  if(!userProfile?.dob){showToast(t('Először töltsd ki a profilod!','Fill in your profile first!'));return;}
+  const el=document.getElementById('hermetic-result');
+  const elText=document.getElementById('hermetic-result-text');
+  el.style.display='block';
+  elText.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const a=getArchetype(),lp=calcLifePath(userProfile.dob),ch=calcChaldean(userProfile.name||''),z=getWesternZodiac(userProfile.dob),cz=getChineseZodiac(userProfile.dob);
+  const lang=currentLang==='hu'?'Hungarian':'English';
+  const text=await callGemini(`You are a Hermetic master trained in the Kybalion tradition.
+User's cosmic profile:
+- Archetype: ${lang==='Hungarian'?a.hu:a.name} (${a.icon})
+- Pythagorean Life Path: ${lp}
+- Chaldean Soul Vibration: ${ch}
+- Western Zodiac: ${lang==='Hungarian'?z.sign:z.en} (${z.emoji})
+- Chinese Zodiac: ${lang==='Hungarian'?cz.sign:cz.en} (${cz.emoji}, ${cz.element})
+- Name: ${userProfile.name||'Unknown'}
+- Born: ${userProfile.dob}, ${userProfile.hour||'?'}:${userProfile.min||'?'}, ${userProfile.place||'Unknown'}
+
+Apply ALL 7 Hermetic Principles (Mentalism, Correspondence, Vibration, Polarity, Rhythm, Cause & Effect, Gender) to this person's unique blueprint. For each principle 1-2 sentences showing how it manifests in their life. End with a powerful closing message about their soul's mission. Be mystical and profound. Speak directly. Respond in ${lang}.`);
+  elText.textContent=text;
+  // Save for dashboard preview
+  localStorage.setItem(`mm-analysis-hermetic-${currentUser?.uid}`,JSON.stringify({icon:'🔯',titleHu:'Hermetikus Összegzés',titleEn:'Hermetic Summary',text,ts:Date.now()}));
+  // Update dashboard preview
+  const dashPrev=document.getElementById('dash-hermetic-preview');
+  const dashBtn=document.getElementById('dash-hermetic-btn');
+  if(dashPrev){dashPrev.textContent=text.slice(0,160)+'...';dashPrev.style.display='block';}
+  if(dashBtn){dashBtn.innerHTML=`<span style="font-size:12px;color:var(--gold);letter-spacing:1px;" data-hu="→ Teljes elemzés megtekintése" data-en="→ View full reading">→ ${t('Teljes elemzés megtekintése','View full reading')}</span>`;}
+  updateDashAnalyses();
+}
+
+// ── PALM ──
+async function startCamera(){
+  if(cameraStream)return;
+  try{
+    cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+    const v=document.getElementById('palm-video');
+    v.srcObject=cameraStream;await v.play();
+  }catch{showToast(t('Kamera nem elérhető','Camera unavailable'));}
+}
+function stopCamera(){
+  if(!cameraStream)return;
+  cameraStream.getTracks().forEach(t=>t.stop());
+  cameraStream=null;
+  const v=document.getElementById('palm-video');if(v)v.srcObject=null;
+}
+async function doScan(){
+  const video=document.getElementById('palm-video');
+  if(!video.srcObject){showToast(t('Kamera nem aktív','Camera not active'));return;}
+  if(!await spendCredits(3))return;
+  const canvas=document.getElementById('palm-canvas');
+  canvas.width=video.videoWidth||640;canvas.height=video.videoHeight||480;
+  canvas.getContext('2d').drawImage(video,0,0);
+  const b64=canvas.toDataURL('image/jpeg',0.85).split(',')[1];
+  stopCamera();
+  await analyzePalmImage(b64);
+}
+async function handlePalmFile(e){
+  const file=e.target.files[0];if(!file)return;
+  if(!await spendCredits(3))return;
+  const reader=new FileReader();
+  reader.onload=async ev=>await analyzePalmImage(ev.target.result.split(',')[1]);
+  reader.readAsDataURL(file);
+}
+async function analyzePalmImage(b64){
+  showScreen('palm-result-screen');
+  const body=document.getElementById('palm-result-body');
+  body.innerHTML=`<div class="loading"><div class="spinner"></div><span>${t('Tenyér elemzése...','Analyzing palm...')}</span></div>`;
+  await saveUserProfile({palmScans:(userProfile.palmScans||0)+1});
+  const lang=currentLang==='hu'?'Hungarian':'English';
+  try{
+    const resp=await fetch(GEMINI_URL,{method:'POST',headers:{'Content-Type':'application/json','X-goog-api-key':GEMINI_KEY},
+      body:JSON.stringify({contents:[{parts:[
+        {text:`You are Cheiro, the legendary palm reader. Analyze this palm image. Identify the Life Line, Head Line, Heart Line, Fate Line if visible. Give a mystical, personal reading. 4-5 sentences. Speak directly to the person. Respond in ${lang}.`},
+        {inline_data:{mime_type:'image/jpeg',data:b64}}
+      ]}]})});
+    const data=await resp.json();
+    if(!resp.ok){console.error('Gemini API Error (Palm):',data);body.innerHTML=`<div class="palm-result-text">${t(`Hiba: ${data.error?.message||'Ismeretlen hiba'}`,`Error: ${data.error?.message||'Unknown error'}`)}</div>`;return;}
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||t('Nem sikerült elemezni.','Analysis failed.');
+    // Save for dashboard
+    localStorage.setItem(`mm-analysis-palm-${currentUser?.uid}`,JSON.stringify({icon:'🔮',titleHu:'Cheiro AI – Tenyér',titleEn:'Cheiro AI – Palm',text,ts:Date.now()}));
+    updateDashAnalyses();
+    body.innerHTML=`
+      <div class="analysis-gold-card" style="width:100%;margin-bottom:0;">
+        <div class="analysis-gold-header">
+          <div class="analysis-gold-icon">🔮</div>
+          <div class="analysis-gold-title">${t('CHEIRO AI – TENYÉR ELEMZÉS','CHEIRO AI – PALM READING')}</div>
+        </div>
+        <div class="analysis-gold-body">${text}</div>
+        <button class="btn-share" onclick="shareAnalysis('palm')"><span class="share-icon">📤</span>${t('Megosztás','Share')}</button>
+      </div>
+      <button class="btn-outline" onclick="showScreen('dashboard')" style="width:80%;margin-top:16px;">← ${t('Vissza','Back')}</button>`;
+  }catch(e){console.error('Fetch Error (Palm):',e);body.innerHTML=`<div class="palm-result-text">${t('Hiba az elemzés során.','Error during analysis.')}</div>`;}
+}
+
+// ── DASHBOARD ANALYSES ──
+function updateDashAnalyses(){
+  const uid=currentUser?.uid;
+  if(!uid)return;
+  const keys=['palm','num','zod','chin','arch'];
+  const analyses=keys.map(k=>{
+    try{const d=localStorage.getItem(`mm-analysis-${k}-${uid}`);return d?JSON.parse(d):null;}catch{return null;}
+  }).filter(Boolean).sort((a,b)=>b.ts-a.ts);
+
+  const container=document.getElementById('dash-analyses-cards');
+  const wrapper=document.getElementById('dash-analyses-preview');
+  if(!container||!wrapper)return;
+
+  if(analyses.length===0){wrapper.style.display='none';return;}
+  wrapper.style.display='block';
+
+  container.innerHTML=analyses.map(a=>`
+    <div class="dash-analysis-card">
+      <div class="da-icon">${a.icon}</div>
+      <div class="da-content">
+        <div class="da-title">${currentLang==='hu'?a.titleHu:a.titleEn}</div>
+        <div class="da-text">${a.text.slice(0,120)}${a.text.length>120?'…':''}</div>
+      </div>
+    </div>`).join('');
+
+  // Hermetic dashboard preview
+  try{
+    const hd=localStorage.getItem(`mm-analysis-hermetic-${uid}`);
+    if(hd){
+      const h=JSON.parse(hd);
+      const dashPrev=document.getElementById('dash-hermetic-preview');
+      const dashBtn=document.getElementById('dash-hermetic-btn');
+      if(dashPrev){dashPrev.textContent=h.text.slice(0,160)+'...';dashPrev.style.display='block';}
+      if(dashBtn){dashBtn.innerHTML=`<span style="font-size:12px;color:var(--gold);letter-spacing:1px;">→ ${t('Teljes elemzés megtekintése','View full reading')}</span>`;}
+    }
+  }catch{}
+}
+
+// ── RESTORE SAVED ANALYSES ON SCREEN LOAD ──
+function restoreSavedAnalyses(){
+  const uid=currentUser?.uid;if(!uid)return;
+  const restore=[
+    {key:'num', textId:'num-result-text', wrapperId:'num-result', iconId:'num-result-icon', icon:'🔢'},
+    {key:'zod', textId:'zod-result-text', wrapperId:'zod-result', iconId:'zod-result-icon', iconFn:()=>getWesternZodiac(userProfile?.dob||'')?.emoji||'♈'},
+    {key:'chin',textId:'chin-result-text',wrapperId:'chin-result',iconId:'chin-result-icon',iconFn:()=>getChineseZodiac(userProfile?.dob||'')?.emoji||'🐉'},
+    {key:'arch',textId:'arch-result-text',wrapperId:'arch-result',iconId:'arch-result-icon',iconFn:()=>getArchetype()?.icon||'🜁'},
+    {key:'hermetic',textId:'hermetic-result-text',wrapperId:'hermetic-result',icon:'🔯'},
+    {key:'bc',  textId:'bc-result-text',  wrapperId:'bc-result',  icon:'🌌'},
+    {key:'tarot',textId:'tarot-result-text',wrapperId:'tarot-result',icon:'🃏'},
+    {key:'bio', textId:'bio-result-text', wrapperId:'bio-result', icon:'📊'},
+  ];
+  restore.forEach(({key,textId,wrapperId,iconId,icon,iconFn})=>{
+    try{
+      const d=localStorage.getItem(`mm-analysis-${key}-${uid}`);
+      if(!d)return;
+      const {text}=JSON.parse(d);
+      const wrapper=document.getElementById(wrapperId);
+      const textEl=document.getElementById(textId);
+      if(wrapper&&textEl){wrapper.style.display='block';textEl.textContent=text;}
+      if(iconId){const ic=document.getElementById(iconId);if(ic)ic.textContent=iconFn?iconFn():(icon||'');}
+    }catch{}
+  });
+}
+// ── BIRTH CHART ──
+const PLANETS=[
+  {sym:'☀️',name:'Nap',en:'Sun',house:1},{sym:'🌙',name:'Hold',en:'Moon',house:4},
+  {sym:'☿',name:'Merkúr',en:'Mercury',house:3},{sym:'♀',name:'Vénusz',en:'Venus',house:7},
+  {sym:'♂',name:'Mars',en:'Mars',house:1},{sym:'♃',name:'Jupiter',en:'Jupiter',house:9},
+  {sym:'♄',name:'Szaturnusz',en:'Saturn',house:10},{sym:'⛢',name:'Uránusz',en:'Uranus',house:11},
+];
+const ASPECTS_HU=['Konjunkció ☀️🌙 — Új kezdet energiája','Szextil ☀️☿ — Kommunikáció erősödik','Trigon ☿♀ — Harmónia és kreativitás','Kvadrát ♂♄ — Feszültség és növekedés','Oppozíció ♃⛢ — Egyensúly keresése'];
+const ASPECTS_EN=['Conjunction ☀️🌙 — New beginnings energy','Sextile ☀️☿ — Communication strengthens','Trine ☿♀ — Harmony and creativity','Square ♂♄ — Tension and growth','Opposition ♃⛢ — Seeking balance'];
+
+function getAscendant(dob,hour){
+  // Simplified ascendant: based on birth hour offset into zodiac
+  const h=parseInt(hour)||6;
+  const ZD_NAMES=[
+    {hu:'Kos',en:'Aries',em:'♈'},{hu:'Bika',en:'Taurus',em:'♉'},
+    {hu:'Ikrek',en:'Gemini',em:'♊'},{hu:'Rák',en:'Cancer',em:'♋'},
+    {hu:'Oroszlán',en:'Leo',em:'♌'},{hu:'Szűz',en:'Virgo',em:'♍'},
+    {hu:'Mérleg',en:'Libra',em:'♎'},{hu:'Skorpió',en:'Scorpio',em:'♏'},
+    {hu:'Nyilas',en:'Sagittarius',em:'♐'},{hu:'Bak',en:'Capricorn',em:'♑'},
+    {hu:'Vízöntő',en:'Aquarius',em:'♒'},{hu:'Halak',en:'Pisces',em:'♓'},
+  ];
+  const d=new Date(dob), monthOffset=d.getMonth();
+  const idx=(h+monthOffset*2)%12;
+  return ZD_NAMES[idx];
+}
+function getPlanetSign(dob,planetIndex){
+  const d=new Date(dob);
+  const offset=(d.getFullYear()-1970+planetIndex*7+d.getMonth()*3)%12;
+  const signs=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+  const names=[
+    {hu:'Kos',en:'Aries'},{hu:'Bika',en:'Taurus'},{hu:'Ikrek',en:'Gemini'},
+    {hu:'Rák',en:'Cancer'},{hu:'Oroszlán',en:'Leo'},{hu:'Szűz',en:'Virgo'},
+    {hu:'Mérleg',en:'Libra'},{hu:'Skorpió',en:'Scorpio'},{hu:'Nyilas',en:'Sagittarius'},
+    {hu:'Bak',en:'Capricorn'},{hu:'Vízöntő',en:'Aquarius'},{hu:'Halak',en:'Pisces'},
+  ];
+  return {sign:signs[offset],...names[offset]};
+}
+function loadBirthChart(){
+  if(!userProfile?.dob)return;
+  updateCreditDisplays();
+  document.querySelectorAll('[id^="bc-credits"]').forEach(el=>el.textContent='✦ '+(userProfile?.credits||0));
+  const asc=getAscendant(userProfile.dob,userProfile.hour||'6');
+  document.getElementById('bc-asc-symbol').textContent=asc.em;
+  document.getElementById('bc-asc-name').textContent=currentLang==='hu'?asc.hu:asc.en;
+  document.getElementById('bc-asc-desc').textContent=currentLang==='hu'?'A külső személyiséged és első benyomásod':'Your outer personality and first impression';
+  const grid=document.getElementById('bc-planets');
+  grid.innerHTML=PLANETS.map((p,i)=>{
+    const s=getPlanetSign(userProfile.dob,i);
+    return `<div class="planet-card"><div class="p-sym">${p.sym}</div><div class="p-name">${currentLang==='hu'?p.name:p.en}</div><div class="p-sign">${s.sign} ${currentLang==='hu'?s.hu:s.en}</div><div class="p-house">${currentLang==='hu'?p.house+'. ház':p.house+'th house'}</div></div>`;
+  }).join('');
+}
+async function doBirthChart(){
+  if(!userProfile?.dob){showToast(t('Először töltsd ki a profilod!','Fill in your profile first!'));return;}
+  if(!await spendCredits(4))return;
+  const asc=getAscendant(userProfile.dob,userProfile.hour||'6');
+  const z=getWesternZodiac(userProfile.dob),cz=getChineseZodiac(userProfile.dob),lp=calcLifePath(userProfile.dob);
+  const planets=PLANETS.map((p,i)=>{const s=getPlanetSign(userProfile.dob,i);return `${p.en} in ${s.en} (${p.house}th house)`;}).join(', ');
+  const aspects=ASPECTS_EN.join('; ');
+  const lang=currentLang==='hu'?'Hungarian':'English';
+  const el=document.getElementById('bc-result'),elText=document.getElementById('bc-result-text');
+  el.style.display='block';elText.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const text=await callGemini(`You are an Ultra Astrologer trained in both Western astrology and the Hermetic Kybalion tradition.
+Birth data: DOB ${userProfile.dob}, hour ${userProfile.hour||'unknown'}, place ${userProfile.place||'unknown'}.
+Ascendant: ${asc.en} (${asc.em})
+Planetary positions: ${planets}
+Key aspects: ${aspects}
+Sun sign: ${z.en}, Chinese sign: ${cz.en}, Life Path: ${lp}
+
+Give an ultra-deep reading:
+1. Ascendant interpretation (2 sentences)
+2. Most powerful planetary aspect (2 sentences)
+3. Soul mission based on Sun+Moon+Ascendant (2 sentences)
+4. Kybalion connection — which of the 7 Hermetic principles dominates this chart and why (2 sentences)
+5. Closing cosmic message (1 sentence)
+
+Be mystical, profound, speak directly. Respond in ${lang}.`);
+  elText.textContent=text;
+  localStorage.setItem(`mm-analysis-bc-${currentUser?.uid}`,JSON.stringify({icon:'🌌',titleHu:'Születési Térkép',titleEn:'Birth Chart',text,ts:Date.now()}));
+  updateDashAnalyses();
+}
+
+// ── TAROT ──
+const TAROT_DECK=[
+  {icon:'🌟',hu:'A Bolond',en:'The Fool'},{icon:'🔮',hu:'A Mágus',en:'The Magician'},
+  {icon:'🌙',hu:'A Főpapnő',en:'High Priestess'},{icon:'🌸',hu:'A Császárnő',en:'The Empress'},
+  {icon:'👑',hu:'A Császár',en:'The Emperor'},{icon:'🙏',hu:'A Főpap',en:'The Hierophant'},
+  {icon:'💑',hu:'A Szerelmesek',en:'The Lovers'},{icon:'🏆',hu:'A Harcos',en:'The Chariot'},
+  {icon:'🦁',hu:'Az Erő',en:'Strength'},{icon:'🏮',hu:'A Remete',en:'The Hermit'},
+  {icon:'☸️',hu:'A Szerencsekerék',en:'Wheel of Fortune'},{icon:'⚖️',hu:'Az Igazság',en:'Justice'},
+  {icon:'🙃',hu:'A Felakasztott',en:'The Hanged Man'},{icon:'💀',hu:'A Halál',en:'Death'},
+  {icon:'🔥',hu:'A Mértékletesség',en:'Temperance'},{icon:'😈',hu:'Az Ördög',en:'The Devil'},
+  {icon:'🗼',hu:'A Torony',en:'The Tower'},{icon:'⭐',hu:'A Csillag',en:'The Star'},
+  {icon:'🌕',hu:'A Hold',en:'The Moon'},{icon:'☀️',hu:'A Nap',en:'The Sun'},
+  {icon:'🎺',hu:'Az Ítélet',en:'Judgement'},{icon:'🌍',hu:'A Világ',en:'The World'},
+];
+let drawnCards=[];
+function loadTarot(){
+  updateCreditDisplays();
+  // Reset if no cards drawn yet
+  if(drawnCards.length===0){
+    [0,1,2].forEach(i=>{
+      const card=document.getElementById(`tarot-c${i}`);
+      if(card)card.classList.remove('flipped');
+      const icon=document.getElementById(`ti-${i}`);
+      const name=document.getElementById(`tn-${i}`);
+      if(icon)icon.textContent=['⭐','☀️','🌙'][i];
+      if(name)name.textContent='–';
+    });
+    document.getElementById('tarot-result').style.display='none';
+  }
+}
+async function doTarot(){
+  if(!userProfile?.dob){showToast(t('Először töltsd ki a profilod!','Fill in your profile first!'));return;}
+  if(!await spendCredits(2))return;
+  // Shuffle and pick 3
+  const shuffled=[...TAROT_DECK].sort(()=>Math.random()-.5);
+  drawnCards=shuffled.slice(0,3);
+  // Set card faces (hidden until flipped)
+  drawnCards.forEach((card,i)=>{
+    const cardEl=document.getElementById(`tarot-c${i}`);
+    if(cardEl)cardEl.classList.remove('flipped');
+    document.getElementById(`ti-${i}`).textContent=card.icon;
+    document.getElementById(`tn-${i}`).textContent=currentLang==='hu'?card.hu:card.en;
+  });
+  showToast(t('Kártyák keverve! Kattints a lapokra! 🃏','Cards shuffled! Tap to flip! 🃏'));
+  // Auto-flip after short delay with stagger
+  setTimeout(()=>flipTarot(0),600);
+  setTimeout(()=>flipTarot(1),1100);
+  setTimeout(()=>flipTarot(2),1600);
+  // Get AI reading
+  setTimeout(()=>getTarotReading(),2000);
+}
+function flipTarot(i){
+  const card=document.getElementById(`tarot-c${i}`);
+  if(card&&drawnCards.length>0)card.classList.add('flipped');
+}
+async function getTarotReading(){
+  if(drawnCards.length<3)return;
+  const lang=currentLang==='hu'?'Hungarian':'English';
+  const el=document.getElementById('tarot-result'),elText=document.getElementById('tarot-result-text');
+  el.style.display='block';elText.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const names=drawnCards.map((c,i)=>`${['Past','Present','Future'][i]}: ${c.en}`).join(', ');
+  const text=await callGemini(`You are a mystical Tarot master. Three-card reading:
+${names}
+Person's archetype: ${getArchetype().name}, Life Path: ${calcLifePath(userProfile.dob)}.
+Give a flowing, personal 3-card reading. Interpret each card in its position and how they connect as a story. 6-8 sentences total. Speak directly and mystically. Respond in ${lang}.`);
+  elText.textContent=text;
+  localStorage.setItem(`mm-analysis-tarot-${currentUser?.uid}`,JSON.stringify({icon:'🃏',titleHu:'Tarot Olvasat',titleEn:'Tarot Reading',text,ts:Date.now()}));
+  updateDashAnalyses();
+}
+
+// ── BIORHYTHM ──
+const BIO_CYCLES=[
+  {key:'phys', hu:'Fizikai',   en:'Physical',  days:23, color:'#e05555', icon:'💪'},
+  {key:'emot', hu:'Érzelmi',   en:'Emotional', days:28, color:'#5599e0', icon:'💙'},
+  {key:'intel',hu:'Szellemi',  en:'Intellectual',days:33,color:'#55cc88',icon:'🧠'},
+  {key:'intuit',hu:'Intuitív', en:'Intuitive', days:38, color:'#cc88ff', icon:'🔮'},
+  {key:'spirit',hu:'Spirituális',en:'Spiritual',days:53,color:'#D4AF37', icon:'✨'},
+];
+let bioOffset=0;
+function getBioValue(dob,cycleDays,offsetDays){
+  const born=new Date(dob);
+  const now=new Date();
+  now.setDate(now.getDate()+offsetDays);
+  const diff=Math.floor((now-born)/(1000*60*60*24));
+  return Math.sin(2*Math.PI*diff/cycleDays);
+}
+function loadBiorhythm(){
+  if(!userProfile?.dob)return;
+  renderBio();
+}
+function moveBioDate(d){bioOffset+=d;renderBio();}
+function renderBio(){
+  if(!userProfile?.dob)return;
+  const today=new Date();today.setDate(today.getDate()+bioOffset);
+  const label=today.toLocaleDateString(currentLang==='hu'?'hu-HU':'en-US',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('bio-date-lbl').textContent=label;
+  // Values
+  const vals=BIO_CYCLES.map(c=>({...c,val:getBioValue(userProfile.dob,c.days,bioOffset)}));
+  document.getElementById('bio-values').innerHTML=vals.map(c=>`
+    <div class="bio-val">
+      <div class="bv-icon">${c.icon}</div>
+      <div class="bv-pct" style="color:${c.color}">${Math.round((c.val+1)/2*100)}%</div>
+      <div class="bv-label">${currentLang==='hu'?c.hu:c.en}</div>
+    </div>`).join('');
+  // SVG graph (30 days window centered on today)
+  const W=340,H=200,days=30,cx=W/(days),midY=H/2;
+  const paths=vals.map(c=>{
+    let d=`M 0 ${midY-getBioValue(userProfile.dob,c.days,bioOffset-15)*80}`;
+    for(let i=1;i<=days;i++){
+      const x=i*cx, y=midY-getBioValue(userProfile.dob,c.days,bioOffset-15+i)*80;
+      d+=` L ${x} ${y}`;
+    }
+    return `<path d="${d}" stroke="${c.color}" stroke-width="2" fill="none" opacity="0.85"/>`;
+  });
+  // Today marker
+  const todayX=(15)*cx;
+  const svg=document.getElementById('bio-svg');
+  svg.innerHTML=`
+    <line x1="0" y1="${midY}" x2="${W}" y2="${midY}" stroke="#333" stroke-width="1"/>
+    <line x1="${todayX}" y1="0" x2="${todayX}" y2="${H}" stroke="${'var(--gold)'}" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+    ${paths.join('')}
+    <circle cx="${todayX}" cy="${midY}" r="3" fill="var(--gold)"/>`;
+  // Legend
+  document.getElementById('bio-legend').innerHTML=vals.map(c=>`
+    <div class="bio-legend-item">
+      <div class="bio-legend-dot" style="background:${c.color}"></div>
+      ${currentLang==='hu'?c.hu:c.en}
+    </div>`).join('');
+}
+async function doBioAI(){
+  if(!userProfile?.dob){showToast(t('Először töltsd ki a profilod!','Fill in your profile first!'));return;}
+  const vals=BIO_CYCLES.map(c=>({...c,val:getBioValue(userProfile.dob,c.days,bioOffset)}));
+  const summary=vals.map(c=>`${c.en}: ${Math.round((c.val+1)/2*100)}%`).join(', ');
+  const lang=currentLang==='hu'?'Hungarian':'English';
+  const el=document.getElementById('bio-result'),elText=document.getElementById('bio-result-text');
+  el.style.display='block';elText.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const text=await callGemini(`You are a mystical biorhythm master. Today's cycles: ${summary}. Person archetype: ${getArchetype().name}. Give a mystical, practical interpretation of these energy levels — what to embrace, avoid, and focus on. 4-5 sentences. Speak directly. Respond in ${lang}.`);
+  elText.textContent=text;
+  localStorage.setItem(`mm-analysis-bio-${currentUser?.uid}`,JSON.stringify({icon:'📊',titleHu:'Bioritmus',titleEn:'Biorhythm',text,ts:Date.now()}));
+  updateDashAnalyses();
+}
+
+// ── SHARE ──
+const SHARE_TITLES={
+  palm:  {hu:'🔮 Cheiro AI – Tenyérolvasás',       en:'🔮 Cheiro AI – Palm Reading'},
+  num:   {hu:'🔢 Numerológia elemzésem',            en:'🔢 My Numerology Reading'},
+  zod:   {hu:'♈ Csillagjegy elemzésem',             en:'♈ My Zodiac Reading'},
+  chin:  {hu:'🐉 Kínai horoszkóp elemzésem',        en:'🐉 My Chinese Zodiac Reading'},
+  arch:  {hu:'🜁 Archetípus elemzésem',              en:'🜁 My Archetype Reading'},
+  hermetic:{hu:'🔯 Hermetikus Nagy Összegzésem',    en:'🔯 My Hermetic Grand Summary'},
+  bc:    {hu:'🌌 Születési Térképem',               en:'🌌 My Birth Chart Reading'},
+  tarot: {hu:'🃏 Tarot Olvasatom',                  en:'🃏 My Tarot Reading'},
+  bio:   {hu:'📊 Bioritmus Elemzésem',              en:'📊 My Biorhythm Reading'},
+};
+async function shareAnalysis(key){
+  const uid=currentUser?.uid;
+  let text='';
+  if(key==='palm'){
+    // palm text is in the DOM directly
+    const el=document.querySelector('#palm-result-body .analysis-gold-body');
+    text=el?.textContent||'';
+  } else {
+    try{const d=localStorage.getItem(`mm-analysis-${key}-${uid}`);if(d)text=JSON.parse(d).text;}catch{}
+    if(!text){
+      const ids={num:'num-result-text',zod:'zod-result-text',chin:'chin-result-text',arch:'arch-result-text',hermetic:'hermetic-result-text',bc:'bc-result-text',tarot:'tarot-result-text',bio:'bio-result-text'};
+      const el=document.getElementById(ids[key]||key+'-result-text');text=el?.textContent||'';
+    }
+  }
+  if(!text){showToast(t('Nincs megosztható elemzés!','No analysis to share!'));return;}
+
+  const titles=SHARE_TITLES[key]||{hu:'✦ Mystic Masters',en:'✦ Mystic Masters'};
+  const title=currentLang==='hu'?titles.hu:titles.en;
+  const shareText=`${title}\n\n${text}\n\n✦ mystic-masters.web.app`;
+
+  if(navigator.share){
+    try{
+      await navigator.share({title:'Mystic Masters',text:shareText});
+      showToast(t('Megosztva! ✦','Shared! ✦'));
+    }catch(e){if(e.name!=='AbortError')fallbackCopy(shareText);}
+  } else {
+    fallbackCopy(shareText);
+  }
+}
+function fallbackCopy(text){
+  navigator.clipboard?.writeText(text).then(()=>{
+    showToast(t('Vágólapra másolva! 📋','Copied to clipboard! 📋'));
+  }).catch(()=>showToast(t('Nem sikerült másolni.','Copy failed.')));
+}
+window.shareAnalysis=shareAnalysis;
+
+// ── GEMINI TEXT ──
+async function callGemini(prompt){
+  if(!GEMINI_KEY){console.error('GEMINI_KEY is missing!');return t('Hiba: Hiányzó API kulcs.','Error: Missing API key.');}
+  try{
+    const resp=await fetch(GEMINI_URL,{method:'POST',headers:{'Content-Type':'application/json','X-goog-api-key':GEMINI_KEY},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+    const data=await resp.json();
+    if(!resp.ok){console.error('Gemini API Error:',data);return t(`Hiba: ${data.error?.message||'Ismeretlen hiba'}`,`Error: ${data.error?.message||'Unknown error'}`);}
+    return data.candidates?.[0]?.content?.parts?.[0]?.text||t('Nem sikerült.','Failed.');
+  }catch(err){console.error('Fetch Error:',err);return t('Hiba az AI hívás során.','AI call error.');}
+}
+
+// ── SW + INIT ──
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+setLang(currentLang);
+</script>
+</div>
+</body>
+</html>

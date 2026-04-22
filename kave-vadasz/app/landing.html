@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#3B1F0C"/>
+<title>Kávé Vadász – Specialty Coffee Kereső</title>
+<meta name="description" content="Találd meg a legközelebbi specialty kávézót! Térkép, lista, kategóriák – ingyenes PWA app, letöltés nélkül."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --brown:#3B1F0C;--brown-mid:#5A3010;--brown-light:#C47A3A;
+  --cream:#FDFAF6;--cream-mid:#F5EDE0;--cream-dark:#E8D9C5;
+  --accent:#C47A3A;--accent-light:#F0D9BC;--accent-dim:#9E5E22;
+  --text:#2A1505;--text-muted:#7A5C42;--text-dim:#AAA;
+  --gray-light:#f3f4f6;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;line-height:1.7;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(253,250,246,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--cream-dark);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--brown);text-decoration:none;font-weight:700;}
+.nav-links{display:flex;gap:28px;align-items:center;list-style:none;}
+.nav-links a{text-decoration:none;color:var(--text-muted);font-size:0.9rem;transition:color 0.2s;}
+.nav-links a:hover{color:var(--brown);}
+.nav-cta{background:var(--brown);color:var(--accent-light)!important;padding:8px 20px;border-radius:8px;font-weight:700!important;transition:background 0.2s!important;}
+.nav-cta:hover{background:var(--brown-mid)!important;}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px;background:none;border:none;}
+.hamburger span{width:24px;height:2px;background:var(--brown);display:block;}
+.mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:var(--cream);border-bottom:2px solid var(--brown);z-index:99;padding:16px 20px;flex-direction:column;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,0.08);}
+.mobile-menu.open{display:flex;}
+.mobile-menu a{color:var(--brown);text-decoration:none;font-size:1rem;padding:8px 0;border-bottom:1px solid var(--cream-dark);}
+.mobile-menu a:last-child{border-bottom:none;}
+
+/* HERO */
+.hero{min-height:100vh;background:var(--brown);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 20px 60px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 40%,rgba(196,122,58,0.15) 0%,transparent 70%);}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(196,122,58,0.15);border:1px solid rgba(196,122,58,0.35);color:var(--accent-light);font-size:0.8rem;font-weight:700;padding:6px 18px;border-radius:100px;letter-spacing:2px;text-transform:uppercase;margin-bottom:32px;animation:fadeUp 0.6s ease both;}
+.hero-logo{font-size:80px;margin-bottom:16px;animation:fadeUp 0.6s 0.1s ease both;filter:drop-shadow(0 0 24px rgba(196,122,58,0.4));}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,7vw,5rem);font-weight:900;color:var(--accent-light);line-height:1.05;letter-spacing:-1px;margin-bottom:12px;animation:fadeUp 0.6s 0.2s ease both;}
+.hero-sub{font-family:'Playfair Display',serif;font-size:clamp(1rem,2.5vw,1.4rem);font-style:italic;color:rgba(240,217,188,0.7);margin-bottom:24px;animation:fadeUp 0.6s 0.3s ease both;}
+.hero p{font-size:1.1rem;color:rgba(240,217,188,0.85);max-width:520px;margin:0 auto 44px;font-weight:300;animation:fadeUp 0.6s 0.4s ease both;}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;animation:fadeUp 0.6s 0.5s ease both;}
+.btn-primary{background:var(--accent);color:var(--brown);padding:16px 36px;border-radius:10px;font-family:'Lato',sans-serif;font-size:1rem;font-weight:700;text-decoration:none;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 24px rgba(196,122,58,0.4);}
+.btn-primary:hover{background:var(--accent-light);transform:translateY(-2px);}
+.btn-outline{background:transparent;color:var(--accent-light);padding:16px 36px;border-radius:10px;font-size:1rem;font-weight:400;text-decoration:none;border:1.5px solid rgba(196,122,58,0.4);transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);}
+.hero-stats{display:flex;gap:48px;margin-top:72px;padding-top:40px;border-top:1px solid rgba(196,122,58,0.2);animation:fadeUp 0.6s 0.6s ease both;flex-wrap:wrap;justify-content:center;}
+.stat{text-align:center;}
+.stat-num{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--accent);line-height:1;}
+.stat-lbl{font-size:0.78rem;color:rgba(240,217,188,0.5);margin-top:4px;text-transform:uppercase;letter-spacing:0.8px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTIONS */
+section{padding:96px 20px;}
+.section-inner{max-width:1100px;margin:0 auto;}
+.section-label{font-size:0.78rem;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:block;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);color:var(--brown);line-height:1.15;margin-bottom:16px;letter-spacing:-0.5px;}
+.section-sub{font-size:1rem;color:var(--text-muted);max-width:540px;line-height:1.7;margin-bottom:56px;}
+
+/* FEATURES GRID */
+.features-bg{background:var(--cream-mid);}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2px;border:1px solid var(--cream-dark);}
+.feat-card{background:var(--cream);padding:36px 32px;transition:background 0.2s;position:relative;overflow:hidden;}
+.feat-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:0;background:var(--accent);transition:height 0.3s;}
+.feat-card:hover{background:#FFF8F0;}
+.feat-card:hover::before{height:100%;}
+.feat-icon{font-size:2.4rem;margin-bottom:18px;display:block;}
+.feat-title{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--brown);margin-bottom:10px;}
+.feat-desc{font-size:0.95rem;color:var(--text-muted);line-height:1.7;}
+
+/* CATEGORIES */
+.cat-section{background:var(--brown);}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-top:48px;}
+.cat-card{background:rgba(196,122,58,0.08);border:1px solid rgba(196,122,58,0.2);border-radius:16px;padding:28px 20px;text-align:center;transition:all 0.2s;}
+.cat-card:hover{background:rgba(196,122,58,0.15);border-color:var(--accent);transform:translateY(-4px);}
+.cat-icon{font-size:2.2rem;margin-bottom:12px;display:block;}
+.cat-name{font-family:'Playfair Display',serif;font-size:1rem;color:var(--accent-light);margin-bottom:6px;}
+.cat-desc{font-size:0.82rem;color:rgba(240,217,188,0.55);line-height:1.5;}
+
+/* HOW IT WORKS */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:48px;margin-top:64px;position:relative;}
+.steps::before{content:'';position:absolute;top:28px;left:10%;right:10%;height:1px;background:linear-gradient(to right,transparent,var(--cream-dark),transparent);}
+.step{text-align:center;}
+.step-num{width:56px;height:56px;border-radius:50%;border:2px solid var(--accent);background:var(--cream);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--brown);margin:0 auto 20px;font-weight:700;}
+.step-title{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--brown);margin-bottom:8px;}
+.step-desc{font-size:0.88rem;color:var(--text-muted);line-height:1.6;}
+
+/* INSTALL */
+.install-bg{background:var(--cream-mid);}
+.install-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px;}
+.install-card{background:var(--cream);border:1.5px solid var(--cream-dark);border-radius:16px;padding:32px 28px;}
+.install-os{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.install-os-icon{font-size:2rem;}
+.install-os-name{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--brown);font-weight:700;}
+.install-os-sub{font-size:0.75rem;color:var(--text-dim);}
+.install-steps{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.install-step{display:flex;gap:10px;align-items:flex-start;}
+.install-step-num{width:24px;height:24px;border-radius:50%;background:var(--brown);color:var(--accent);font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.install-step-txt{font-size:0.85rem;color:#444;line-height:1.5;}
+.install-step-txt b{color:var(--brown);}
+.install-note{margin-top:16px;background:rgba(196,122,58,0.08);border-radius:10px;padding:10px 14px;font-size:0.78rem;color:var(--accent-dim);line-height:1.5;}
+
+/* CTA */
+.cta-section{background:var(--brown);text-align:center;padding:96px 20px;}
+.cta-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,3rem);color:var(--accent-light);margin-bottom:16px;}
+.cta-sub{color:rgba(240,217,188,0.6);font-size:1rem;margin-bottom:40px;font-style:italic;}
+
+/* FOOTER */
+footer{background:#1a0d06;padding:48px 20px 28px;}
+.footer-inner{max-width:1100px;margin:0 auto;}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px;margin-bottom:40px;}
+.footer-brand p{color:rgba(240,217,188,0.5);font-size:0.88rem;line-height:1.7;margin-top:12px;max-width:280px;}
+.footer-logo{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--accent);font-weight:700;}
+.footer-col h4{font-family:'Playfair Display',serif;color:var(--accent);font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.footer-col a{color:rgba(240,217,188,0.5);text-decoration:none;font-size:0.9rem;transition:color 0.2s;}
+.footer-col a:hover{color:var(--accent);}
+.footer-bottom{border-top:1px solid rgba(196,122,58,0.15);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-size:0.8rem;color:rgba(240,217,188,0.25);}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:768px){
+  nav{padding:0 20px}.nav-links{display:none}.hamburger{display:flex}
+  .hero-stats{gap:28px}.footer-top{grid-template-columns:1fr;gap:32px}
+  .steps::before{display:none} section{padding:70px 20px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">☕ Kávé Vadász</a>
+  <button class="hamburger" onclick="document.getElementById('mob').classList.toggle('open')" aria-label="Menü"><span></span><span></span><span></span></button>
+  <ul class="nav-links">
+    <li><a href="#features">Funkciók</a></li>
+    <li><a href="#categories">Kategóriák</a></li>
+    <li><a href="#how">Hogyan működik</a></li>
+    <li><a href="#install">Telepítés</a></li>
+    <li><a href="https://kave-vadasz.web.app" class="nav-cta">☕ Megnyitás</a></li>
+  </ul>
+</nav>
+<div class="mobile-menu" id="mob">
+  <a href="#features" onclick="document.getElementById('mob').classList.remove('open')">☕ Funkciók</a>
+  <a href="#categories" onclick="document.getElementById('mob').classList.remove('open')">🫘 Kategóriák</a>
+  <a href="#how" onclick="document.getElementById('mob').classList.remove('open')">📍 Hogyan működik</a>
+  <a href="#install" onclick="document.getElementById('mob').classList.remove('open')">📱 Telepítés</a>
+  <a href="https://kave-vadasz.web.app" class="nav-cta" style="text-align:center;border-bottom:none!important;">☕ Megnyitás →</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">☕ Specialty Coffee Kereső</div>
+  <div class="hero-logo">☕</div>
+  <h1>Kávé Vadász</h1>
+  <div class="hero-sub">A legjobb kávé — mindig a közeledben.</div>
+  <p>Specialty kávézók, kávéházak és pékség-kávézók egy helyen. Térkép, kategóriák, natív navigáció — teljesen ingyenes.</p>
+  <div class="hero-btns">
+    <a href="https://kave-vadasz.web.app" class="btn-primary">☕ Megnyitás</a>
+    <a href="#features" class="btn-outline">Funkciók →</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">Kategória</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-lbl">Ingyenes</div></div>
+    <div class="stat"><div class="stat-num">PWA</div><div class="stat-lbl">Letöltés nélkül</div></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="features-bg">
+  <div class="section-inner">
+    <div class="reveal">
+      <span class="section-label">☕ Amit kapsz</span>
+      <h2 class="section-title">Minden, amit egy<br>kávéimádó keres</h2>
+      <p class="section-sub">Specialty single origin-től a klasszikus kávéházig — megtalálod, ami neked való.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card reveal">
+        <span class="feat-icon">🗺️</span>
+        <h3 class="feat-title">Interaktív térkép</h3>
+        <p class="feat-desc">Az összes közeli kávézó egy térképen — a GPS helyzetedtől automatikusan a legközelebbiek jelennek meg. Városra is kereshetsz.</p>
+      </div>
+      <div class="feat-card reveal">
+        <span class="feat-icon">📋</span>
+        <h3 class="feat-title">Kategóriás lista</h3>
+        <p class="feat-desc">Specialty, pékség-kávézó, cold brew, kávéház, nyitva — szűrj pontosan arra, amit keresel. A legközelebbi mindig felül.</p>
+      </div>
+      <div class="feat-card reveal">
+        <span class="feat-icon">🧭</span>
+        <h3 class="feat-title">Natív navigáció</h3>
+        <p class="feat-desc">Egy koppintás — és elindul az Apple Maps, Google Maps vagy Waze. Nem maradok az appban, hanem elindítalak a célhoz.</p>
+      </div>
+      <div class="feat-card reveal">
+        <span class="feat-icon">🟢</span>
+        <h3 class="feat-title">Nyitva most</h3>
+        <p class="feat-desc">Szűrj csak a jelenleg nyitva lévő kávézókra — ne pazarold az időt zárt ajtók előtt állva.</p>
+      </div>
+      <div class="feat-card reveal">
+        <span class="feat-icon">🔍</span>
+        <h3 class="feat-title">Keresés</h3>
+        <p class="feat-desc">Kávézó neve vagy városnév alapján keresel — az eredmény azonnal megjelenik listában és térképen egyaránt.</p>
+      </div>
+      <div class="feat-card reveal">
+        <span class="feat-icon">📱</span>
+        <h3 class="feat-title">PWA — letöltés nélkül</h3>
+        <p class="feat-desc">Add a kezdőképernyőre iPhone-on vagy Androidon — úgy működik mint egy natív app, App Store nélkül.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section id="categories" class="cat-section">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center">
+      <span class="section-label" style="color:rgba(196,122,58,0.7)">🫘 Kategóriák</span>
+      <h2 class="section-title" style="color:var(--accent-light)">Megtalálod, amit keresel</h2>
+      <p class="section-sub" style="color:rgba(240,217,188,0.6);margin:0 auto 48px;">Nem minden kávézó egyforma — szűrj arra, ami neked fontos.</p>
+    </div>
+    <div class="cat-grid">
+      <div class="cat-card reveal">
+        <span class="cat-icon">🫘</span>
+        <div class="cat-name">Specialty</div>
+        <div class="cat-desc">Single origin, pour over, AeroPress — ahol a kávé maga a főszereplő</div>
+      </div>
+      <div class="cat-card reveal">
+        <span class="cat-icon">🥐</span>
+        <div class="cat-name">Pékség-kávézó</div>
+        <div class="cat-desc">Friss croissant + specialty espresso — a tökéletes reggeli kombó</div>
+      </div>
+      <div class="cat-card reveal">
+        <span class="cat-icon">🧊</span>
+        <div class="cat-name">Cold Brew</div>
+        <div class="cat-desc">Hidegen főzött, hosszan érlelt — a nyár itala szakértő kézből</div>
+      </div>
+      <div class="cat-card reveal">
+        <span class="cat-icon">🏛️</span>
+        <div class="cat-name">Kávéház</div>
+        <div class="cat-desc">Klasszikus kávéházi hangulat, márványasztal, újság — az időtlen élmény</div>
+      </div>
+      <div class="cat-card reveal">
+        <span class="cat-icon">☕</span>
+        <div class="cat-name">Összes</div>
+        <div class="cat-desc">Láss mindent egyszerre — minden típusú kávézó egy helyen</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center">
+      <span class="section-label">📍 Egyszerű & gyors</span>
+      <h2 class="section-title" style="text-align:center">Hogyan működik?</h2>
+      <p class="section-sub" style="margin:0 auto">Három lépés, és már tudod hol a legjobb kávé a közeledben.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">1</div>
+        <h3 class="step-title">Nyisd meg az appot</h3>
+        <p class="step-desc">Látogass el a kave-vadasz.web.app oldalra. Nincs letöltés, nincs regisztráció.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">2</div>
+        <h3 class="step-title">Válassz kategóriát</h3>
+        <p class="step-desc">Specialty, pékség, cold brew, kávéház — válaszd ki, mit keresel, a lista azonnal szűr.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">3</div>
+        <h3 class="step-title">Indulj el!</h3>
+        <p class="step-desc">Koppints a navigáció gombra — Apple Maps, Google Maps vagy Waze vezet oda.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section id="install" class="install-bg">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center">
+      <span class="section-label">📱 Telepítési útmutató</span>
+      <h2 class="section-title" style="text-align:center">Add a telefonodra!</h2>
+      <p class="section-sub" style="margin:0 auto 0">Nem kell semmit letölteni — add hozzá a kezdőképernyőhöz és natív appként működik.</p>
+    </div>
+    <div class="install-grid">
+      <div class="install-card reveal">
+        <div class="install-os">
+          <div class="install-os-icon">🍎</div>
+          <div><div class="install-os-name">iPhone – Safari</div><div class="install-os-sub">Ajánlott böngésző iOS-en</div></div>
+        </div>
+        <ul class="install-steps">
+          <li class="install-step"><div class="install-step-num">1</div><div class="install-step-txt">Nyisd meg <b>kave-vadasz.web.app</b> Safariban</div></li>
+          <li class="install-step"><div class="install-step-num">2</div><div class="install-step-txt">Koppints a <b>🔗 Megosztás</b> ikonra alul</div></li>
+          <li class="install-step"><div class="install-step-num">3</div><div class="install-step-txt">Válaszd: <b>„Kezdőképernyőre adás"</b></div></li>
+          <li class="install-step"><div class="install-step-num">4</div><div class="install-step-txt">Koppints a <b>Hozzáadás</b> gombra — kész! 🎉</div></li>
+        </ul>
+        <div class="install-note">⚠️ Csak Safari-ban működik — Chrome-ban nem jelenik meg az opció iOS-en.</div>
+      </div>
+      <div class="install-card reveal">
+        <div class="install-os">
+          <div class="install-os-icon">🤖</div>
+          <div><div class="install-os-name">Android – Chrome</div><div class="install-os-sub">Ajánlott böngésző Androidon</div></div>
+        </div>
+        <ul class="install-steps">
+          <li class="install-step"><div class="install-step-num">1</div><div class="install-step-txt">Nyisd meg <b>kave-vadasz.web.app</b> Chrome-ban</div></li>
+          <li class="install-step"><div class="install-step-num">2</div><div class="install-step-txt">Koppints a <b>⋮ három pontra</b> jobb felül</div></li>
+          <li class="install-step"><div class="install-step-num">3</div><div class="install-step-txt">Válaszd: <b>„Hozzáadás a kezdőképernyőhöz"</b></div></li>
+          <li class="install-step"><div class="install-step-num">4</div><div class="install-step-txt">Koppints a <b>Hozzáadás</b> gombra — kész! 🎉</div></li>
+        </ul>
+        <div class="install-note">💡 Néha automatikusan felugrik a telepítési banner — arra is rá lehet koppintani!</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="reveal">
+    <div class="cta-title">A legjobb kávé<br>egy koppintásra van.</div>
+    <div class="cta-sub">Ingyenes · Regisztráció nélkül · Azonnal indul</div>
+    <a href="https://kave-vadasz.web.app" class="btn-primary" style="font-size:1.1rem;padding:18px 48px;margin:0 auto;display:inline-flex;">☕ Megnyitás</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">☕ Kávé Vadász</div>
+        <p>Ingyenes specialty coffee kereső app — térkép, lista, natív navigáció. Megtalálod a legjobb kávét a közeledben, bárhol is vagy Magyarországon.</p>
+        <p style="margin-top:10px;color:rgba(240,217,188,0.25);font-size:0.82rem">A Vadász Apps família tagja</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigáció</h4>
+        <ul>
+          <li><a href="https://kave-vadasz.web.app">App megnyitása</a></li>
+          <li><a href="#features">Funkciók</a></li>
+          <li><a href="#categories">Kategóriák</a></li>
+          <li><a href="#install">Telepítési útmutató</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Kapcsolat</h4>
+        <ul>
+          <li><a href="#" data-em="dmFkYXN6YXBwc0BnbWFpbC5jb20=" onclick="this.href='mailto:'+atob(this.dataset.em);return true;">✉ <span data-em="dmFkYXN6YXBwc0BnbWFpbC5jb20=" onclick="this.parentNode.click()">kapcsolat</span></a></li>
+          <li><a href="https://vadasz-apps.web.app">🛡️ Vadász Apps</a></li>
+          <li><a href="https://ko-fi.com/kavevadasz">☕ Támogass Ko-fi-n</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Kávé Vadász · Készítette: Králik Zola · Minden jog fenntartva</span>
+      <span>☕ Ingyenes · PWA</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const observer = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){ if(e.isIntersecting) e.target.classList.add('visible'); });
+},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){ observer.observe(el); });
+
+document.querySelectorAll('.feat-card,.step,.install-card,.cat-card').forEach(function(el,i){
+  el.style.transitionDelay=(i*0.07)+'s';
+});
+
+var lastScroll=0,nav=document.querySelector('nav');
+nav.style.transition='transform 0.3s ease';
+window.addEventListener('scroll',function(){
+  var cur=window.scrollY;
+  nav.style.transform=(cur>lastScroll&&cur>100)?'translateY(-100%)':'translateY(0)';
+  lastScroll=cur;
+});
+</script>
+</body>
+</html>

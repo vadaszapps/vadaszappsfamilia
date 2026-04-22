@@ -1,0 +1,25 @@
+{
+  "name": "Szivar Vadász",
+  "short_name": "SzivarVadász",
+  "description": "Magyar szivarkedvelők közösségi térképe",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0604",
+  "theme_color": "#D4AF37",
+  "orientation": "portrait",
+  "lang": "hu",
+  "icons": [
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/szivar-vadasz.firebasestorage.app/o/01.gif?alt=media&token=106e8d0b-22df-43f3-920b-685c2cd2710b",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/szivar-vadasz.firebasestorage.app/o/01.gif?alt=media&token=106e8d0b-22df-43f3-920b-685c2cd2710b",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

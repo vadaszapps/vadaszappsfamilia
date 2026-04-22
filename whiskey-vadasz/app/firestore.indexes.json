@@ -1,0 +1,28 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "whiskeybolts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "megerositve", "order": "ASCENDING" },
+        { "fieldPath": "datum",       "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "whiskeybolts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "tipus",  "order": "ASCENDING" },
+        { "fieldPath": "datum",  "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "esemenyek",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "datum_ts", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

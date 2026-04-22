@@ -1,0 +1,1854 @@
+<!-- © 2026 Szivar Vadász. Minden jog fenntartva. Szerzői jogi védelem alatt áll. -->
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-59HHDKQZNY"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-59HHDKQZNY');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Szivar Vadász</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#D4AF37">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Szivar Vadász">
+    <link rel="apple-touch-icon" href="https://firebasestorage.googleapis.com/v0/b/szivar-vadasz.firebasestorage.app/o/01.gif?alt=media&token=106e8d0b-22df-43f3-920b-685c2cd2710b">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #1a0f0a; color: #fff; -webkit-font-smoothing: antialiased; }
+        :root { --gold: #D4AF37; --black: #0a0604; --brown: #2C1B12; --navbar: 54px; --header: 64px; --copyright: 27px; }
+
+        .page { display: none; flex-direction: column; width: 100%; height: 100%; position: absolute; top: 0; left: 0; overflow: hidden; }
+        .page.active { display: flex; }
+
+        header { height: var(--header); padding: 0 15px; background: var(--black); border-bottom: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 50; }
+        header h1 { color: var(--gold); font-size: 1.2rem; }
+        .logo-text { font-size: 1.85rem; font-weight: bold; color: var(--gold); letter-spacing: 2px; line-height: 1.2; }
+        .logo-sub { font-size: 0.9rem; color: #aa9988; }
+        .cigar-logo { width: 240px; filter: drop-shadow(0 0 14px rgba(212,175,55,0.5)); margin-top: 0; position: relative; z-index: 10; }
+
+        input, textarea { width: 100%; padding: 12px; background: var(--brown); border: 1px solid var(--gold); color: white; border-radius: 8px; font-size: 1rem; outline: none; }
+        input::placeholder, textarea::placeholder { color: #aa9988; }
+        button { background: var(--gold); color: var(--black); padding: 15px; border: none; width: 100%; font-weight: bold; font-size: 1.1rem; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+        button:active { background: #b8960f; }
+        .btn-outline { background: transparent; border: 1px solid var(--gold); color: var(--gold); }
+
+        /* ========== NAVBAR & COPYRIGHT ========== */
+        #global-navbar {
+            height: var(--navbar);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: var(--black);
+            border-top: 1px solid var(--gold);
+            position: fixed;
+            bottom: var(--copyright);
+            width: 100%;
+            z-index: 1000;
+            touch-action: manipulation;
+        }
+        #global-navbar span {
+            color: #ccc;
+            font-size: 0.72rem;
+            cursor: pointer;
+            padding: 8px 5px;
+            -webkit-tap-highlight-color: transparent;
+            transition: color 0.2s;
+            text-align: center;
+            line-height: 1.2;
+        }
+        #global-navbar span.active { color: var(--gold); border-bottom: 2px solid var(--gold); }
+        #global-copyright { position: fixed; bottom: 0; left: 0; width: 100%; height: var(--copyright); line-height: var(--copyright); text-align: center; background: var(--black); color: var(--gold); font-size: 0.72rem; font-weight: bold; z-index: 1001; }
+        .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 15px; padding-bottom: calc(var(--navbar) + var(--copyright) + 20px); position: relative; }
+
+        .hero { text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; flex: 1; padding: 20px; overflow: hidden; }
+        .hero h2 { font-size: 1.8rem; color: var(--gold); margin: 15px 0; }
+        .hero p { color: #ddd; margin-bottom: 20px; max-width: 300px; line-height: 1.6; }
+        .hero-buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 300px; }
+        .facebook-link { margin-top: 30px; padding-top: 20px; text-align: center; border-top: 1px solid #4a3326; }
+        .facebook-link a { color: var(--gold); text-decoration: none; border: 1px solid var(--gold); padding: 8px 20px; border-radius: 25px; font-size: 0.9rem; display: inline-block; }
+        .powered-by { font-size: 0.8rem; color: #665544; margin-top: 8px; }
+
+        /* ========== TÉRKÉP ========== */
+        #map-page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #map { position: absolute; top: var(--header); left: 0; right: 0; bottom: calc(var(--navbar) + var(--copyright)); width: 100%; background: #1a0f0a; }
+        #map-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 5; pointer-events: none; }
+        .spinner { width: 40px; height: 40px; border: 3px solid #4a3326; border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #indulas-btn { display: none; position: absolute; bottom: calc(var(--navbar) + var(--copyright) + 16px); left: 50%; transform: translateX(-50%); z-index: 50; background: #22c55e; color: #fff; border: none; border-radius: 30px; padding: 14px 32px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 20px rgba(34,197,94,0.5); white-space: nowrap; width: auto; }
+        #nav-choice-panel { display: none; position: absolute; bottom: calc(var(--navbar) + var(--copyright)); left: 0; right: 0; z-index: 70; background: rgba(10,6,4,0.97); border-top: 2px solid var(--gold); padding: 14px; flex-direction: column; gap: 10px; }
+        #nav-choice-panel.active { display: flex; }
+        .nav-choice-btn { padding: 13px; border-radius: 10px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; color: #fff; }
+        #btn-apple-maps { background: #1a73e8; }
+        #btn-google-maps { background: #34a853; }
+        #btn-waze { background: #6c3fc5; }
+        #btn-nav-cancel { background: #333; color: #aaa; }
+
+        /* ========== BOLT PANEL ========== */
+        #bolt-panel { display: none; position: absolute; bottom: calc(var(--navbar) + var(--copyright)); left: 0; right: 0; z-index: 60; background: #0a0604; border-top: 2px solid var(--gold); border-radius: 16px 16px 0 0; padding: 16px; box-shadow: 0 -4px 30px rgba(0,0,0,0.7); }
+        #bolt-panel.active { display: block; }
+        #bolt-panel-handle { width: 40px; height: 4px; background: #4a3326; border-radius: 2px; margin: 0 auto 14px; }
+        #bolt-panel-nev { color: var(--gold); font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; }
+        #bolt-panel-cim { color: #aaa; font-size: 0.85rem; margin-bottom: 10px; }
+        #bolt-panel-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+        .badge { padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; border: 1px solid transparent; }
+        .badge-humidor-pro  { background: #14532d; color: #4ade80; border-color: #16a34a; }
+        .badge-humidor-alap { background: #713f12; color: #fbbf24; border-color: #d97706; }
+        .badge-humidor-no   { background: #3f1212; color: #f87171; border-color: #dc2626; }
+        .badge-megeros      { background: #1a2e4a; color: #60a5fa; border-color: #2563eb; }
+        #bolt-panel-leiras { color: #ccc; font-size: 0.82rem; margin-bottom: 14px; }
+        #bolt-panel-close { position: absolute; top: 14px; right: 14px; background: #2C1B12; border: 1px solid #4a3326; color: #aaa; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        /* ========== SZŰRŐK & LISTA ========== */
+        #filter-bar { display: flex; gap: 8px; padding: 8px 12px; background: #0a0604; border-bottom: 1px solid #2a1a0a; overflow-x: auto; flex-shrink: 0; -webkit-overflow-scrolling: touch; }
+        #filter-bar::-webkit-scrollbar { display: none; }
+        .filter-btn { padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; border: 1px solid #4a3326; background: #1a100a; color: #ccc; cursor: pointer; white-space: nowrap; }
+        .filter-btn.active-filter { background: var(--gold); color: var(--black); border-color: var(--gold); }
+        .cigar-card { background: #1a100a; border: 1px solid #4a3326; border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
+        .cigar-icon { font-size: 1.8rem; flex-shrink: 0; }
+        .cigar-details { flex: 1; min-width: 0; }
+        .cigar-details h3 { margin: 0 0 3px; color: var(--gold); font-size: 0.95rem; }
+        .cigar-details p { margin: 2px 0; font-size: 0.8rem; color: #ccc; }
+        .price-tag { color: var(--gold); font-size: 0.78rem; margin-top: 3px; display: block; }
+        .nav-btn { background: var(--gold); color: var(--black); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; flex-shrink: 0; border: none; }
+        .humidor-badge { display: inline-block; font-size: 0.72rem; padding: 2px 8px; border-radius: 10px; margin-top: 4px; }
+        .humidor-badge.pro  { background: #14532d; color: #4ade80; }
+        .humidor-badge.alap { background: #713f12; color: #fbbf24; }
+        .humidor-badge.no   { background: #3f1212; color: #f87171; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #665544; }
+        .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+        .last-updated { font-size: 0.72rem; color: #554433; text-align: right; padding: 4px 12px; }
+
+        /* ========== PARTNER ========== */
+        .partner-section { margin-bottom: 25px; }
+        .partner-section h2 { color: var(--gold); font-size: 0.85rem; letter-spacing: 1px; border-bottom: 1px solid #4a3326; padding-bottom: 8px; margin-bottom: 12px; }
+        .partner-card { background: #1a100a; border: 1px solid #4a3326; border-radius: 8px; padding: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; }
+        .partner-icon { font-size: 2rem; flex-shrink: 0; }
+        .partner-info h3 { color: var(--gold); font-size: 0.95rem; margin: 0 0 3px; }
+        .partner-info p { font-size: 0.8rem; color: #aaa; }
+        .copyright-bar { text-align: center; padding: 15px; font-size: 0.72rem; color: #554433; border-top: 1px solid #2a1a0a; margin-top: 10px; }
+
+        /* ========== 18+ DISCLAIMER ========== */
+        #disclaimer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,6,4,0.97); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        #disclaimer-box { background: #1a100a; border: 2px solid var(--gold); border-radius: 20px; padding: 32px 24px; max-width: 320px; width: 100%; text-align: center; box-shadow: 0 0 30px rgba(212,175,55,0.5), 0 0 60px rgba(212,175,55,0.2); }
+        #disclaimer-box .disc-icon { font-size: 2.8rem; margin-bottom: 10px; display: block; filter: drop-shadow(0 0 8px rgba(212,175,55,0.7)); }
+        #disclaimer-box h2 { color: var(--gold); font-size: 1.5rem; margin-bottom: 12px; text-shadow: 0 0 15px rgba(212,175,55,0.6); }
+        #disclaimer-box p { color: #ccc; font-size: 0.88rem; line-height: 1.6; margin-bottom: 22px; }
+        #btn-18-yes { background: linear-gradient(135deg, #D4AF37 0%, #a07d10 100%); color: #000; padding: 14px; border: none; width: 100%; font-weight: bold; font-size: 1rem; border-radius: 10px; cursor: pointer; margin-bottom: 10px; display: block; box-shadow: 0 4px 15px rgba(212,175,55,0.5); }
+        #btn-18-no { background: transparent; border: 1px solid #4a3326; color: #888; padding: 12px; width: 100%; font-size: 0.88rem; border-radius: 10px; cursor: pointer; display: block; }
+
+        /* ========== SZKENN OLDAL ========== */
+        #qr-wrap { position: absolute; top: var(--header); left: 0; right: 0; bottom: calc(var(--navbar) + var(--copyright)); display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; overflow: hidden; }
+        #qr-video { width: 100%; max-width: 420px; object-fit: cover; }
+        #qr-aim { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -60%); width: 200px; height: 200px; border: 3px solid var(--gold); border-radius: 12px; box-shadow: 0 0 0 1000px rgba(0,0,0,0.45); pointer-events: none; }
+        #qr-hint { position: absolute; top: calc(50% - 60px + 115px); left: 50%; transform: translateX(-50%); color: rgba(212,175,55,0.7); font-size: 0.78rem; text-align: center; white-space: nowrap; pointer-events: none; }
+        #qr-status { position: absolute; bottom: 90px; left: 0; right: 0; text-align: center; color: var(--gold); font-size: 0.9rem; padding: 0 20px; }
+        #qr-btn-row { position: absolute; bottom: 16px; left: 0; right: 0; display: flex; flex-direction: column; gap: 8px; padding: 0 20px; }
+        .scan-main-btn { width: 100%; padding: 14px; border-radius: 50px; font-size: 1rem; background: linear-gradient(135deg,#D4AF37 0%,#8a6d0a 100%); color: #000; font-weight: bold; box-shadow: 0 0 20px rgba(212,175,55,0.4); border: none; cursor: pointer; }
+        .scan-alt-btn { width: 100%; padding: 11px; border-radius: 50px; font-size: 0.88rem; background: transparent; border: 1px solid rgba(212,175,55,0.5); color: var(--gold); cursor: pointer; }
+        #credit-badge { position: absolute; top: 8px; right: 12px; background: rgba(10,6,4,0.85); border: 1px solid var(--gold); border-radius: 20px; padding: 4px 10px; font-size: 0.78rem; color: var(--gold); font-weight: bold; }
+
+        /* ========== LOGIN OVERLAY ========== */
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,6,4,0.97); z-index: 8500; display: none; align-items: center; justify-content: center; padding: 20px; }
+        #login-overlay.active { display: flex; }
+        #login-box { background: #1a100a; border: 2px solid var(--gold); border-radius: 20px; padding: 32px 24px; max-width: 320px; width: 100%; text-align: center; }
+        #login-box h2 { color: var(--gold); font-size: 1.3rem; margin-bottom: 8px; }
+        #login-box p { color: #ccc; font-size: 0.85rem; line-height: 1.6; margin-bottom: 24px; }
+        .login-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 13px; border-radius: 10px; font-size: 0.95rem; font-weight: bold; cursor: pointer; margin-bottom: 12px; border: none; }
+        .login-btn-google { background: #fff; color: #222; }
+        .login-btn-cancel { background: transparent; color: #888; font-size: 0.85rem; border: 1px solid #333; margin-top: 4px; }
+
+        /* ========== AI EREDMÉNY TELJES LAP ========== */
+        #ai-result-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0604; z-index: 8000; display: none; flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        #ai-result-page.active { display: flex; }
+        #ai-result-header { background: var(--black); border-bottom: 1px solid var(--gold); padding: 14px 16px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        #ai-result-back { background: transparent; border: 1px solid var(--gold); color: var(--gold); border-radius: 8px; padding: 8px 14px; font-size: 0.85rem; font-weight: bold; cursor: pointer; width: auto; white-space: nowrap; }
+        #ai-result-title { color: var(--gold); font-size: 1rem; font-weight: bold; flex: 1; text-align: center; }
+        #ai-result-body-page { padding: 20px 16px; padding-bottom: 40px; flex: 1; }
+        .ai-cigar-name { color: var(--gold); font-size: 1.5rem; font-weight: bold; text-align: center; margin-bottom: 4px; line-height: 1.3; }
+        .ai-cigar-sub { color: #aa9988; font-size: 0.9rem; text-align: center; margin-bottom: 20px; }
+        .ai-info-card { background: #1a100a; border: 1px solid #3a2010; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+        .ai-info-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #2a1a0a; }
+        .ai-info-row:last-child { border-bottom: none; }
+        .ai-info-label { color: var(--gold); font-size: 0.8rem; font-weight: bold; min-width: 70px; padding-top: 1px; }
+        .ai-info-val { color: #ddd; font-size: 0.88rem; flex: 1; line-height: 1.5; }
+        .ai-strength-wrap { display: flex; align-items: center; gap: 8px; }
+        .ai-strength-bar { display: flex; gap: 4px; }
+        .ai-strength-dot { width: 18px; height: 10px; border-radius: 3px; }
+        .ai-strength-label { color: #aaa; font-size: 0.8rem; }
+        .ai-desc-block { background: #1a100a; border: 1px solid #3a2010; border-radius: 12px; padding: 16px; margin-bottom: 12px; color: #ccc; font-size: 0.88rem; line-height: 1.7; }
+        .ai-where-block { background: #1a1a0a; border: 1px solid #3a3010; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; }
+        .ai-where-label { color: var(--gold); font-size: 0.78rem; font-weight: bold; letter-spacing: 0.05em; margin-bottom: 6px; }
+        .ai-where-text { color: #ccc; font-size: 0.85rem; line-height: 1.6; }
+        .ai-action-row { display: flex; gap: 10px; margin-top: 4px; }
+        .ai-save-btn { flex: 1; background: linear-gradient(135deg,#D4AF37,#8a6d0a); color: #000; border: none; border-radius: 50px; padding: 14px; font-size: 0.95rem; font-weight: bold; cursor: pointer; }
+        .ai-back-btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); border-radius: 50px; padding: 14px 20px; font-size: 0.95rem; font-weight: bold; cursor: pointer; width: auto; }
+
+        /* ========== KO-FI PAYWALL ========== */
+        #kofi-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,6,4,0.97); z-index: 8200; display: none; align-items: center; justify-content: center; padding: 20px; }
+        #kofi-overlay.active { display: flex; }
+        #kofi-box { background: #1a100a; border: 2px solid var(--gold); border-radius: 20px; padding: 28px 22px; max-width: 340px; width: 100%; text-align: center; }
+        #kofi-box .kofi-icon { font-size: 3rem; margin-bottom: 10px; display: block; }
+        #kofi-box h2 { color: var(--gold); font-size: 1.3rem; margin-bottom: 10px; }
+        #kofi-box p { color: #ccc; font-size: 0.85rem; line-height: 1.6; margin-bottom: 6px; }
+        #kofi-box .kofi-highlight { color: var(--gold); font-size: 1rem; font-weight: bold; margin: 14px 0; }
+        .kofi-btn { background: #FF5E5B; color: #fff; border: none; border-radius: 10px; padding: 15px; width: 100%; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .kofi-check-btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); border-radius: 10px; padding: 12px; width: 100%; font-size: 0.9rem; font-weight: bold; cursor: pointer; margin-bottom: 8px; }
+        .kofi-cancel-btn { background: transparent; border: 1px solid #333; color: #888; border-radius: 10px; padding: 11px; width: 100%; font-size: 0.85rem; cursor: pointer; }
+
+
+        /* ========== GYŰJTEMÉNY OLDAL ========== */
+        #collection-page .content { padding-bottom: calc(var(--navbar) + var(--copyright) + 20px); }
+        .coll-card { background: #1a100a; border: 1px solid #4a3326; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; position: relative; }
+        .coll-card-name { color: var(--gold); font-size: 1rem; font-weight: bold; margin-bottom: 2px; padding-right: 30px; }
+        .coll-card-sub { color: #aa9988; font-size: 0.8rem; margin-bottom: 8px; }
+        .coll-strength-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+        .coll-dot { width: 14px; height: 8px; border-radius: 2px; }
+        .coll-desc { color: #ccc; font-size: 0.82rem; line-height: 1.5; }
+        .coll-date { color: #554433; font-size: 0.72rem; margin-top: 6px; }
+        .coll-delete { position: absolute; top: 12px; right: 12px; background: transparent; border: 1px solid #4a3326; color: #886655; border-radius: 6px; width: 26px; height: 26px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; width: auto; padding: 3px 8px; font-size: 0.75rem; }
+        .coll-empty { text-align: center; padding: 60px 20px; color: #665544; }
+        .coll-empty-icon { font-size: 3.5rem; margin-bottom: 16px; }
+        .coll-login-prompt { background: #1a100a; border: 1px solid var(--gold); border-radius: 12px; padding: 20px; text-align: center; margin: 20px 0; }
+        .coll-login-prompt p { color: #ccc; font-size: 0.88rem; margin-bottom: 14px; line-height: 1.6; }
+        .coll-stats-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+        .coll-stat { flex: 1; background: #1a100a; border: 1px solid #3a2010; border-radius: 10px; padding: 10px; text-align: center; }
+        .coll-stat-num { color: var(--gold); font-size: 1.4rem; font-weight: bold; }
+        .coll-stat-lbl { color: #887766; font-size: 0.72rem; margin-top: 2px; }
+
+
+        
+
+
+        /* ========== PROFIL GOMB (bal felső sarok) ========== */
+        #profile-fab {
+            position: fixed; top: 12px; left: 12px; z-index: 2000;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--black); border: 2px solid var(--gold);
+            color: var(--gold); font-size: 1.3rem;
+            cursor: pointer; display: none;
+            align-items: center; justify-content: center;
+            box-shadow: 0 2px 12px rgba(212,175,55,0.4);
+            padding: 0; width: 44px;
+        }
+        #profile-fab.visible { display: flex; }
+
+        /* ========== PROFIL PANEL (teljes képernyő overlay) ========== */
+        #profile-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 9000; display: none;
+        }
+        #profile-overlay.active { display: block; }
+
+        #profile-panel {
+            position: fixed; top: 0; left: -340px; width: 320px; height: 100%;
+            background: #0d0804; z-index: 9001;
+            transition: left 0.28s ease; display: flex;
+            border-right: 1px solid #2a1a0a;
+        }
+        #profile-panel.open { left: 0; }
+
+        /* Bal ikonos sáv */
+        #prof-icon-bar {
+            width: 60px; background: var(--black);
+            border-right: 1px solid #2a1a0a;
+            display: flex; flex-direction: column;
+            align-items: center; padding-top: 14px; gap: 4px;
+            flex-shrink: 0;
+        }
+        .prof-icon-btn {
+            width: 46px; height: 46px; border-radius: 10px;
+            background: transparent; border: none;
+            color: #665544; font-size: 1.3rem;
+            cursor: pointer; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: background 0.15s, color 0.15s;
+            padding: 0; width: 46px; gap: 2px;
+        }
+        .prof-icon-btn span { font-size: 0.52rem; color: #554433; line-height: 1; }
+        .prof-icon-btn.active { background: #1a100a; color: var(--gold); }
+        .prof-icon-btn.active span { color: var(--gold); }
+        #prof-icon-close {
+            margin-top: auto; margin-bottom: 14px;
+            width: 46px; height: 46px; border-radius: 10px;
+            background: transparent; border: none;
+            color: #665544; font-size: 1.1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0; width: 46px;
+        }
+
+        /* Jobb tartalom panel */
+        #prof-content {
+            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+        }
+        .prof-section { display: none; padding: 16px 14px; }
+        .prof-section.active { display: block; }
+        .prof-section-title {
+            color: #aa9988; font-size: 0.72rem; font-weight: bold;
+            letter-spacing: 0.08em; margin-bottom: 14px;
+            padding-bottom: 8px; border-bottom: 1px solid #2a1a0a;
+        }
+
+        /* Account szekció */
+        .prof-avatar { width: 56px; height: 56px; border-radius: 50%; background: #1a100a; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 10px; }
+        .prof-name { color: var(--gold); font-size: 1rem; font-weight: bold; margin-bottom: 2px; }
+        .prof-email { color: #665544; font-size: 0.78rem; margin-bottom: 14px; }
+        .prof-credit-badge { display: inline-flex; align-items: center; gap: 6px; background: #1a100a; border: 1px solid var(--gold); border-radius: 20px; padding: 6px 14px; font-size: 0.88rem; color: var(--gold); font-weight: bold; margin-bottom: 16px; }
+        .prof-logout-btn { background: transparent; border: 1px solid #4a3326; color: #887766; border-radius: 8px; padding: 10px; width: 100%; font-size: 0.85rem; cursor: pointer; }
+
+        /* Kredit szekció */
+        .kredit-big { text-align: center; padding: 16px 0 20px; }
+        .kredit-big-num { color: var(--gold); font-size: 3rem; font-weight: bold; line-height: 1; }
+        .kredit-big-lbl { color: #887766; font-size: 0.82rem; margin-top: 4px; }
+        .kredit-kofi-btn { background: #FF5E5B; color: #fff; border: none; border-radius: 10px; padding: 13px; width: 100%; font-size: 0.95rem; font-weight: bold; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .kredit-check-btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); border-radius: 10px; padding: 11px; width: 100%; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
+
+        /* Mentett szivarok szekció */
+        .sc-card { background: #1a100a; border: 1px solid #3a2010; border-radius: 10px; padding: 11px 12px; margin-bottom: 8px; position: relative; }
+        .sc-name { color: var(--gold); font-size: 0.88rem; font-weight: bold; margin-bottom: 2px; padding-right: 28px; }
+        .sc-sub { color: #887766; font-size: 0.75rem; margin-bottom: 5px; }
+        .sc-dots { display: flex; gap: 3px; margin-bottom: 4px; }
+        .sc-dot { width: 12px; height: 7px; border-radius: 2px; }
+        .sc-stars { color: #D4AF37; font-size: 0.82rem; margin-bottom: 3px; }
+        .sc-note { color: #887766; font-size: 0.75rem; font-style: italic; margin-top: 3px; line-height: 1.4; border-left: 2px solid #3a2010; padding-left: 6px; }
+        .sc-date { color: #443322; font-size: 0.68rem; margin-top: 4px; }
+        .sc-del { position: absolute; top: 8px; right: 8px; background: transparent; border: none; color: #554433; font-size: 0.9rem; cursor: pointer; padding: 3px 6px; width: auto; }
+
+        /* Statisztika szekció */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+        .stat-card { background: #1a100a; border: 1px solid #3a2010; border-radius: 10px; padding: 12px; text-align: center; }
+        .stat-num { color: var(--gold); font-size: 1.6rem; font-weight: bold; }
+        .stat-lbl { color: #887766; font-size: 0.72rem; margin-top: 3px; line-height: 1.3; }
+        .stat-top { background: #1a100a; border: 1px solid #3a2010; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+        .stat-top-title { color: #aa9988; font-size: 0.72rem; font-weight: bold; letter-spacing: 0.06em; margin-bottom: 8px; }
+        .stat-top-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #1a0f0a; font-size: 0.82rem; }
+        .stat-top-item:last-child { border-bottom: none; }
+        .stat-top-item span { color: #ccc; }
+        .stat-top-item strong { color: var(--gold); }
+
+        /* ========== STATISZTIKA ========== */
+        #stats-page .content { padding-bottom: calc(var(--navbar) + var(--copyright) + 20px); }
+    </style>
+    <script>
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+            var targetPage = document.getElementById(pageId);
+            if (targetPage) targetPage.classList.add('active');
+            document.querySelectorAll('#global-navbar span').forEach(function(s) { s.classList.remove('active'); });
+            var navMap = { 'landing-page':0,'map-page':1,'list-page':2,'add-page':3,'partner-page':4,'qr-page':5,'stats-page':6 };
+            var idx = navMap[pageId];
+            if (idx !== undefined) {
+                var spans = document.querySelectorAll('#global-navbar span');
+                if (spans[idx]) spans[idx].classList.add('active');
+            }
+            if (pageId === 'stats-page' && typeof window.loadStats === 'function') window.loadStats();
+            if (pageId === 'collection-page' && typeof window.loadCollection === 'function') window.loadCollection();
+            if (pageId === 'map-page') {
+                fixMapSize();
+                if (typeof window.loadMap === 'function') window.loadMap();
+            } else {
+                var indBtn = document.getElementById('indulas-btn');
+                if (indBtn) indBtn.style.display = 'none';
+                var navPanel = document.getElementById('nav-choice-panel');
+                if (navPanel) navPanel.classList.remove('active');
+                var boltPanel = document.getElementById('bolt-panel');
+                if (boltPanel) boltPanel.classList.remove('active');
+            }
+            if (pageId === 'list-page' && typeof window.loadList === 'function') {
+                window.loadList();
+                setTimeout(function() {
+                    var c = document.getElementById('list-container');
+                    if (c) c.scrollTop = 0;
+                }, 50);
+            }
+        }
+
+        function filterList() { if (typeof window._filterList === 'function') window._filterList(); }
+        function saveShop(useGPS) { if (typeof window._saveShop === 'function') window._saveShop(useGPS); else alert('Még tölt!'); }
+
+        function fixMapSize() {
+            var mapEl = document.getElementById('map');
+            if (!mapEl) return;
+            var h = window.innerHeight - 64 - 54 - 27;
+            mapEl.style.height = h + 'px';
+        }
+        window.addEventListener('resize', function() {
+            if (document.getElementById('map-page').classList.contains('active')) {
+                fixMapSize();
+                if (typeof gmap !== 'undefined' && gmap) google.maps.event.trigger(gmap, 'resize');
+            }
+        });
+
+        function check18() {
+            if (!sessionStorage.getItem('age18ok')) {
+                document.getElementById('disclaimer-overlay').style.display = 'flex';
+            }
+        }
+        window.addEventListener('load', check18);
+    </script>
+</head>
+<body>
+
+<!-- 18+ DISCLAIMER -->
+<!-- PROFIL FAB GOMB -->
+<button id="profile-fab" onclick="window.openProfile()">👤</button>
+
+<div id="disclaimer-overlay" style="display:none">
+    <div id="disclaimer-box">
+        <span class="disc-icon">🚬</span>
+        <h2>18+ Tartalom</h2>
+        <p>A Szivar Vadász dohánytermékekkel kapcsolatos információkat tartalmaz. Az oldal kizárólag 18 éven felüliek számára elérhető.</p>
+        <button id="btn-18-yes" onclick="document.getElementById('disclaimer-overlay').style.display='none'; sessionStorage.setItem('age18ok','1')">✅ Igen, elmúltam 18 éves</button>
+        <button id="btn-18-no" onclick="window.location.href='https://google.com'">✕ Nem, még nem múltam el 18</button>
+    </div>
+</div>
+
+<!-- PROFIL PANEL OVERLAY -->
+<div id="profile-overlay" onclick="window.closeProfile()"></div>
+
+<!-- PROFIL PANEL -->
+<div id="profile-panel">
+    <!-- Bal ikonos sáv -->
+    <div id="prof-icon-bar">
+        <button class="prof-icon-btn active" id="pib-account" onclick="window.switchProfTab('account')">
+            👤<span>Fiók</span>
+        </button>
+        <button class="prof-icon-btn" id="pib-credits" onclick="window.switchProfTab('credits')">
+            ⚡<span>Kredit</span>
+        </button>
+        <button class="prof-icon-btn" id="pib-saved" onclick="window.switchProfTab('saved')">
+            🚬<span>Mentett</span>
+        </button>
+        <button class="prof-icon-btn" id="pib-stats" onclick="window.switchProfTab('stats')">
+            📊<span>Stat</span>
+        </button>
+        <button id="prof-icon-close" onclick="window.closeProfile()">✕</button>
+    </div>
+
+    <!-- Jobb tartalom -->
+    <div id="prof-content">
+
+        <!-- FIÓK -->
+        <div class="prof-section active" id="prof-tab-account">
+            <div class="prof-section-title">FIÓKOM</div>
+            <div class="prof-avatar" id="pa-avatar">👤</div>
+            <div class="prof-name" id="pa-name">—</div>
+            <div class="prof-email" id="pa-email"></div>
+            <div class="prof-credit-badge" id="pa-credits">⚡ 0 kredit</div>
+            <button class="prof-logout-btn" onclick="window.profLogout()">Kijelentkezés</button>
+        </div>
+
+        <!-- KREDIT -->
+        <div class="prof-section" id="prof-tab-credits">
+            <div class="prof-section-title">KREDITEM</div>
+            <div class="kredit-big">
+                <div class="kredit-big-num" id="pk-num">0</div>
+                <div class="kredit-big-lbl">leolvasás maradt</div>
+            </div>
+            <p style="color:#887766;font-size:0.82rem;line-height:1.6;margin-bottom:16px;text-align:center">
+                1 kávé = 30 leolvasás.<br>Befizetés után nyomd meg az "Ellenőrzés" gombot.
+            </p>
+            <button class="kredit-kofi-btn" onclick="window.openKofi()">
+                <img src="https://storage.ko-fi.com/cdn/cup-border.png" style="width:20px;height:20px" alt="">
+                Fizetek a Ko-fi-n
+            </button>
+            <button class="kredit-check-btn" onclick="window.checkKofiCreditPanel()">✓ Már fizettem — Ellenőrzés</button>
+            <div id="pk-status" style="text-align:center;margin-top:10px;font-size:0.82rem;color:var(--gold);min-height:20px"></div>
+        </div>
+
+        <!-- MENTETT SZIVAROK -->
+        <div class="prof-section" id="prof-tab-saved">
+            <div class="prof-section-title">MENTETT SZIVARJAIM</div>
+            <div id="ps-list"><div style="text-align:center;padding:30px;color:#554433">Betöltés...</div></div>
+        </div>
+
+        <!-- STATISZTIKA -->
+        <div class="prof-section" id="prof-tab-stats">
+            <div class="prof-section-title">STATISZTIKÁM</div>
+            <div class="stat-grid" id="pst-grid">
+                <div class="stat-card"><div class="stat-num" id="pst-total">0</div><div class="stat-lbl">Szkennelt szivar</div></div>
+                <div class="stat-card"><div class="stat-num" id="pst-countries">0</div><div class="stat-lbl">Ország</div></div>
+                <div class="stat-card"><div class="stat-num" id="pst-avg">—</div><div class="stat-lbl">Átlag értékelés</div></div>
+                <div class="stat-card"><div class="stat-num" id="pst-top5">0</div><div class="stat-lbl">5 csillagos</div></div>
+            </div>
+            <div class="stat-top" id="pst-countries-top">
+                <div class="stat-top-title">🌍 TOP ORSZÁGOK</div>
+                <div id="pst-countries-list"></div>
+            </div>
+            <div class="stat-top" id="pst-brands-top">
+                <div class="stat-top-title">🏭 TOP MÁRKÁK</div>
+                <div id="pst-brands-list"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay">
+    <div id="login-box">
+        <div style="font-size:2.2rem;margin-bottom:10px">🔐</div>
+        <h2>Bejelentkezés</h2>
+        <p>Az AI Szivar Szkenn funkcióhoz bejelentkezés szükséges. Az első <strong style="color:var(--gold)">3 leolvasás ingyenes!</strong></p>
+        <button class="login-btn login-btn-google" onclick="window.loginWithGoogle()">
+            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            Folytatás Google-lal
+        </button>
+        <button class="login-btn login-btn-cancel" onclick="document.getElementById('login-overlay').classList.remove('active')">Mégsem</button>
+    </div>
+</div>
+
+<!-- ÉRTÉKELŐ POPUP -->
+<div id="rate-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,6,4,0.97);z-index:8600;display:none;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#1a100a;border:2px solid var(--gold);border-radius:20px;padding:26px 22px;max-width:340px;width:100%">
+        <h3 id="rate-cigar-name" style="color:var(--gold);font-size:1rem;margin-bottom:6px;text-align:center"></h3>
+        <div style="color:#aa9988;font-size:0.82rem;text-align:center;margin-bottom:16px">Hogyan ízlett? Adj hozzá értékelést és egy emléket!</div>
+        <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px">
+            <button onclick="window.setRating(1)" id="star-1" style="font-size:2rem;background:transparent;border:none;cursor:pointer;padding:4px;width:auto;color:#4a3326">★</button>
+            <button onclick="window.setRating(2)" id="star-2" style="font-size:2rem;background:transparent;border:none;cursor:pointer;padding:4px;width:auto;color:#4a3326">★</button>
+            <button onclick="window.setRating(3)" id="star-3" style="font-size:2rem;background:transparent;border:none;cursor:pointer;padding:4px;width:auto;color:#4a3326">★</button>
+            <button onclick="window.setRating(4)" id="star-4" style="font-size:2rem;background:transparent;border:none;cursor:pointer;padding:4px;width:auto;color:#4a3326">★</button>
+            <button onclick="window.setRating(5)" id="star-5" style="font-size:2rem;background:transparent;border:none;cursor:pointer;padding:4px;width:auto;color:#4a3326">★</button>
+        </div>
+        <textarea id="rate-note" rows="3" placeholder="Pl. A haverokkal szívtuk... Túl erős volt... Top 3!" style="width:100%;padding:10px 12px;background:#0d0804;border:1px solid #4a3326;color:#fff;border-radius:10px;font-size:0.88rem;resize:none;outline:none;margin-bottom:14px;font-family:inherit"></textarea>
+        <button onclick="window.saveWithRating(false)" style="background:linear-gradient(135deg,#D4AF37,#8a6d0a);color:#000;border:none;border-radius:50px;padding:13px;width:100%;font-size:0.95rem;font-weight:bold;cursor:pointer;margin-bottom:8px">💾 Mentés</button>
+        <button onclick="window.saveWithRating(true)" style="background:transparent;border:1px solid #4a3326;color:#887766;border-radius:50px;padding:11px;width:100%;font-size:0.85rem;cursor:pointer">Kihagyom — mentés értékelés nélkül</button>
+    </div>
+</div>
+
+<!-- KO-FI PAYWALL OVERLAY -->
+<div id="kofi-overlay">
+    <div id="kofi-box">
+        <span class="kofi-icon">☕</span>
+        <h2>Kifogytál a kreditből!</h2>
+        <p>Az ingyenes leolvasásaid elfogytak.</p>
+        <p class="kofi-highlight">Vegyél egy szivart a fejlesztőnek<br>és kapsz érte <strong>30 leolvasást!</strong></p>
+        <p style="font-size:0.78rem;color:#887766;margin-bottom:16px">Befizetés után kattints az "Ellenőrzés" gombra — a kreditek automatikusan jóváírásra kerülnek.</p>
+        <button class="kofi-btn" onclick="window.openKofi()">
+            <img src="https://storage.ko-fi.com/cdn/cup-border.png" style="width:20px;height:20px" alt="">
+            Fizetek a Ko-fi-n
+        </button>
+        <button class="kofi-check-btn" onclick="window.checkKofiCredit()">✓ Már fizettem — Ellenőrzés</button>
+        <button class="kofi-cancel-btn" onclick="document.getElementById('kofi-overlay').classList.remove('active')">Mégsem</button>
+    </div>
+</div>
+
+<!-- AI EREDMÉNY TELJES LAP -->
+<div id="ai-result-page">
+    <div id="ai-result-header">
+        <button id="ai-result-back" onclick="window.closeResultPage()">← Vissza</button>
+        <div id="ai-result-title">Szivar azonosítva</div>
+        <div style="width:70px"></div>
+    </div>
+    <div id="ai-result-body-page">
+        <div class="ai-cigar-name" id="res-nev"></div>
+        <div class="ai-cigar-sub" id="res-gyar-sub"></div>
+        <div class="ai-info-card">
+            <div class="ai-info-row" id="res-row-gyar" style="display:none">
+                <div class="ai-info-label">🏭 Gyár</div>
+                <div class="ai-info-val" id="res-gyar"></div>
+            </div>
+            <div class="ai-info-row" id="res-row-orszag" style="display:none">
+                <div class="ai-info-label">🌍 Ország</div>
+                <div class="ai-info-val" id="res-orszag"></div>
+            </div>
+            <div class="ai-info-row" id="res-row-eros" style="display:none">
+                <div class="ai-info-label">💪 Erősség</div>
+                <div class="ai-info-val">
+                    <div class="ai-strength-wrap">
+                        <div class="ai-strength-bar" id="res-strength-dots"></div>
+                        <div class="ai-strength-label" id="res-eros-text"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ai-desc-block" id="res-jellemzok" style="display:none"></div>
+        <div class="ai-where-block" id="res-where-block" style="display:none">
+            <div class="ai-where-label">📍 HOL KAPHATÓ</div>
+            <div class="ai-where-text" id="res-megtalalhato"></div>
+        </div>
+        <div class="ai-action-row" style="flex-wrap:wrap;gap:8px">
+            <button class="ai-save-btn" onclick="window.saveScannedCigar()" style="flex:1;min-width:140px">💾 Mentés</button>
+            <button class="ai-share-btn" onclick="window.shareOnFacebook()" style="flex:1;min-width:140px;background:linear-gradient(135deg,#D4AF37 0%,#8a6d0a 100%);color:#000;border:none;border-radius:50px;padding:14px;font-size:0.9rem;font-weight:bold;cursor:pointer">📤 Megosztás</button>
+        </div>
+        <div style="margin-top:8px">
+            <button class="ai-back-btn" onclick="window.closeResultPage()" style="width:100%">← Kamera</button>
+        </div>
+    </div>
+</div>
+
+<!-- KEZDŐLAP -->
+<div id="landing-page" class="page active">
+    <header>
+        <div style="text-align:center">
+            <div class="logo-text">SZIVAR VADÁSZ</div>
+            <div class="logo-sub">Közösségi szivarbolt térkép</div>
+        </div>
+    </header>
+    <div class="hero">
+        <img src="https://firebasestorage.googleapis.com/v0/b/szivar-vadasz.firebasestorage.app/o/01.gif?alt=media&token=106e8d0b-22df-43f3-920b-685c2cd2710b" class="cigar-logo" alt="logo">
+        <h2>Üdv Szivar Vadász!</h2>
+        <p>Találd meg a legjobb füstölnivalót a közelben. ;)</p>
+        <div class="hero-buttons">
+            <button onclick="showPage('map-page')">📍 TÉRKÉP NÉZET</button>
+            <button onclick="showPage('list-page')" class="btn-outline">📜 BOLTLISTA</button>
+        </div>
+        <div class="facebook-link">
+            <a href="https://facebook.com/groups/szivarklub" target="_blank">🔗 Powered by SZIVAR KLUB</a>
+            <div class="powered-by">Csatlakozz a közösséghez Facebookon!</div>
+        </div>
+    </div>
+</div>
+
+<!-- TÉRKÉP -->
+<div id="map-page" class="page">
+    <header><h1>📍 Szivar boltok</h1></header>
+    <div id="map"></div>
+    <div id="map-loading">
+        <div class="spinner"></div>
+        <p style="color:var(--gold);font-size:0.9rem">🗺️ Térkép betöltése...</p>
+    </div>
+    <button id="indulas-btn" onclick="navValasztoMegnyit()">🧭 INDULÁS!</button>
+    <div id="nav-choice-panel">
+        <div style="color:var(--gold);font-size:0.85rem;text-align:center;margin-bottom:4px;font-weight:bold">🧭 Válassz navigációs appot</div>
+        <button class="nav-choice-btn" id="btn-apple-maps" onclick="navMegnyit('apple')">🗺️ Apple Maps</button>
+        <button class="nav-choice-btn" id="btn-google-maps" onclick="navMegnyit('google')">🌍 Google Maps</button>
+        <button class="nav-choice-btn" id="btn-waze" onclick="navMegnyit('waze')">🚗 Waze</button>
+        <button class="nav-choice-btn" id="btn-nav-cancel" onclick="navValasztoZar()">✕ Mégsem</button>
+    </div>
+    <div id="bolt-panel">
+        <div id="bolt-panel-close" onclick="document.getElementById('bolt-panel').classList.remove('active')">✕</div>
+        <div id="bolt-panel-handle"></div>
+        <div id="bolt-panel-nev"></div>
+        <div id="bolt-panel-cim"></div>
+        <div id="bolt-panel-badges"></div>
+        <div id="bolt-panel-leiras"></div>
+        <button id="bolt-panel-nav-btn">🧭 INDULÁS!</button>
+    </div>
+</div>
+
+<!-- LISTA -->
+<div id="list-page" class="page">
+    <header><input type="text" id="searchInput" placeholder="🔍 Keresés..." oninput="filterList()" style="margin:0"></header>
+    <div id="filter-bar">
+        <button class="filter-btn active-filter" id="filter-all" onclick="setFilter('all')">🔓 Mind</button>
+        <button class="filter-btn" id="filter-humidor" onclick="setFilter('humidor')">🏆 Humidor</button>
+        <button class="filter-btn" id="filter-stats" onclick="showPage('stats-page')">📊 Statisztika</button>
+    </div>
+    <div id="last-updated-bar" class="last-updated"></div>
+    <div id="list-container" class="content"></div>
+</div>
+
+<!-- ÚJ BOLT -->
+<div id="add-page" class="page">
+    <header><h1>➕ Új szivarbolt</h1></header>
+    <div class="content">
+        <div style="margin-bottom:15px"><input type="text" id="shopName" placeholder="Bolt neve *"></div>
+        <div style="margin-bottom:15px"><input type="text" id="shopAddress" placeholder="Cím (utca, házszám, város) *"></div>
+        <div style="margin-bottom:15px"><textarea id="shopDesc" placeholder="Leírás (pl. milyen szivarokat árulnak)" rows="3"></textarea></div>
+        <div style="margin-bottom:15px">
+            <p style="color:#aa9988;font-size:0.85rem;margin-bottom:8px">Humidor minősítés:</p>
+            <div style="display:flex;gap:8px">
+                <button type="button" id="hum-pro" class="filter-btn" style="flex:1" onclick="setHumidor('pro')">🟢 Profi</button>
+                <button type="button" id="hum-alap" class="filter-btn" style="flex:1" onclick="setHumidor('alap')">🟡 Alap</button>
+                <button type="button" id="hum-no" class="filter-btn" style="flex:1" onclick="setHumidor('no')">🔴 Nincs</button>
+            </div>
+        </div>
+        <button onclick="saveShop(false)" style="margin-bottom:10px">💾 MENTÉS CÍM ALAPJÁN</button>
+        <button onclick="saveShop(true)" class="btn-outline">📍 MENTÉS GPS POZÍCIÓVAL</button>
+        <p style="font-size:0.8rem;color:#aaa;margin-top:10px;text-align:center">A beküldött boltokat 48 órán belül ellenőrizzük.</p>
+    </div>
+</div>
+
+<!-- PARTNEREK -->
+<div id="partner-page" class="page">
+    <header><h1>🌐 Partner</h1></header>
+    <div class="content">
+        <div class="partner-section">
+            <h2>⭐ TÁMOGATÓK & SZPONZOROK</h2>
+            <a class="partner-card" href="https://ko-fi.com/szivarvadasz" target="_blank" style="border-color:#D4AF37">
+                <div class="partner-icon">⭐</div>
+                <div class="partner-info"><h3>Légy Te az első szponzor!</h3><p>Kattints és írj nekünk!</p></div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="partner-section">
+            <h2>👥 FACEBOOK KÖZÖSSÉGEK</h2>
+            <a class="partner-card" href="https://facebook.com/groups/szivarklub" target="_blank">
+                <div class="partner-icon">🇭🇺</div>
+                <div class="partner-info"><h3>Szivar Klub</h3><p>Magyar szivar szerelmesek közössége</p></div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="partner-section">
+            <h2>🛒 SZIVAROZÓ HELYEK, TERASZOK</h2>
+            <div class="partner-card" style="opacity:0.5">
+                <div class="partner-icon">🌿</div>
+                <div class="partner-info"><h3>Hamarosan...</h3><p>Teraszok, ahol nyugodtan lehet szivarozni – hamarosan térképen!</p></div>
+            </div>
+        </div>
+        <div class="partner-section">
+            <h2>🐾 VADÁSZ ALKALMAZÁSOK</h2>
+            <a class="partner-card" href="https://vadasz-apps.web.app" target="_blank">
+                <div class="partner-icon">🛡️</div>
+                <div class="partner-info">
+                    <h3>Ismerd meg az összes Vadász appot!</h3>
+                    <p>Trafik, Szivar, Hangszerbolt és még több – egy helyen, ingyen, telepítési útmutatóval!</p>
+                </div>
+                <div class="partner-arrow">›</div>
+            </a>
+        </div>
+        <div class="partner-section">
+            <h2>❤️ TÁMOGASD AZ APPOT</h2>
+            <a class="partner-card" href="https://ko-fi.com/szivarvadasz" target="_blank" style="border-color:#D4AF37">
+                <div class="partner-icon">☕</div>
+                <div class="partner-info"><h3>Vegyél egy szivart a fejlesztőnek!</h3><p>Az app ingyenes, de a fejlesztés nem az 😄</p></div>
+                <div class="partner-arrow">›</div>
+            </a>
+            <div style="text-align:center;margin-top:10px">
+                <a href="https://ko-fi.com/szivarvadasz" target="_blank">
+                    <img src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" alt="Ko-fi támogatás" style="height:40px;border-radius:8px">
+                </a>
+            </div>
+        </div>
+        <div class="copyright-bar">
+            © 2024–<span id="copy-year"></span> Szivar Vadász. Minden jog fenntartva.<br>
+            Készítette: Králik Zola | v2.1<br>
+            Az alkalmazás tartalma szerzői jogi védelem alatt áll.
+        </div>
+    </div>
+</div>
+
+<!-- SZKENN OLDAL -->
+<div id="qr-page" class="page">
+    <header>
+        <div style="display:flex;align-items:center;gap:8px">
+            <h1>🔍 Szivar Szkenn</h1>
+        </div>
+
+    </header>
+    <div id="qr-wrap">
+        <!-- Rejtett file input a natív kamera/galéria híváshoz -->
+        <input type="file" id="ai-file-input" accept="image/*" capture="environment" style="display:none" onchange="window.handleFileInput(this)">
+        <video id="qr-video" playsinline style="display:none"></video>
+        <canvas id="ai-canvas" style="display:none"></canvas>
+
+        <!-- Kamera preview vagy placeholder -->
+        <div id="camera-placeholder" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#000">
+            <div style="font-size:4rem">📷</div>
+            <div style="color:rgba(212,175,55,0.7);font-size:0.9rem;text-align:center;padding:0 30px">Irányítsd a kamerát<br>a szivar gyűrűjére</div>
+        </div>
+
+        <div id="credit-badge"></div>
+        <div id="qr-status" style="position:absolute;bottom:96px;left:0;right:0;text-align:center;color:var(--gold);font-size:0.88rem;padding:0 20px"></div>
+        <div id="qr-btn-row">
+            <button class="scan-main-btn" onclick="window.startScan()">✨ SZIVAR FELISMERÉSE (AI)</button>
+            <button class="scan-alt-btn" id="btn-login-status" onclick="window.handleLoginBtn()">🔐 Bejelentkezés</button>
+        </div>
+    </div>
+</div>
+
+<!-- GYŰJTEMÉNY OLDAL -->
+<div id="collection-page" class="page">
+    <header><h1>🚬 Gyűjteményem</h1></header>
+    <div class="content">
+        <div id="coll-login-wall" style="display:none">
+            <div class="coll-login-prompt">
+                <div style="font-size:2rem;margin-bottom:10px">🔐</div>
+                <p>A gyűjteményed megtekintéséhez<br>bejelentkezés szükséges.</p>
+                <button onclick="document.getElementById('login-overlay').classList.add('active')" style="width:auto;padding:12px 24px;border-radius:50px">Google bejelentkezés</button>
+            </div>
+        </div>
+        <div id="coll-stats-bar" class="coll-stats-bar" style="display:none">
+            <div class="coll-stat">
+                <div class="coll-stat-num" id="coll-total">0</div>
+                <div class="coll-stat-lbl">Mentett szivar</div>
+            </div>
+            <div class="coll-stat">
+                <div class="coll-stat-num" id="coll-countries">0</div>
+                <div class="coll-stat-lbl">Ország</div>
+            </div>
+            <div class="coll-stat">
+                <div class="coll-stat-num" id="coll-credits-left" style="color:#4ade80">0</div>
+                <div class="coll-stat-lbl">Kredit maradt</div>
+            </div>
+        </div>
+        <div id="coll-container"></div>
+    </div>
+</div>
+
+<!-- STATISZTIKA -->
+<div id="stats-page" class="page">
+    <header><h1>📊 Statisztika</h1></header>
+    <div class="content">
+        <div id="stats-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px"></div>
+        <div style="background:#1a0f0a;border:1px solid #3a2010;border-radius:12px;padding:14px;margin-bottom:14px">
+            <h3 style="color:var(--gold);margin:0 0 12px;font-size:0.95rem">🏙️ Top 10 város – legtöbb bolt</h3>
+            <canvas id="cityChart" height="260"></canvas>
+        </div>
+        <div style="background:#1a0f0a;border:1px solid #3a2010;border-radius:12px;padding:14px;margin-bottom:14px">
+            <h3 style="color:var(--gold);margin:0 0 12px;font-size:0.95rem">🏆 Humidor eloszlás</h3>
+            <canvas id="humidorChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<div id="global-navbar">
+    <span onclick="showPage('landing-page')" class="active">🏠 Kezdő</span>
+    <span onclick="showPage('map-page')">📍 Térkép</span>
+    <span onclick="showPage('list-page')">📜 Lista</span>
+    <span onclick="showPage('add-page')">➕ Új</span>
+    <span onclick="showPage('partner-page')">🌐 Partner</span>
+    <span onclick="showPage('qr-page')">🔍 Szkenn</span>
+</div>
+<div id="global-copyright">© 2024–<span class="copy-year"></span> Szivar Vadász | 🚬 18+</div>
+
+<script>
+    var y = new Date().getFullYear();
+    document.querySelectorAll('.copy-year').forEach(function(el){ el.textContent = y; });
+    document.getElementById('copy-year').textContent = y;
+</script>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqCZBsFCKSnHm_NXAS2lcb6X860e1xMYk&libraries=places"></script>
+<script async src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script type="module">
+    import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getFirestore, collection, getDocs, addDoc, doc, getDoc, setDoc, updateDoc, increment, query, orderBy, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
+    const app = initializeApp({
+        apiKey:            "AIzaSyBQEZITjf8G8fSntPEoGQlSimUfwzNyDig",
+        authDomain:        "szivar-vadasz.firebaseapp.com",
+        projectId:         "szivar-vadasz",
+        storageBucket:     "szivar-vadasz.firebasestorage.app",
+        messagingSenderId: "179497854451",
+        appId:             "1:179497854451:web:842c34ce899b1aafee1e86"
+    });
+    const db   = getFirestore(app, 'szivarvadasz');
+    const auth = getAuth(app);
+
+    var gmap=null, markers=[], trafiks=[], allShops=[];
+    var userLoc={lat:47.4979,lng:19.0402};
+    var navCelLat=null, navCelLng=null, navCelNev=null;
+    var userMarker=null, posWatchId=null;
+    var activeFilter='all';
+    var selectedHumidor='';
+    var shopClusterer=null;
+
+    // ============================================================
+    // AUTH & KREDIT RENDSZER
+    // ============================================================
+    var currentUser = null;
+    var userCredits = 0;
+    var FREE_SCANS = 3;
+    var CREDITS_PER_PAYMENT = 30;
+    var GEMINI_KEY = 'AIzaSyBKb1MIFo8nTZbfS7URsfWZwBnTMtx_S6M';
+    var lastScannedResult = null;
+    var lastCapturedBlob = null; // A fotó blob-ja megosztáshoz
+
+    onAuthStateChanged(auth, async function(user) {
+        currentUser = user;
+        if (user) {
+            await ensureUserDoc(user);
+            await refreshCredits();
+            updateScanUI();
+        } else {
+            updateScanUI();
+        }
+    });
+
+    async function ensureUserDoc(user) {
+        var ref = doc(db, 'users', user.uid);
+        var snap = await getDoc(ref);
+        if (!snap.exists()) {
+            await setDoc(ref, {
+                email: user.email || '',
+                displayName: user.displayName || '',
+                credits: FREE_SCANS,
+                totalScans: 0,
+                createdAt: new Date().toISOString()
+            });
+            userCredits = FREE_SCANS;
+        } else {
+            // Mindig töltjük be a valódi értéket Firestore-ból
+            var d = snap.data();
+            userCredits = (d.credits !== undefined) ? d.credits : 0;
+        }
+    }
+
+    async function refreshCredits() {
+        if (!currentUser) { userCredits = 0; return; }
+        var ref = doc(db, 'users', currentUser.uid);
+        var snap = await getDoc(ref);
+        if (snap.exists()) {
+            userCredits = snap.data().credits || 0;
+        }
+    }
+
+    function updateScanUI() {
+        var badge    = document.getElementById('credit-badge');
+        var loginBtn = document.getElementById('btn-login-status');
+        var fab      = document.getElementById('profile-fab');
+        if (currentUser) {
+            badge.textContent = '⚡ ' + userCredits + ' kredit';
+            badge.style.display = 'block';
+            loginBtn.style.display = 'none';
+            if (fab) fab.classList.add('visible');
+            // Profil panel fejléc frissítés ha nyitva van
+            var paName = document.getElementById('pa-name');
+            var paCred = document.getElementById('pa-credits');
+            var pkNum  = document.getElementById('pk-num');
+            if (paName) paName.textContent = currentUser.displayName || currentUser.email || 'Vadász';
+            if (paCred) paCred.textContent = '⚡ ' + userCredits + ' kredit';
+            if (pkNum)  pkNum.textContent  = userCredits;
+        } else {
+            badge.style.display = 'none';
+            loginBtn.style.display = 'block';
+            loginBtn.textContent = '🔐 Bejelentkezés';
+            if (fab) fab.classList.remove('visible');
+        }
+    }
+
+    window.handleLoginBtn = function() {
+        if (currentUser) {
+            if (confirm('Kijelentkezel?')) {
+                signOut(auth).then(function() { updateScanUI(); });
+            }
+        } else {
+            document.getElementById('login-overlay').classList.add('active');
+        }
+    };
+
+    window.loginWithGoogle = async function() {
+        try {
+            var provider = new GoogleAuthProvider();
+            await signInWithPopup(auth, provider);
+            document.getElementById('login-overlay').classList.remove('active');
+        } catch(e) {
+            alert('Google bejelentkezés sikertelen: ' + e.message);
+        }
+    };
+
+    // Apple login eltávolítva
+
+    // ============================================================
+    // SZKENN INDÍTÁS — belépési pont a gombra
+    // ============================================================
+    window.startScan = function() {
+        if (!currentUser) {
+            document.getElementById('login-overlay').classList.add('active');
+            return;
+        }
+        // iOS: .click() AZONNAL kell hívni, async/await elveszíti a user gesture-t!
+        if (userCredits <= 0) {
+            document.getElementById('kofi-overlay').classList.add('active');
+            // Háttérben frissítjük ha esetleg már kapott kredittet
+            refreshCredits().then(function() {
+                updateScanUI();
+                if (userCredits > 0) document.getElementById('kofi-overlay').classList.remove('active');
+            });
+            return;
+        }
+        // Kamera azonnali megnyitása — sync kontextusban marad
+        document.getElementById('ai-file-input').click();
+        // Háttérben frissítjük a krediteket a következő scan előtt
+        refreshCredits().then(updateScanUI);
+    };
+
+    // ============================================================
+    // FÁJL INPUT KEZELÉS (kamera vagy galéria)
+    // ============================================================
+    window.handleFileInput = async function(input) {
+        if (!input.files || !input.files[0]) return;
+        var file = input.files[0];
+        lastCapturedBlob = file; // Elmentjük megosztáshoz
+        input.value = ''; // reset hogy újra lehessen fényképezni
+
+        var status = document.getElementById('qr-status');
+        status.textContent = '📸 Kép betöltése...';
+
+        // Kép olvasás és átméretezés
+        var reader = new FileReader();
+        reader.onload = async function(e) {
+            var img = new Image();
+            img.onload = async function() {
+                var canvas = document.getElementById('ai-canvas');
+                var maxW = 800;
+                var scale = Math.min(1, maxW / img.width);
+                canvas.width  = Math.round(img.width  * scale);
+                canvas.height = Math.round(img.height * scale);
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                var imageData = canvas.toDataURL('image/jpeg', 0.75).split(',')[1];
+
+                // Fotó preview a placeholder helyett
+                document.getElementById('camera-placeholder').style.backgroundImage = 'url(' + e.target.result + ')';
+                document.getElementById('camera-placeholder').style.backgroundSize = 'cover';
+                document.getElementById('camera-placeholder').style.backgroundPosition = 'center';
+                document.getElementById('camera-placeholder').innerHTML = '';
+
+                await callGemini(imageData);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    // ============================================================
+    // GEMINI API HÍVÁS
+    // ============================================================
+    async function callGemini(imageData) {
+        var status = document.getElementById('qr-status');
+        status.innerHTML = '🤖 AI elemzés folyamatban...<br><span style="font-size:0.78rem;color:#887766">Ez pár másodpercet vesz igénybe</span>';
+
+        try {
+            var resp = await fetch(
+                'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + GEMINI_KEY,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                { text: 'Te egy szivar-szakértő AI vagy. A képen egy szivar vagy szivargyűrű látható. Azonosítsd és válaszolj CSAK egyetlen nyers JSON objektummal, semmi mással - se magyarázat, se gondolkodás, se markdown, se backtick, se kódblokk. Csak a JSON. Formátum: {"nev":"pontos márkanév és típus","gyar":"gyártó cég neve","orszag":"gyártási ország","eros":"erősség szövegesen pl. Közepesen erős","erosSzam":3,"jellemzok":"2-3 mondat a szivarról magyarul","megtalalhato":"Ha ez a szivar elérhető Magyarországon, sorolj fel 2-4 KÜLÖNBÖZŐ konkrét helyet ahol valószínűleg kapható — például: Szivarpalota (Budapest, Váci u. 10.), La Casa del Habano (Budapest), Havanna Szivarszaküzlet, Cigar Shop (Budapest, Andrássy út), Humidor Szaküzlet, szivar.hu, cigarworld.hu, tabaccheria.hu webshopok. Válassz a listából az adott szivar típusához illőt — kubai szivarnál kubai szakboltokat, nicaraguai premiumoknak más helyeket. HA ez a márka Magyarországon nem vagy alig kapható, írd egyértelműen: Magyarországon nehezen elérhető, importált termék — keress rá: [márkanév] online szivarwebshop."}. Az erosSzam kötelezően 1-5 közötti egész. Ha nem azonosítható, nev mezőbe írj: Ismeretlen szivar.' },
+                                { inline_data: { mime_type: 'image/jpeg', data: imageData } }
+                            ]
+                        }],
+                        safetySettings: [
+                            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+                            { category: 'HARM_CATEGORY_HARASSMENT',         threshold: 'BLOCK_NONE' },
+                            { category: 'HARM_CATEGORY_HATE_SPEECH',        threshold: 'BLOCK_NONE' },
+                            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',  threshold: 'BLOCK_NONE' }
+                        ],
+                        generationConfig: { temperature: 0.1, maxOutputTokens: 500, thinkingConfig: { thinkingBudget: 0 } }
+                    })
+                }
+            );
+
+            if (!resp.ok) {
+                var errText = await resp.text();
+                throw new Error('HTTP ' + resp.status + ': ' + errText.substring(0, 120));
+            }
+
+            var data = await resp.json();
+
+            if (!data.candidates || data.candidates.length === 0) {
+                var reason = (data.promptFeedback && data.promptFeedback.blockReason) || 'üres válasz';
+                status.textContent = '❌ AI nem tudott válaszolni: ' + reason;
+                return;
+            }
+
+            var raw = (data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) || '';
+            // Agresszív JSON tisztítás
+            var clean = raw.replace(/```json/g,'').replace(/```/g,'').trim();
+            // Ha van prefix szöveg a JSON előtt, kivágjuk
+            var jsonStart = clean.indexOf('{');
+            if (jsonStart > 0) clean = clean.substring(jsonStart);
+
+            var res;
+            try {
+                res = JSON.parse(clean);
+            } catch(parseErr) {
+                console.error('JSON parse hiba, raw:', raw);
+                status.textContent = '❌ Nem sikerült a felismerés. Próbálj élesebb, közelebbi képet!';
+                return;
+            }
+
+            // Kredit levonás sikeres azonosítás után
+            await deductCredit();
+
+            // Eredmény megjelenítés
+            lastScannedResult = res;
+            showResultPage(res);
+            status.textContent = '✅ Felismerve!';
+
+        } catch(e) {
+            console.error('AI hiba:', e);
+            if (e.message && e.message.indexOf('429') !== -1) {
+                status.textContent = '❌ API kvóta kimerült. Próbáld újra később!';
+            } else {
+                status.textContent = '❌ Hiba: ' + e.message;
+            }
+        }
+    }
+
+    // ============================================================
+    // KREDIT LEVONÁS
+    // ============================================================
+    async function deductCredit() {
+        if (!currentUser) return;
+        try {
+            var ref = doc(db, 'users', currentUser.uid);
+            await updateDoc(ref, {
+                credits: increment(-1),
+                totalScans: increment(1)
+            });
+            userCredits = Math.max(0, userCredits - 1);
+            updateScanUI();
+        } catch(e) {
+            console.error('Kredit levonás hiba:', e);
+        }
+    }
+
+    // ============================================================
+    // EREDMÉNY OLDAL MEGJELENÍTÉS
+    // ============================================================
+    function showResultPage(res) {
+        document.getElementById('res-nev').textContent = res.nev || 'Ismeretlen szivar';
+
+        // Gyár + ország alcím
+        var sub = [];
+        if (res.gyar) sub.push(res.gyar);
+        if (res.orszag) sub.push(res.orszag);
+        document.getElementById('res-gyar-sub').textContent = sub.join(' · ');
+
+        // Info sorok
+        if (res.gyar) { document.getElementById('res-gyar').textContent = res.gyar; document.getElementById('res-row-gyar').style.display='flex'; }
+        if (res.orszag) { document.getElementById('res-orszag').textContent = res.orszag; document.getElementById('res-row-orszag').style.display='flex'; }
+
+        // Erősség dotsok
+        if (res.eros || res.erosSzam) {
+            var num = parseInt(res.erosSzam) || parseErosszam(res.eros);
+            var dotsEl = document.getElementById('res-strength-dots');
+            dotsEl.innerHTML = '';
+            for (var i = 1; i <= 5; i++) {
+                var dot = document.createElement('div');
+                dot.className = 'ai-strength-dot';
+                if (i <= num) {
+                    dot.style.background = num <= 2 ? '#4ade80' : num === 3 ? '#fbbf24' : '#f87171';
+                } else {
+                    dot.style.background = '#2a1a0a';
+                    dot.style.border = '1px solid #4a3326';
+                }
+                dotsEl.appendChild(dot);
+            }
+            document.getElementById('res-eros-text').textContent = res.eros || '';
+            document.getElementById('res-row-eros').style.display = 'flex';
+        }
+
+        if (res.jellemzok) { document.getElementById('res-jellemzok').textContent = res.jellemzok; document.getElementById('res-jellemzok').style.display='block'; }
+        if (res.megtalalhato) { document.getElementById('res-megtalalhato').textContent = res.megtalalhato; document.getElementById('res-where-block').style.display='block'; }
+
+        document.getElementById('ai-result-page').classList.add('active');
+    }
+
+    function parseErosszam(str) {
+        if (!str) return 3;
+        var s = str.toLowerCase();
+        if (s.indexOf('enyhe') !== -1 && s.indexOf('közep') === -1) return 1;
+        if (s.indexOf('enyhe-közep') !== -1 || s.indexOf('enyhén közep') !== -1) return 2;
+        if (s.indexOf('közep') !== -1 && s.indexOf('erős') === -1) return 3;
+        if (s.indexOf('közep') !== -1 && s.indexOf('erős') !== -1) return 4;
+        if (s.indexOf('erős') !== -1) return 4;
+        if (s.indexOf('teli') !== -1 || s.indexOf('full') !== -1) return 5;
+        return 3;
+    }
+
+    window.closeResultPage = function() {
+        document.getElementById('ai-result-page').classList.remove('active');
+        // Reset sorok
+        ['res-row-gyar','res-row-orszag','res-row-eros'].forEach(function(id){ document.getElementById(id).style.display='none'; });
+        document.getElementById('res-jellemzok').style.display='none';
+        document.getElementById('res-where-block').style.display='none';
+    };
+
+    var currentRating = 0;
+
+    window.saveScannedCigar = function() {
+        if (!lastScannedResult || !currentUser) {
+            alert('Bejelentkezés szükséges a mentéshez!');
+            return;
+        }
+        // Rating popup megnyitása
+        currentRating = 0;
+        document.getElementById('rate-cigar-name').textContent = lastScannedResult.nev || 'Szivar értékelése';
+        document.getElementById('rate-note').value = '';
+        for (var i = 1; i <= 5; i++) {
+            document.getElementById('star-' + i).classList.remove('active');
+        }
+        var ro = document.getElementById('rate-overlay'); ro.style.display='flex';
+    };
+
+    window.setRating = function(n) {
+        currentRating = n;
+        for (var i = 1; i <= 5; i++) {
+            var s = document.getElementById('star-' + i);
+            if (s) s.style.color = i <= n ? '#D4AF37' : '#4a3326';
+        }
+    };
+
+    window.saveWithRating = async function(skip) {
+        document.getElementById('rate-overlay').style.display='none';
+        var note = skip ? '' : (document.getElementById('rate-note').value.trim());
+        var rating = skip ? 0 : currentRating;
+        try {
+            await addDoc(collection(db, 'users/' + currentUser.uid + '/savedCigars'), {
+                nev:       lastScannedResult.nev || '',
+                gyar:      lastScannedResult.gyar || '',
+                orszag:    lastScannedResult.orszag || '',
+                eros:      lastScannedResult.eros || '',
+                erosSzam:  lastScannedResult.erosSzam || 3,
+                jellemzok: lastScannedResult.jellemzok || '',
+                rating:    rating,
+                note:      note,
+                datum:     new Date().toISOString()
+            });
+            // Profil saved tab újratöltése
+            profTabLoaded.saved = false; profTabLoaded.stats = false;
+            // Visszajelzés
+            var status = document.getElementById('qr-status');
+            if (status) status.textContent = '✅ Mentve' + (rating ? ' (' + '★'.repeat(rating) + ')' : '') + '!';
+            window.closeResultPage();
+        } catch(e) {
+            alert('❌ Mentési hiba: ' + e.message);
+        }
+    };
+
+    // ============================================================
+    // KO-FI PAYWALL
+    // ============================================================
+    window.openKofi = function() {
+        window.open('https://ko-fi.com/szivarvadasz', '_blank');
+    };
+
+    // Ko-fi webhook eredménye: a Cloud Function ír a Firestore-ba
+    // users/{uid}/credits += 30 amikor webhook beérkezik.
+    // Az "Ellenőrzés" gomb manuálisan frissíti a kredit megjelenítést.
+    window.checkKofiCredit = async function() {
+        if (!currentUser) { alert('Előbb jelentkezz be!'); return; }
+        document.getElementById('kofi-overlay').classList.remove('active');
+        var status = document.getElementById('qr-status');
+        var prevCredits = userCredits;
+        status.innerHTML = '⏳ Várakozás a Ko-fi visszaigazolásra...<br><span style="font-size:0.78rem;color:#887766">Ez akár 30 másodpercig tarthat</span>';
+
+        // Polling: 6x próbál 5 másodpercenként (30mp összesen)
+        var attempts = 0;
+        var maxAttempts = 6;
+        var poll = async function() {
+            attempts++;
+            await refreshCredits();
+            updateScanUI();
+            if (userCredits > prevCredits) {
+                status.textContent = '✅ ' + userCredits + ' kredit jóváírva! Szkennelhetsz!';
+                return;
+            }
+            if (attempts < maxAttempts) {
+                status.innerHTML = '⏳ Ellenőrzés... (' + attempts + '/' + maxAttempts + ')<br><span style="font-size:0.78rem;color:#887766">A Ko-fi értesítés úton van</span>';
+                setTimeout(poll, 5000);
+            } else {
+                status.innerHTML = '⏳ Még nem érkezett meg.<br><span style="font-size:0.78rem;color:#887766">Próbáld újra 1 perc múlva, vagy írj nekünk!</span>';
+            }
+        };
+        setTimeout(poll, 3000); // első ellenőrzés 3mp után
+    };
+
+    // Ko-fi webhook Cloud Function — users/{uid}/credits += 30
+    // A Function URL: https://us-central1-szivar-vadasz.cloudfunctions.net/kofiWebhook
+    // Ko-fi Dashboard → Webhooks → POST erre az URL-re
+    // Body tartalmazza: data.email → Firebase Auth email alapján uid keresés → credits +30
+
+
+
+    // ============================================================
+    // FACEBOOK MEGOSZTÁS
+    // ============================================================
+    window.shareOnFacebook = async function() {
+        if (!lastScannedResult) return;
+        var nev      = lastScannedResult.nev    || 'Ismeretlen szivar';
+        var gyar     = lastScannedResult.gyar   || '';
+        var orszag   = lastScannedResult.orszag || '';
+        var eros     = lastScannedResult.eros   || '';
+        var erosSzam = parseInt(lastScannedResult.erosSzam) || 3;
+        var dots = ['○','○','○','○','○'];
+        for (var i = 0; i < erosSzam; i++) dots[i] = '●';
+
+        // Szöveg URL nélkül — így a Facebook engedi a képfeltöltést!
+        var shareText = '🚬 Ezt a szivart azonosítottam a Szivar Vadász appban!\n\n'
+            + '📛 ' + nev + '\n'
+            + (gyar   ? '🏭 Gyár: ' + gyar   + '\n' : '')
+            + (orszag ? '🌍 Ország: ' + orszag + '\n' : '')
+            + (eros   ? '💪 Erősség: ' + eros + ' [' + dots.join('') + ']\n' : '')
+            + '\n#SzivarVadász #szivar #cigar';
+
+        // iOS natív share — képpel együtt
+        if (navigator.share) {
+            try {
+                var shareData = { title: 'Szivar Vadász — ' + nev, text: shareText };
+                // Kép hozzáadása ha lehetséges
+                if (lastCapturedBlob && navigator.canShare) {
+                    var imgFile = new File([lastCapturedBlob], 'szivar.jpg', { type: 'image/jpeg' });
+                    if (navigator.canShare({ files: [imgFile] })) {
+                        shareData.files = [imgFile];
+                    }
+                }
+                await navigator.share(shareData);
+                return;
+            } catch(e) {
+                if (e.name === 'AbortError') return;
+            }
+        }
+
+        // PC fallback: szöveg vágólapra + instrukció modal
+        try { await navigator.clipboard.writeText(shareText); } catch(e) {}
+
+        // Instrukció megjelenítése modal-ban (nem alert)
+        window.showShareInstructions(shareText);
+    };
+
+    window.showShareInstructions = function(shareText) {
+        var existing = document.getElementById('share-instructions');
+        if (existing) existing.remove();
+
+        var box = document.createElement('div');
+        box.id = 'share-instructions';
+        box.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,6,4,0.97);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+
+        var inner = document.createElement('div');
+        inner.style.cssText = 'background:#1a100a;border:2px solid var(--gold);border-radius:20px;padding:24px 20px;max-width:340px;width:100%';
+
+        var preview = shareText.replace(/\n/g,'<br>');
+        inner.innerHTML = '<div style="font-size:2rem;text-align:center;margin-bottom:10px">📤</div>'
+            + '<h3 style="color:var(--gold);text-align:center;margin-bottom:12px;font-size:1rem">Megosztás Facebookon</h3>'
+            + '<div style="background:#0d0804;border-radius:10px;padding:12px;margin-bottom:14px;font-size:0.82rem;color:#ccc;line-height:1.6">' + preview + '</div>'
+            + '<p style="color:#4ade80;font-size:0.82rem;text-align:center;margin-bottom:16px">✅ Szöveg vágólapra másolva!</p>'
+            + '<p style="color:#aa9988;font-size:0.78rem;line-height:1.5;margin-bottom:16px;text-align:center">1. Nyisd meg a Facebook appot<br>2. Hozz létre új bejegyzést<br>3. Add hozzá a fotódat a galériából<br>4. Illeszd be a szöveget (vágólapról)</p>';
+
+        var fbBtn = document.createElement('button');
+        fbBtn.textContent = '📘 Szivar Klub megnyitása';
+        fbBtn.style.cssText = 'background:#1877F2;color:#fff;border:none;border-radius:50px;padding:13px;width:100%;font-size:0.95rem;font-weight:bold;cursor:pointer;margin-bottom:8px;display:block';
+        fbBtn.onclick = function() {
+            window.open('https://www.facebook.com/groups/szivarklub','_blank');
+            box.remove();
+        };
+
+        var closeBtn = document.createElement('button');
+        closeBtn.textContent = 'Bezárás';
+        closeBtn.style.cssText = 'background:transparent;border:1px solid #4a3326;color:#887766;border-radius:50px;padding:11px;width:100%;font-size:0.85rem;cursor:pointer;display:block';
+        closeBtn.onclick = function() { box.remove(); };
+
+        inner.appendChild(fbBtn);
+        inner.appendChild(closeBtn);
+        box.appendChild(inner);
+        document.body.appendChild(box);
+    };
+
+    // ============================================================
+    // GYŰJTEMÉNY LOGIKA
+    // ============================================================
+    window.loadCollection = async function() {
+        var loginWall = document.getElementById('coll-login-wall');
+        var statsBar  = document.getElementById('coll-stats-bar');
+        var container = document.getElementById('coll-container');
+
+        if (!currentUser) {
+            loginWall.style.display = 'block';
+            statsBar.style.display  = 'none';
+            container.innerHTML = '';
+            return;
+        }
+        loginWall.style.display = 'none';
+        container.innerHTML = '<div class="empty-state"><div class="spinner" style="margin:0 auto"></div></div>';
+
+        try {
+            var q = query(
+                collection(db, 'users/' + currentUser.uid + '/savedCigars'),
+                orderBy('datum', 'desc')
+            );
+            var snap = await getDocs(q);
+            var cigars = [];
+            snap.forEach(function(d) { cigars.push({ id: d.id, ...d.data() }); });
+
+            // Stats
+            var countries = new Set(cigars.map(function(c){ return c.orszag || ''; }).filter(Boolean));
+            document.getElementById('coll-total').textContent    = cigars.length;
+            document.getElementById('coll-countries').textContent = countries.size;
+            document.getElementById('coll-credits-left').textContent = userCredits;
+            statsBar.style.display = 'flex';
+
+            if (!cigars.length) {
+                container.innerHTML = '<div class="coll-empty"><div class="coll-empty-icon">🚬</div><p style="color:#887766">Még nincs mentett szivared.<br>Szkennelj egyet és mentsd el!</p></div>';
+                return;
+            }
+
+            var html = '';
+            cigars.forEach(function(c) {
+                var erosSzam = parseInt(c.erosSzam) || 3;
+                var dots = '';
+                for (var i = 1; i <= 5; i++) {
+                    var col = i <= erosSzam
+                        ? (erosSzam <= 2 ? '#4ade80' : erosSzam === 3 ? '#fbbf24' : '#f87171')
+                        : '#2a1a0a';
+                    var border = i <= erosSzam ? '' : 'border:1px solid #4a3326;';
+                    dots += '<div class="coll-dot" style="background:' + col + ';' + border + '"></div>';
+                }
+                var datum = c.datum ? new Date(c.datum).toLocaleDateString('hu-HU') : '';
+                var sub = [c.gyar, c.orszag].filter(Boolean).join(' · ');
+                html += '<div class="coll-card">';
+                html += '<button class="coll-delete" onclick="window.deleteFromCollection(\'' + c.id + '\', this)">✕ Töröl</button>';
+                html += '<div class="coll-card-name">' + (c.nev || 'Ismeretlen') + '</div>';
+                if (sub) html += '<div class="coll-card-sub">' + sub + '</div>';
+                if (c.eros) html += '<div class="coll-strength-row">' + dots + '<span style="color:#aaa;font-size:0.78rem;margin-left:4px">' + c.eros + '</span></div>';
+                if (c.jellemzok) html += '<div class="coll-desc">' + c.jellemzok + '</div>';
+                if (datum) html += '<div class="coll-date">📅 ' + datum + '</div>';
+                html += '</div>';
+            });
+            container.innerHTML = html;
+
+        } catch(e) {
+            container.innerHTML = '<p style="text-align:center;color:#e55;padding:20px">❌ ' + e.message + '</p>';
+        }
+    };
+
+    window.deleteFromCollection = async function(docId, btn) {
+        if (!currentUser || !docId) return;
+        if (!confirm('Törlöd a listádból?')) return;
+        try {
+            await deleteDoc(doc(db, 'users/' + currentUser.uid + '/savedCigars', docId));
+            // Card eltávolítása animáció nélkül
+            var card = btn.closest('.coll-card');
+            if (card) card.remove();
+            // Számláló frissítése
+            var tot = document.getElementById('coll-total');
+            if (tot) tot.textContent = Math.max(0, parseInt(tot.textContent) - 1);
+        } catch(e) {
+            alert('❌ Törlési hiba: ' + e.message);
+        }
+    };
+
+
+    // ============================================================
+    // PROFIL PANEL LOGIKA
+    // ============================================================
+    var profTabLoaded = {};
+
+    window.openProfile = function() {
+        document.getElementById('profile-panel').classList.add('open');
+        document.getElementById('profile-overlay').classList.add('active');
+        window.switchProfTab('account');
+    };
+
+    window.closeProfile = function() {
+        document.getElementById('profile-panel').classList.remove('open');
+        document.getElementById('profile-overlay').classList.remove('active');
+    };
+
+    window.switchProfTab = function(tab) {
+        // Ikonok
+        ['account','credits','saved','stats'].forEach(function(t) {
+            var btn = document.getElementById('pib-' + t);
+            if (btn) btn.classList.toggle('active', t === tab);
+        });
+        // Szekciók
+        document.querySelectorAll('.prof-section').forEach(function(s) { s.classList.remove('active'); });
+        var sec = document.getElementById('prof-tab-' + tab);
+        if (sec) sec.classList.add('active');
+
+        // Tartalom betöltése
+        if (tab === 'account')  window.loadProfAccount();
+        if (tab === 'credits')  window.loadProfCredits();
+        if (tab === 'saved' && !profTabLoaded.saved) { window.loadProfSaved(); }
+        if (tab === 'stats'  && !profTabLoaded.stats) { window.loadProfStats(); }
+    };
+
+    window.loadProfAccount = function() {
+        if (!currentUser) return;
+        var name = currentUser.displayName || currentUser.email || 'Vadász';
+        document.getElementById('pa-name').textContent    = name;
+        document.getElementById('pa-email').textContent   = currentUser.email || '';
+        document.getElementById('pa-credits').textContent = '⚡ ' + userCredits + ' kredit';
+    };
+
+    window.loadProfCredits = function() {
+        document.getElementById('pk-num').textContent = userCredits;
+    };
+
+    window.profLogout = function() {
+        if (confirm('Kijelentkezel?')) {
+            signOut(auth).then(function() {
+                window.closeProfile();
+                updateScanUI();
+            });
+        }
+    };
+
+    window.checkKofiCreditPanel = async function() {
+        var status = document.getElementById('pk-status');
+        var prevCredits = userCredits;
+        status.textContent = '⏳ Ellenőrzés...';
+        var attempts = 0;
+        var poll = async function() {
+            attempts++;
+            await refreshCredits();
+            updateScanUI();
+            document.getElementById('pk-num').textContent = userCredits;
+            document.getElementById('pa-credits').textContent = '⚡ ' + userCredits + ' kredit';
+            if (userCredits > prevCredits) {
+                status.textContent = '✅ ' + userCredits + ' kredit jóváírva!';
+                return;
+            }
+            if (attempts < 6) {
+                status.textContent = '⏳ Várakozás... (' + attempts + '/6)';
+                setTimeout(poll, 5000);
+            } else {
+                status.textContent = '⏳ Még nem érkezett. Próbáld 1 perc múlva!';
+            }
+        };
+        setTimeout(poll, 3000);
+    };
+
+    window.loadProfSaved = async function() {
+        profTabLoaded.saved = true;
+        if (!currentUser) { document.getElementById('ps-list').innerHTML = '<div style="text-align:center;padding:30px;color:#554433">Bejelentkezés szükséges</div>'; return; }
+        var list = document.getElementById('ps-list');
+        list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--gold);font-size:0.8rem">⏳ Betöltés...</div>';
+        try {
+            var q = query(collection(db, 'users/' + currentUser.uid + '/savedCigars'), orderBy('datum','desc'));
+            var snap = await getDocs(q);
+            var cigars = [];
+            snap.forEach(function(d) { var data = d.data(); data._id = d.id; cigars.push(data); });
+            if (!cigars.length) {
+                list.innerHTML = '<div style="text-align:center;padding:30px;color:#554433;font-size:0.85rem;line-height:1.6">Még nincs mentett szivared.<br>Szkennelj egyet!</div>';
+                return;
+            }
+            var html = '';
+            cigars.forEach(function(c) {
+                var erosSzam = parseInt(c.erosSzam) || 3;
+                var dots = '';
+                for (var i = 1; i <= 5; i++) {
+                    var col = i <= erosSzam ? (erosSzam<=2?'#4ade80':erosSzam===3?'#fbbf24':'#f87171') : '#2a1a0a';
+                    dots += '<div class="sc-dot" style="background:' + col + ';border:' + (i>erosSzam?'1px solid #4a3326':'none') + '"></div>';
+                }
+                var datum  = c.datum  ? new Date(c.datum).toLocaleDateString('hu-HU') : '';
+                var sub    = [c.gyar, c.orszag].filter(Boolean).join(' · ');
+                var stars  = c.rating > 0 ? '<div class="sc-stars">' + '★'.repeat(c.rating) + '<span style="color:#3a2010">' + '★'.repeat(5-c.rating) + '</span></div>' : '';
+                var note   = c.note   ? '<div class="sc-note">' + c.note + '</div>' : '';
+                html += '<div class="sc-card" id="sc-' + c._id + '">';
+                html += '<button class="sc-del" onclick="window.deleteProfCigar(\'' + c._id + '\')">✕</button>';
+                html += '<div class="sc-name">' + (c.nev||'Ismeretlen') + '</div>';
+                if (sub)   html += '<div class="sc-sub">' + sub + '</div>';
+                if (stars) html += stars;
+                html += '<div class="sc-dots">' + dots + '</div>';
+                if (note)  html += note;
+                if (datum) html += '<div class="sc-date">' + datum + '</div>';
+                html += '</div>';
+            });
+            list.innerHTML = html;
+        } catch(e) {
+            list.innerHTML = '<div style="color:#e55;font-size:0.8rem;padding:10px">❌ ' + e.message + '</div>';
+        }
+    };
+
+    window.deleteProfCigar = async function(docId) {
+        if (!currentUser || !docId) return;
+        if (!confirm('Törlöd a listádból?')) return;
+        try {
+            await deleteDoc(doc(db, 'users/' + currentUser.uid + '/savedCigars', docId));
+            var card = document.getElementById('sc-' + docId);
+            if (card) card.remove();
+            profTabLoaded.stats = false; // stats újratöltés szükséges
+        } catch(e) { alert('❌ ' + e.message); }
+    };
+
+    window.loadProfStats = async function() {
+        profTabLoaded.stats = true;
+        if (!currentUser) return;
+        try {
+            var q = query(collection(db, 'users/' + currentUser.uid + '/savedCigars'), orderBy('datum','desc'));
+            var snap = await getDocs(q);
+            var cigars = [];
+            snap.forEach(function(d) { cigars.push(d.data()); });
+
+            var countries = {}, brands = {}, ratingSum = 0, ratingCount = 0, top5 = 0;
+            cigars.forEach(function(c) {
+                if (c.orszag) countries[c.orszag] = (countries[c.orszag]||0) + 1;
+                if (c.gyar)   brands[c.gyar]     = (brands[c.gyar]||0)     + 1;
+                if (c.rating > 0) { ratingSum += c.rating; ratingCount++; }
+                if (c.rating === 5) top5++;
+            });
+
+            document.getElementById('pst-total').textContent     = cigars.length;
+            document.getElementById('pst-countries').textContent  = Object.keys(countries).length;
+            document.getElementById('pst-avg').textContent        = ratingCount ? (ratingSum/ratingCount).toFixed(1) : '—';
+            document.getElementById('pst-top5').textContent       = top5;
+
+            // Top országok
+            var topC = Object.entries(countries).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+            document.getElementById('pst-countries-list').innerHTML = topC.map(function(e){
+                return '<div class="stat-top-item"><span>' + e[0] + '</span><strong>' + e[1] + ' db</strong></div>';
+            }).join('') || '<div style="color:#554433;font-size:0.82rem">Még nincs elég adat</div>';
+
+            // Top márkák
+            var topB = Object.entries(brands).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+            document.getElementById('pst-brands-list').innerHTML = topB.map(function(e){
+                return '<div class="stat-top-item"><span>' + e[0] + '</span><strong>' + e[1] + ' db</strong></div>';
+            }).join('') || '<div style="color:#554433;font-size:0.82rem">Még nincs elég adat</div>';
+
+        } catch(e) {
+            document.getElementById('pst-grid').innerHTML = '<div style="color:#e55;padding:10px">❌ ' + e.message + '</div>';
+        }
+    };
+
+    // ============================================================
+    // TÉRKÉP LOGIKA
+    // ============================================================
+    window.showBoltPanel = function(nev, cim, leiras, humidor, megerositve, lat, lng) {
+        document.getElementById('bolt-panel-nev').textContent = nev;
+        document.getElementById('bolt-panel-cim').textContent = cim;
+        document.getElementById('bolt-panel-leiras').textContent = leiras || '';
+        var badges = document.getElementById('bolt-panel-badges');
+        badges.innerHTML = '';
+        if (humidor === 'pro') badges.innerHTML += '<span class="badge badge-humidor-pro">🟢 Profi humidor</span>';
+        else if (humidor === 'alap') badges.innerHTML += '<span class="badge badge-humidor-alap">🟡 Alap humidor</span>';
+        else badges.innerHTML += '<span class="badge badge-humidor-no">🔴 Nincs humidor</span>';
+        if (megerositve) badges.innerHTML += '<span class="badge badge-megeros">✨ Megerősített</span>';
+        var navBtn = document.getElementById('bolt-panel-nav-btn');
+        navCelLat = lat; navCelLng = lng; navCelNev = nev;
+        navBtn.onclick = function() { navValasztoMegnyit(); };
+        document.getElementById('nav-choice-panel').classList.remove('active');
+        document.getElementById('indulas-btn').style.display = 'none';
+        document.getElementById('bolt-panel').classList.add('active');
+    };
+
+    window.loadMap = function() {
+        if (typeof google==='undefined'||!google.maps) { setTimeout(window.loadMap,300); return; }
+        if (gmap) {
+            fixMapSize(); google.maps.event.trigger(gmap,'resize'); gmap.setCenter(userLoc);
+            document.getElementById('map-loading').style.display = 'none';
+            return;
+        }
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(pos){ userLoc={lat:pos.coords.latitude,lng:pos.coords.longitude}; buildMap(); },
+                function(){ buildMap(); }, {timeout:6000}
+            );
+        } else { buildMap(); }
+    };
+
+    function buildMap() {
+        fixMapSize();
+        document.getElementById('map-loading').style.display = 'none';
+        gmap = new google.maps.Map(document.getElementById('map'), {
+            center: userLoc, zoom: 14,
+            fullscreenControl:false, mapTypeControl:false, streetViewControl:false, zoomControl:true,
+            styles:[
+                {elementType:"geometry",stylers:[{color:"#242f3e"}]},
+                {elementType:"labels.text.stroke",stylers:[{color:"#242f3e"}]},
+                {elementType:"labels.text.fill",stylers:[{color:"#746855"}]},
+                {featureType:"road",elementType:"geometry",stylers:[{color:"#38414e"}]},
+                {featureType:"road",elementType:"labels.text.fill",stylers:[{color:"#9ca5b3"}]},
+                {featureType:"water",elementType:"geometry",stylers:[{color:"#17263c"}]},
+                {featureType:"poi",stylers:[{visibility:"off"}]},
+                {featureType:"transit",stylers:[{visibility:"off"}]}
+            ]
+        });
+        userMarker = new google.maps.Marker({
+            position: userLoc, map: gmap,
+            icon: { path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW, scale:6, fillColor:"#4285F4", fillOpacity:1, strokeColor:"#fff", strokeWeight:2, rotation:0 },
+            title:"Te vagy itt", zIndex:999
+        });
+        gmap.addListener('click', function() {
+            document.getElementById('bolt-panel').classList.remove('active');
+            document.getElementById('indulas-btn').style.display = 'none';
+        });
+        startPosWatch();
+        loadShopsOnMap();
+    }
+
+    async function loadShopsOnMap() {
+        try {
+            var snap = await getDocs(collection(db, "szivarozok"));
+            var newMarkers = [];
+            snap.forEach(function(d) {
+                var s = d.data();
+                if (s.source === 'user_submit' && !s.megerositve) return;
+                if (!s.lat || !s.lng) return;
+                var lat=parseFloat(s.lat), lng=parseFloat(s.lng);
+                var humIcon = s.humidor==='pro'
+                    ? 'https://maps.google.com/mapfiles/ms/icons/green-dot.png'
+                    : s.humidor==='alap'
+                        ? 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
+                        : 'https://maps.google.com/mapfiles/ms/icons/red-dot.png';
+                var m = new google.maps.Marker({ position:{lat,lng}, title:s.nev||'Szivarbolt', icon:{url:humIcon}, zIndex:10 });
+                m.addListener('click', function() { window.showBoltPanel(s.nev||'Szivarbolt',s.cim||'',s.leiras||'',s.humidor||'',s.megerositve||false,lat,lng); });
+                newMarkers.push(m);
+            });
+            if (shopClusterer) shopClusterer.clearMarkers();
+            shopClusterer = new markerClusterer.MarkerClusterer({ map:gmap, markers:newMarkers, algorithmOptions:{maxZoom:14} });
+        } catch(e) { console.error('loadShopsOnMap hiba:', e); }
+    }
+
+    function startPosWatch() {
+        if (posWatchId) navigator.geolocation.clearWatch(posWatchId);
+        posWatchId = navigator.geolocation.watchPosition(function(pos) {
+            userLoc = {lat:pos.coords.latitude,lng:pos.coords.longitude};
+            if (userMarker) userMarker.setPosition(userLoc);
+        }, null, {enableHighAccuracy:true});
+    }
+
+    window.navValasztoMegnyit = function() { document.getElementById('bolt-panel').classList.remove('active'); document.getElementById('nav-choice-panel').classList.add('active'); };
+    window.navValasztoZar    = function() { document.getElementById('nav-choice-panel').classList.remove('active'); };
+    window.navMegnyit = function(type) {
+        var url = "";
+        if (type==='apple')  url = "http://maps.apple.com/?daddr="+navCelLat+","+navCelLng;
+        else if (type==='google') url = "https://www.google.com/maps/dir/?api=1&destination="+navCelLat+","+navCelLng;
+        else if (type==='waze')   url = "https://waze.com/ul?ll="+navCelLat+","+navCelLng+"&navigate=yes";
+        window.open(url, '_blank');
+        window.navValasztoZar();
+    };
+
+    // ============================================================
+    // LISTA LOGIKA
+    // ============================================================
+    window.loadList = function() {
+        var c=document.getElementById('list-container');
+        c.innerHTML='<div class="empty-state"><div class="spinner" style="margin:0 auto"></div></div>';
+        getDocs(collection(db,"szivarozok")).then(function(snap) {
+            allShops=[];
+            var latestDate=null;
+            snap.forEach(function(d){
+                var s=d.data();
+                if (s.source==='user_submit'&&!s.megerositve) return;
+                allShops.push(s);
+                if (s.datum) { var dt=new Date(s.datum); if (!latestDate||dt>latestDate) latestDate=dt; }
+            });
+            var updBar=document.getElementById('last-updated-bar');
+            updBar.textContent = latestDate ? '🕐 Utolsó bolt beküldve: '+latestDate.toLocaleDateString('hu-HU') : '';
+            renderList(allShops);
+        }).catch(function(e){ c.innerHTML='<p style="text-align:center;color:#e55;padding:20px">❌ '+e.message+'</p>'; });
+    };
+
+    function renderList(shops) {
+        var c=document.getElementById('list-container');
+        var q=(document.getElementById('searchInput').value||'').toLowerCase();
+        var filtered=shops.filter(function(s){
+            var matchText=(s.nev||'').toLowerCase().indexOf(q)!==-1||(s.cim||'').toLowerCase().indexOf(q)!==-1;
+            if (!matchText) return false;
+            if (activeFilter==='humidor') return s.humidor==='pro'||s.humidor==='alap';
+            return true;
+        });
+        if (!filtered.length) {
+            c.innerHTML='<div class="empty-state"><div class="empty-icon">🔍</div><p>Nincs találat.<br>Legyél Te az első vadász!</p><button onclick="showPage(\'add-page\')" style="width:auto;padding:10px 20px">➕ Bolt beküldése</button></div>';
+            return;
+        }
+        var html='';
+        filtered.forEach(function(s){
+            var lat=s.lat?parseFloat(s.lat):null, lng=s.lng?parseFloat(s.lng):null;
+            var nev=s.nev||'';
+            html+='<div class="cigar-card">';
+            html+='<div class="cigar-icon">'+(s.megerositve?'🏆':'🏪')+'</div>';
+            html+='<div class="cigar-details">';
+            html+='<h3>'+nev+(s.megerositve?' ✨':'')+'</h3>';
+            html+='<p>📍 '+(s.cim||'')+'</p>';
+            if (s.leiras) html+='<p>📝 '+s.leiras+'</p>';
+            if (s.humidor==='pro') html+='<span class="humidor-badge pro">🟢 Profi humidor</span>';
+            else if (s.humidor==='alap') html+='<span class="humidor-badge alap">🟡 Alap humidor</span>';
+            else if (s.humidor==='no') html+='<span class="humidor-badge no">🔴 Nincs humidor</span>';
+            if (s.megerositve) html+='<span class="price-tag">✓ Megerősített</span>';
+            html+='</div>';
+            var nevQ=nev.replace(/'/g,'');
+            if (lat&&lng) html+='<button class="nav-btn" onclick="window.showRoute('+lat+','+lng+',\''+nevQ+'\')">🧭</button>';
+            else if (s.cim){ var sa=(s.cim||'').replace(/'/g,''); html+='<button class="nav-btn" onclick="window.showRouteByAddress(\''+sa+'\',\''+nevQ+'\')">🧭</button>'; }
+            html+='</div>';
+        });
+        c.innerHTML=html;
+    }
+
+    window.showRoute = function(lat,lng,nev) {
+        navCelLat=lat; navCelLng=lng; navCelNev=nev;
+        showPage('map-page');
+        setTimeout(function(){ if (gmap){ gmap.setCenter({lat,lng}); gmap.setZoom(16); window.showBoltPanel(nev,'','','',false,lat,lng); } },500);
+    };
+    window.showRouteByAddress = function(cim,nev) {
+        var geocoder=new google.maps.Geocoder();
+        geocoder.geocode({address:cim},function(results,status){
+            if (status==='OK'&&results[0]){ var loc=results[0].geometry.location; window.showRoute(loc.lat(),loc.lng(),nev); }
+            else { alert('❌ A címet nem sikerült a térképen beazonosítani.'); }
+        });
+    };
+    window.setFilter = function(f) {
+        activeFilter=f;
+        document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active-filter'); });
+        document.getElementById('filter-'+f).classList.add('active-filter');
+        renderList(allShops);
+    };
+    window._filterList = function() { renderList(allShops); };
+
+    // ========== ÚJ BOLT LOGIKA ==========
+    window.setHumidor = function(h) {
+        selectedHumidor=h;
+        ['pro','alap','no'].forEach(function(k){ var b=document.getElementById('hum-'+k); if(b) b.classList.remove('active-filter'); });
+        document.getElementById('hum-'+h).classList.add('active-filter');
+    };
+    window._saveShop = function(useGPS) {
+        var name=document.getElementById('shopName').value.trim();
+        var addr=document.getElementById('shopAddress').value.trim();
+        var desc=document.getElementById('shopDesc').value.trim();
+        if (!name){alert('Kérlek töltsd ki a bolt nevét!');return;}
+        if (!useGPS && !addr){alert('Kérlek töltsd ki a bolt címét!');return;}
+        function saveData(lat,lng,finalAddr) {
+            addDoc(collection(db,"szivarozok"),{nev:name,cim:finalAddr||addr||'',leiras:desc,lat:lat,lng:lng,humidor:selectedHumidor||'',source:'user_submit',datum:new Date().toISOString(),megerositve:false})
+            .then(function(){ alert('✅ Elmentve! Ellenőrzés után megjelenik.'); showPage('map-page'); })
+            .catch(function(e){alert('❌ '+e.message);});
+        }
+        if (useGPS) {
+            navigator.geolocation.getCurrentPosition(function(pos){
+                var lat=pos.coords.latitude, lng=pos.coords.longitude;
+                if (addr) {
+                    saveData(lat,lng,addr);
+                } else {
+                    var geocoder=new google.maps.Geocoder();
+                    geocoder.geocode({location:{lat:lat,lng:lng}},function(results,status){
+                        var resolvedAddr=(status==='OK'&&results[0])?results[0].formatted_address:'';
+                        saveData(lat,lng,resolvedAddr);
+                    });
+                }
+            },function(e){alert('❌ GPS hiba: '+e.message);});
+        } else {
+            var geocoder=new google.maps.Geocoder();
+            geocoder.geocode({address:addr},function(results,status){
+                if (status==='OK'&&results[0]){var loc=results[0].geometry.location;saveData(loc.lat(),loc.lng(),addr);}
+                else{saveData(null,null,addr);alert('✅ Elmentve cím alapján (koordináta nem található)!');}
+            });
+        }
+    };
+
+    // ========== STATISZTIKA LOGIKA ==========
+    var cityChartInst=null, humidorChartInst=null, statsLoaded=false;
+    window.loadStats = function() {
+        if (statsLoaded) return;
+        var container=document.getElementById('stats-cards');
+        container.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--gold);padding:20px">⏳ Betöltés...</div>';
+        getDocs(collection(db,"szivarozok")).then(function(snap){
+            var total=0,humPro=0,humAlap=0,humNo=0,megeros=0;
+            var cityCount={};
+            snap.forEach(function(d){
+                var s=d.data();
+                if (s.source==='user_submit'&&!s.megerositve) return;
+                total++; if(s.humidor==='pro')humPro++; else if(s.humidor==='alap')humAlap++; else humNo++;
+                if(s.megerositve)megeros++;
+                var cim=(s.cim||'').trim(), varos='';
+                var m1=cim.match(/^\d{4}\s+([^,]+)/), m2=cim.match(/^([^,]+),/);
+                if(m1)varos=m1[1].trim(); else if(m2)varos=m2[1].trim();
+                if(varos&&varos.length>1) cityCount[varos]=(cityCount[varos]||0)+1;
+            });
+            container.innerHTML=[['🏪','Összes bolt',total,'#D4AF37'],['🟢','Profi humidor',humPro,'#22c55e'],['🟡','Alap humidor',humAlap,'#eab308'],['✨','Megerősített',megeros,'#a78bfa']].map(function(c){
+                return '<div style="background:#1a0f0a;border:1px solid '+c[3]+'44;border-radius:12px;padding:14px;text-align:center"><div style="font-size:1.6rem">'+c[0]+'</div><div style="color:#ccc;font-size:0.72rem;margin:4px 0">'+c[1]+'</div><div style="color:'+c[3]+';font-size:1.8rem;font-weight:bold">'+c[2]+'</div></div>';
+            }).join('');
+            var sorted=Object.entries(cityCount).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+            if(cityChartInst)cityChartInst.destroy();
+            cityChartInst=new Chart(document.getElementById('cityChart'),{type:'bar',data:{labels:sorted.map(x=>x[0]),datasets:[{label:'Boltok',data:sorted.map(x=>x[1]),backgroundColor:'rgba(212,175,55,0.7)',borderColor:'#D4AF37',borderWidth:1}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#aaa'}},y:{ticks:{color:'#D4AF37'}}}}});
+            if(humidorChartInst)humidorChartInst.destroy();
+            humidorChartInst=new Chart(document.getElementById('humidorChart'),{type:'doughnut',data:{labels:['🟢 Profi','🟡 Alap','🔴 Nincs'],datasets:[{data:[humPro,humAlap,humNo],backgroundColor:['#22c55e','#eab308','#ef4444'],borderColor:'#0a0604',borderWidth:3}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#ccc'}}}}});
+            statsLoaded=true;
+        });
+    };
+
+</script>
+</body>
+</html>

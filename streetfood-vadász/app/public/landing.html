@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Street Food Vadász – Találd meg a legfinomabb food truckokat!</title>
+    <meta name="description" content="Magyarország legjobb street food és food truck keresője. Találd meg a hozzád legközelebb lévő street food helyet, fesztivált, eseményt!">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue: #1565C0;
+            --blue2: #1976D2;
+            --blue-dark: #0D47A1;
+            --light: #E3F2FD;
+            --light2: #BBDEFB;
+            --light3: #90CAF9;
+            --dark: #0D1B2A;
+            --mid: #1E3A5F;
+            --accent: #FF6B35;
+            --accent2: #E85D2A;
+            --white: #FFFFFF;
+            --muted: #5C7A99;
+            --green: #22c55e;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--white);
+            color: var(--dark);
+            font-family: 'Lato', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* ── NAVIGATION ── */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            height: 64px;
+            background: var(--blue);
+            border-bottom: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            box-shadow: 0 2px 20px rgba(21,101,192,0.3);
+        }
+        .nav-brand {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.15;
+        }
+        .nav-brand-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 900;
+            color: var(--white);
+            letter-spacing: 2px;
+        }
+        .nav-brand-sub {
+            font-size: 0.68rem;
+            color: rgba(255,255,255,0.75);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            list-style: none;
+            align-items: center;
+        }
+        .nav-links a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--white); }
+        .nav-cta {
+            background: var(--accent) !important;
+            color: var(--white) !important;
+            padding: 8px 20px;
+            border-radius: 8px;
+            transition: background 0.2s, box-shadow 0.2s !important;
+            box-shadow: 0 2px 10px rgba(255,107,53,0.35);
+        }
+        .nav-cta:hover {
+            background: var(--accent2) !important;
+            box-shadow: 0 4px 18px rgba(255,107,53,0.5) !important;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(160deg, var(--blue) 0%, var(--blue2) 50%, var(--blue-dark) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 100px 24px 70px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* background bubbles */
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 15% 80%, rgba(255,107,53,0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 20%, rgba(255,255,255,0.06) 0%, transparent 35%);
+            pointer-events: none;
+        }
+
+        /* floating food icons background */
+        .hero-bg-icons {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            opacity: 0.08;
+            font-size: 3rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 60px;
+            padding: 40px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-content { position: relative; z-index: 1; max-width: 780px; }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255,107,53,0.2);
+            border: 1px solid rgba(255,107,53,0.6);
+            color: rgba(255,255,255,0.95);
+            font-size: 0.72rem;
+            letter-spacing: 2.5px;
+            padding: 6px 18px;
+            border-radius: 20px;
+            margin-bottom: 28px;
+            font-weight: 700;
+            animation: fadeUp 0.8s ease both;
+        }
+
+        .hero-emoji {
+            font-size: 6rem;
+            display: block;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 24px rgba(255,107,53,0.6));
+            animation: fadeUp 0.9s ease 0.05s both, floatIcon 3s ease-in-out infinite 1s;
+        }
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        .hero h1 {
+            font-family: 'Nunito', sans-serif;
+            font-size: clamp(2rem, 6vw, 3.8rem);
+            font-weight: 900;
+            color: var(--white);
+            line-height: 1.1;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+            animation: fadeUp 1s ease 0.15s both;
+        }
+        .hero h1 span { color: var(--accent); }
+
+        .hero-tagline {
+            font-size: clamp(0.8rem, 2vw, 0.95rem);
+            color: rgba(255,255,255,0.7);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 24px;
+            animation: fadeUp 1s ease 0.25s both;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2.5vw, 1.18rem);
+            color: rgba(255,255,255,0.85);
+            line-height: 1.75;
+            max-width: 520px;
+            margin: 0 auto 40px;
+            animation: fadeUp 1s ease 0.35s both;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp 1s ease 0.5s both;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--white);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            padding: 15px 34px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+            box-shadow: 0 4px 18px rgba(255,107,53,0.45);
+        }
+        .btn-primary:hover {
+            background: var(--accent2);
+            box-shadow: 0 6px 28px rgba(255,107,53,0.55);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: rgba(255,255,255,0.9);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            padding: 13px 32px;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: border-color 0.2s, color 0.2s, transform 0.15s;
+        }
+        .btn-secondary:hover {
+            border-color: var(--white);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .tagline-strip {
+            margin-top: 48px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 1.5px;
+            animation: fadeUp 1s ease 0.65s both;
+        }
+
+        /* scroll hint */
+        .scroll-hint {
+            position: absolute;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255,255,255,0.4);
+            font-size: 0.68rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: fadeUp 1.2s ease 1s both;
+        }
+        .scroll-arrow {
+            width: 18px; height: 18px;
+            border-right: 1.5px solid rgba(255,255,255,0.4);
+            border-bottom: 1.5px solid rgba(255,255,255,0.4);
+            transform: rotate(45deg);
+            animation: bounce 2s ease-in-out infinite;
+        }
+        @keyframes bounce {
+            0%,100% { transform: rotate(45deg) translateY(0); }
+            50% { transform: rotate(45deg) translateY(5px); }
+        }
+
+        /* ── STATS ── */
+        .stats-section {
+            background: var(--light);
+            border-bottom: 1px solid var(--light2);
+            padding: 56px 24px;
+        }
+        .stats-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 32px;
+            text-align: center;
+        }
+        .stat-number {
+            font-family: 'Nunito', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--blue);
+            line-height: 1;
+            display: block;
+        }
+        .stat-label {
+            color: var(--muted);
+            font-size: 0.78rem;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
+
+        /* ── SECTIONS COMMON ── */
+        .section-eyebrow {
+            font-size: 0.72rem;
+            letter-spacing: 3.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        .section-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 900;
+            color: var(--blue);
+            line-height: 1.2;
+        }
+        .section-divider {
+            width: 48px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 2px;
+            margin: 16px auto 0;
+        }
+        .section-header { text-align: center; margin-bottom: 60px; }
+
+        /* ── FEATURES ── */
+        .features-section {
+            padding: 100px 24px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 20px;
+        }
+        .feature-card {
+            background: var(--white);
+            border: 1.5px solid var(--light2);
+            border-radius: 14px;
+            padding: 32px 26px;
+            transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--blue), var(--accent));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s;
+        }
+        .feature-card:hover {
+            border-color: var(--light3);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 36px rgba(21,101,192,0.12);
+        }
+        .feature-card:hover::after { transform: scaleX(1); }
+        .feature-icon { font-size: 2.4rem; margin-bottom: 16px; display: block; }
+        .feature-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 900;
+            color: var(--blue);
+            margin-bottom: 10px;
+        }
+        .feature-desc { color: var(--muted); font-size: 0.92rem; line-height: 1.7; }
+
+        /* ── FOOD TYPES ── */
+        .food-section {
+            background: linear-gradient(160deg, var(--blue) 0%, var(--blue2) 60%, var(--blue-dark) 100%);
+            padding: 100px 24px;
+        }
+        .food-section .section-eyebrow { color: rgba(255,255,255,0.7); }
+        .food-section .section-title { color: var(--white); }
+        .food-section .section-divider { background: var(--accent); }
+        .food-grid {
+            max-width: 900px;
+            margin: 50px auto 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 14px;
+        }
+        .food-pill {
+            background: rgba(255,255,255,0.08);
+            border: 1.5px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 18px 10px;
+            text-align: center;
+            transition: background 0.2s, border-color 0.2s, transform 0.15s;
+            cursor: default;
+        }
+        .food-pill:hover {
+            background: rgba(255,107,53,0.2);
+            border-color: var(--accent);
+            transform: translateY(-3px);
+        }
+        .food-pill-icon { font-size: 1.9rem; display: block; margin-bottom: 7px; }
+        .food-pill-label {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.85);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── HOW ── */
+        .how-section {
+            padding: 100px 24px;
+            max-width: 980px;
+            margin: 0 auto;
+        }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+        .step { text-align: center; }
+        .step-circle {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: var(--light);
+            border: 2px solid var(--light3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--blue);
+            margin-bottom: 18px;
+        }
+        .step-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            font-weight: 900;
+            color: var(--blue);
+            margin-bottom: 8px;
+        }
+        .step-desc { color: var(--muted); font-size: 0.9rem; line-height: 1.65; }
+
+        /* ── EVENTS PREVIEW ── */
+        .events-section {
+            background: var(--light);
+            border-top: 1px solid var(--light2);
+            border-bottom: 1px solid var(--light2);
+            padding: 100px 24px;
+        }
+        .events-inner { max-width: 800px; margin: 0 auto; }
+        .event-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 48px;
+        }
+        .ev-card {
+            background: var(--white);
+            border: 1.5px solid var(--light2);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .ev-card:hover {
+            border-color: var(--blue2);
+            box-shadow: 0 4px 18px rgba(21,101,192,0.1);
+        }
+        .ev-emoji { font-size: 2rem; flex-shrink: 0; }
+        .ev-info { flex: 1; }
+        .ev-date {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+        .ev-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.98rem;
+            font-weight: 900;
+            color: var(--blue);
+            margin-bottom: 2px;
+        }
+        .ev-loc { font-size: 0.78rem; color: var(--muted); }
+        .ev-badge {
+            background: var(--light);
+            border: 1px solid var(--light2);
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--blue);
+            flex-shrink: 0;
+        }
+
+        /* ── CTA ── */
+        .cta-section {
+            padding: 100px 24px;
+            text-align: center;
+            background: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -100px; left: 50%;
+            transform: translateX(-50%);
+            width: 700px; height: 700px;
+            background: radial-gradient(ellipse, rgba(21,101,192,0.05) 0%, transparent 65%);
+            pointer-events: none;
+        }
+        .cta-inner { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; }
+        .cta-emoji { font-size: 4rem; display: block; margin-bottom: 20px; animation: floatIcon 3.5s ease-in-out infinite; }
+        .cta-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            font-weight: 900;
+            color: var(--blue);
+            margin-bottom: 18px;
+        }
+        .cta-sub { color: var(--muted); font-size: 1.08rem; line-height: 1.7; margin-bottom: 40px; }
+
+        /* ── FOOTER ── */
+        footer {
+            background: var(--blue);
+            border-top: 2px solid var(--accent);
+            padding: 48px 24px 0;
+        }
+        .footer-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 48px;
+            align-items: start;
+            padding-bottom: 40px;
+        }
+        .footer-brand-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: var(--white);
+            letter-spacing: 2px;
+        }
+        .footer-brand-sub {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.65);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+        .footer-brand-desc {
+            margin-top: 14px;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.65;
+            max-width: 340px;
+        }
+
+        .footer-links-group { display: flex; flex-direction: column; gap: 24px; }
+        .footer-links-col h4 {
+            font-size: 0.7rem;
+            letter-spacing: 2.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+        .footer-links-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .footer-links-col a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 700;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .footer-links-col a:hover { color: var(--white); }
+        .footer-links-col a .link-arrow {
+            color: var(--accent);
+            font-style: normal;
+            font-size: 0.75rem;
+        }
+
+        .footer-copy {
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.15);
+            padding: 18px 24px;
+            color: rgba(255,255,255,0.55);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(22px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal {
+            opacity: 0;
+            transform: translateY(26px);
+            transition: opacity 0.65s ease, transform 0.65s ease;
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* ── MOBILE ── */
+        @media (max-width: 640px) {
+            nav { padding: 0 18px; }
+            .nav-links { display: none; }
+            .hero h1 { font-size: 2rem; }
+            .hero-emoji { font-size: 4.5rem; }
+            .hero-buttons { flex-direction: column; width: 100%; max-width: 300px; }
+            .btn-primary, .btn-secondary { width: 100%; text-align: center; }
+            .footer-inner { grid-template-columns: 1fr; gap: 32px; }
+            .stats-inner { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+    <div class="nav-brand">
+        <span class="nav-brand-title">🌮 STREET FOOD VADÁSZ</span>
+        <span class="nav-brand-sub">Food Truck & Fesztivál kereső</span>
+    </div>
+    <ul class="nav-links">
+        <li><a href="#features">Funkciók</a></li>
+        <li><a href="#etelek">Ételek</a></li>
+        <li><a href="#esemenyek">Események</a></li>
+        <li><a href="index.html" class="nav-cta">APP MEGNYITÁSA</a></li>
+    </ul>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+    <div class="hero-bg-icons" aria-hidden="true">
+        🌮🍔🍕🥙🍜🥩🌯🍟🧆🥗🍩🌭🍱🥪🥘🫔🌮🍔🍕🥙🍜🥩🌯🍟🧆🥗🍩🌭🍱🥪🥘🫔
+    </div>
+    <div class="hero-content">
+        <span class="hero-badge">🇭🇺 MAGYARORSZÁG LEGJOBB STREET FOOD KERESŐJE</span>
+        <span class="hero-emoji">🌮</span>
+        <h1>STREET FOOD<br><span>VADÁSZ</span></h1>
+        <p class="hero-tagline">Food Truck · Fesztivál · Street Food kereső</p>
+        <p>Találd meg a legfinomabb food truckokat, street food standokat és fesztiválokat a közeledben — térképen, listán, valós időben!</p>
+        <div class="hero-buttons">
+            <a href="index.html" class="btn-primary">📍 TÉRKÉP NÉZET</a>
+            <a href="#features" class="btn-secondary">Tudj meg többet</a>
+        </div>
+        <div class="tagline-strip">
+            🚚 Food Truck &nbsp;·&nbsp; 🍔 Burger &nbsp;·&nbsp; 🍕 Pizza &nbsp;·&nbsp; 🥙 Gyros &nbsp;·&nbsp; 🍜 Ázsiai &nbsp;·&nbsp; 🥩 BBQ &nbsp;·&nbsp; 🌮 Taco
+        </div>
+    </div>
+    <div class="scroll-hint">
+        Görgess
+        <div class="scroll-arrow"></div>
+    </div>
+</section>
+
+<!-- ── STATS ── -->
+<section class="stats-section">
+    <div class="stats-inner">
+        <div class="reveal">
+            <span class="stat-number" data-target="500">500+</span>
+            <div class="stat-label">HELY AZ ADATBÁZISBAN</div>
+        </div>
+        <div class="reveal" style="transition-delay:0.1s">
+            <span class="stat-number">🎉</span>
+            <div class="stat-label">FESZTIVÁLOK & ESEMÉNYEK</div>
+        </div>
+        <div class="reveal" style="transition-delay:0.2s">
+            <span class="stat-number">📍</span>
+            <div class="stat-label">GPS-ALAPÚ KERESÉS</div>
+        </div>
+        <div class="reveal" style="transition-delay:0.3s">
+            <span class="stat-number">🆓</span>
+            <div class="stat-label">TELJESEN INGYENES</div>
+        </div>
+    </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section class="features-section" id="features">
+    <div class="section-header reveal">
+        <p class="section-eyebrow">Funkciók</p>
+        <h2 class="section-title">Minden, amire egy street food rajongónak szüksége van</h2>
+        <div class="section-divider"></div>
+    </div>
+    <div class="features-grid">
+        <div class="feature-card reveal">
+            <span class="feature-icon">📍</span>
+            <div class="feature-title">INTERAKTÍV TÉRKÉP</div>
+            <p class="feature-desc">Nézd meg az összes food truckot és street food helyet egyetlen térképen. GPS-alapú helymeghatározás, azonnali navigáció.</p>
+        </div>
+        <div class="feature-card reveal" style="transition-delay:0.1s">
+            <span class="feature-icon">📜</span>
+            <div class="feature-title">RÉSZLETES HELYLISTA</div>
+            <p class="feature-desc">Szűrj ételstílus szerint, keresd városnév vagy helynév alapján. Valós idejű szűrés, árszint jelzés, stíluscímkék.</p>
+        </div>
+        <div class="feature-card reveal" style="transition-delay:0.2s">
+            <span class="feature-icon">📅</span>
+            <div class="feature-title">FESZTIVÁLOK & ESEMÉNYEK</div>
+            <p class="feature-desc">Közelgő street food fesztiválok és pop-up események egy helyen. Te is beküldheted az általad ismert eseményt!</p>
+        </div>
+        <div class="feature-card reveal" style="transition-delay:0.3s">
+            <span class="feature-icon">🧭</span>
+            <div class="feature-title">AZONNALI NAVIGÁCIÓ</div>
+            <p class="feature-desc">Egy érintéssel indulj el a kiválasztott helyre. Válassz Apple Maps, Google Maps vagy Waze között — autóval, gyalog vagy tömegközlekedéssel.</p>
+        </div>
+        <div class="feature-card reveal" style="transition-delay:0.4s">
+            <span class="feature-icon">➕</span>
+            <div class="feature-title">KÖZÖSSÉGI JELÖLÉS</div>
+            <p class="feature-desc">Ismersz egy remek street food helyet? Add hozzá te is! GPS-koordinátával vagy cím alapján, leírással és stíluscímkékkel.</p>
+        </div>
+        <div class="feature-card reveal" style="transition-delay:0.5s">
+            <span class="feature-icon">🎰</span>
+            <div class="feature-title">LEPJ MEG ENGEM!</span>
+            <p class="feature-desc">Nem tudod mit egyél? A "Lepj meg engem!" gomb véletlenszerűen ajánl egy ételt és egy közeli helyet — vacsoradilemma megoldva!</p>
+        </div>
+    </div>
+</section>
+
+<!-- ── FOOD TYPES ── -->
+<section class="food-section" id="etelek">
+    <div class="section-header reveal">
+        <p class="section-eyebrow">Ételstílusok</p>
+        <h2 class="section-title">Minden ízlésnek van itt valami</h2>
+        <div class="section-divider"></div>
+    </div>
+    <div class="food-grid">
+        <div class="food-pill reveal"><span class="food-pill-icon">🍔</span><div class="food-pill-label">BURGER</div></div>
+        <div class="food-pill reveal" style="transition-delay:0.05s"><span class="food-pill-icon">🍕</span><div class="food-pill-label">PIZZA</div></div>
+        <div class="food-pill reveal" style="transition-delay:0.1s"><span class="food-pill-icon">🥙</span><div class="food-pill-label">GYROS</div></div>
+        <div class="food-pill reveal" style="transition-delay:0.15s"><span class="food-pill-icon">🍜</span><div class="food-pill-label">ÁZSIAI</div></div>
+        <div class="food-pill reveal" style="transition-delay:0.2s"><span class="food-pill-icon">🥩</span><div class="food-pill-label">BBQ</div></div>
+        <div class="food-pill reveal" style="transition-delay:0.25s"><span class="food-pill-icon">🌮</span><div class="food-pill-label">TACO</div></div>
+        <div class="food-pill reveal" style="transition-delay:0.3s"><span class="food-pill-icon">🥐</span><div class="food-pill-label">MAGYAR</div></div>
+        <div class="food-pill reveal" style="transition-delay:0.35s"><span class="food-pill-icon">🥗</span><div class="food-pill-label">VEGÁN</div></div>
+        <div class="food-pill reveal" style="transition-delay:0.4s"><span class="food-pill-icon">🍩</span><div class="food-pill-label">DESSZERT</div></div>
+        <div class="food-pill reveal" style="transition-delay:0.45s"><span class="food-pill-icon">🌭</span><div class="food-pill-label">HOT DOG</div></div>
+    </div>
+</section>
+
+<!-- ── HOW ── -->
+<section class="how-section">
+    <div class="section-header reveal">
+        <p class="section-eyebrow">Hogyan működik</p>
+        <h2 class="section-title">Három egyszerű lépés</h2>
+        <div class="section-divider"></div>
+    </div>
+    <div class="steps">
+        <div class="step reveal">
+            <div class="step-circle">01</div>
+            <div class="step-title">NYISD MEG AZ APPOT</div>
+            <p class="step-desc">Nyisd meg böngészőből vagy telepítsd a telefonodra PWA-ként — iOS és Android egyaránt.</p>
+        </div>
+        <div class="step reveal" style="transition-delay:0.15s">
+            <div class="step-circle">02</div>
+            <div class="step-title">KERESS VAGY BÖNGÉSSZ</div>
+            <p class="step-desc">Nézd a térképet, szűrj ételstílus szerint, böngéssz fesztiválokat — vagy hagyd hogy meglepjen az app!</p>
+        </div>
+        <div class="step reveal" style="transition-delay:0.3s">
+            <div class="step-circle">03</div>
+            <div class="step-title">INDULJ EL & EGYÉL!</div>
+            <p class="step-desc">Koppints az INDULÁS gombra, válaszd a navigációs alkalmazásodat, és hamarosan ott eszed a legfinomabb street foodot!</p>
+        </div>
+    </div>
+</section>
+
+<!-- ── EVENTS ── -->
+<section class="events-section" id="esemenyek">
+    <div class="events-inner">
+        <div class="section-header reveal">
+            <p class="section-eyebrow">Közelgő események</p>
+            <h2 class="section-title">Street food fesztiválok 2026-ban</h2>
+            <div class="section-divider"></div>
+        </div>
+        <div class="event-cards">
+            <div class="ev-card reveal">
+                <span class="ev-emoji">🎉</span>
+                <div class="ev-info">
+                    <div class="ev-date">2026. április 25.</div>
+                    <div class="ev-title">Asian Street Food Festival</div>
+                    <div class="ev-loc">📍 Botellón Terasz, Budapest</div>
+                </div>
+                <div class="ev-badge">Fesztivál</div>
+            </div>
+            <div class="ev-card reveal" style="transition-delay:0.1s">
+                <span class="ev-emoji">🚚</span>
+                <div class="ev-info">
+                    <div class="ev-date">2026. május 16.</div>
+                    <div class="ev-title">Street Kitchen Fesztivál 2026</div>
+                    <div class="ev-loc">📍 Budapest</div>
+                </div>
+                <div class="ev-badge">Fesztivál</div>
+            </div>
+            <div class="ev-card reveal" style="transition-delay:0.2s">
+                <span class="ev-emoji">🎪</span>
+                <div class="ev-info">
+                    <div class="ev-date">2026. szeptember 11.</div>
+                    <div class="ev-title">Nemzetközi Street Food Fesztivál</div>
+                    <div class="ev-loc">📍 Andrássy út, Budapest — 50+ food truck, 17+ ország</div>
+                </div>
+                <div class="ev-badge">Ingyenes!</div>
+            </div>
+        </div>
+        <div style="text-align:center;margin-top:32px" class="reveal">
+            <a href="index.html" class="btn-primary" style="background:var(--blue);box-shadow:0 4px 18px rgba(21,101,192,0.35)">📅 ÖSSZES ESEMÉNY MEGTEKINTÉSE</a>
+        </div>
+    </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section">
+    <div class="cta-inner">
+        <span class="cta-emoji reveal">🌮</span>
+        <h2 class="cta-title reveal">Éhes vagy?</h2>
+        <p class="cta-sub reveal" style="transition-delay:0.1s">Több száz street food hely és food truck vár rád Magyarország-szerte. Találd meg a legközelebbit most!</p>
+        <div class="reveal" style="transition-delay:0.2s">
+            <a href="index.html" class="btn-primary">📍 ALKALMAZÁS MEGNYITÁSA</a>
+        </div>
+    </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <div class="footer-brand-title">🌮 STREET FOOD VADÁSZ</div>
+            <div class="footer-brand-sub">Food Truck & Fesztivál kereső</div>
+            <p class="footer-brand-desc">Magyarország legjobb street food és food truck keresője. Ingyenes, gyors, közösségi — zenészektől zenészeknek. 🚚</p>
+        </div>
+        <div class="footer-links-group">
+            <div class="footer-links-col">
+                <h4>Az app</h4>
+                <ul>
+                    <li><a href="index.html">📍 Térkép nézet</a></li>
+                    <li><a href="index.html">📜 Helylista</a></li>
+                    <li><a href="index.html">📅 Fesztiválok</a></li>
+                    <li><a href="index.html">➕ Hely hozzáadása</a></li>
+                </ul>
+            </div>
+            <div class="footer-links-col">
+                <h4>Partnerek & Támogatás</h4>
+                <ul>
+                    <li>
+                        <a href="https://vadasz-apps.web.app" target="_blank" rel="noopener">
+                            🛡️ Összes Vadász App
+                            <em class="link-arrow">↗</em>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://ko-fi.com/vadaszapps" target="_blank" rel="noopener">
+                            ☕ Támogasd a fejlesztőt
+                            <em class="link-arrow">↗</em>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="mailto:streetfoodvadasz@gmail.com">
+                            ✉️ Kapcsolat / Partnerség
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="footer-copy">© 2026 Street Food Vadász — Minden jog fenntartva.</div>
+</footer>
+
+<script>
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add('visible');
+                io.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => io.observe(el));
+</script>
+</body>
+</html>
