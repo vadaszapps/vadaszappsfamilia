@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Camper Vadász</title>
+  <meta name="description" content="Kempingek és lakóautó megállók keresője Magyarországon és környékén" />
+  <meta name="theme-color" content="#2d5a27" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Camper Vadász" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    :root {
+      --forest: #2d5a27;
+      --forest-dark: #1a3a15;
+      --forest-light: #4a8a42;
+      --sand: #c8a96e;
+      --sand-light: #e8d5a3;
+      --sand-pale: #f5edd8;
+      --sky: #5b8fa8;
+      --sky-light: #a8cfe0;
+      --cream: #faf7f0;
+      --bark: #6b4c2a;
+      --text: #1e1e1e;
+      --text-muted: #6b6b5a;
+      --white: #ffffff;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(45,90,39,0.13);
+      --tab-h: 62px;
+      --header-h: 58px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* SPLASH */
+    #splash {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--forest-dark);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 16px;
+      transition: opacity 0.5s ease;
+    }
+    #splash.hide { opacity: 0; pointer-events: none; }
+    .splash-icon { font-size: 64px; animation: bounce 1.2s ease infinite; }
+    @keyframes bounce {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    .splash-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px; font-weight: 900;
+      color: var(--sand-light);
+      letter-spacing: 1px;
+    }
+    .splash-sub {
+      font-size: 14px; color: var(--sand);
+      opacity: 0.8;
+    }
+    .splash-loader {
+      width: 48px; height: 3px;
+      background: var(--forest-light);
+      border-radius: 2px;
+      margin-top: 12px;
+      overflow: hidden;
+    }
+    .splash-loader::after {
+      content: '';
+      display: block; height: 100%;
+      width: 40%; background: var(--sand);
+      border-radius: 2px;
+      animation: load 1.2s ease infinite;
+    }
+    @keyframes load {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+
+    /* HEADER */
+    header {
+      height: var(--header-h);
+      background: var(--forest-dark);
+      display: flex; align-items: center;
+      padding: 0 16px;
+      gap: 10px;
+      position: relative;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+    .header-logo { font-size: 28px; }
+    .header-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; font-weight: 700;
+      color: var(--sand-light);
+      flex: 1;
+    }
+    .header-btn {
+      background: none; border: none;
+      color: var(--sand-light);
+      font-size: 22px; cursor: pointer;
+      padding: 6px; border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .header-btn:active { background: rgba(255,255,255,0.1); }
+
+    /* FILTER BAR */
+    #filter-bar {
+      background: var(--forest);
+      padding: 8px 12px;
+      display: flex; gap: 8px; overflow-x: auto;
+      flex-shrink: 0;
+      scrollbar-width: none;
+    }
+    #filter-bar::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      white-space: nowrap;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1.5px solid rgba(200,169,110,0.4);
+      background: transparent;
+      color: var(--sand-light);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .filter-chip.active {
+      background: var(--sand);
+      border-color: var(--sand);
+      color: var(--forest-dark);
+    }
+
+    /* CONTENT AREA */
+    #content {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* TABS */
+    .tab-panel { display: none; height: 100%; overflow-y: auto; }
+    .tab-panel.active { display: block; }
+    #tab-map.active { display: flex; flex-direction: column; }
+
+    /* MAP */
+    #map {
+      flex: 1;
+      width: 100%;
+    }
+    .leaflet-popup-content-wrapper {
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      font-family: 'DM Sans', sans-serif;
+    }
+    .popup-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px; font-weight: 700;
+      color: var(--forest-dark);
+      margin-bottom: 4px;
+    }
+    .popup-addr { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+    .popup-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+    .popup-tag {
+      font-size: 11px; padding: 2px 8px;
+      border-radius: 10px;
+      background: var(--sand-pale);
+      color: var(--bark);
+    }
+    .popup-tag.verified { background: var(--forest); color: var(--white); }
+    .popup-nav-btn {
+      display: block; width: 100%;
+      padding: 8px;
+      background: var(--forest);
+      color: var(--white);
+      border: none; border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; text-align: center;
+      text-decoration: none;
+    }
+
+    /* LIST */
+    #tab-list {
+      padding: 12px;
+    }
+    .country-group { margin-bottom: 20px; }
+    .country-header {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px; font-weight: 700;
+      color: var(--forest-dark);
+      padding: 8px 0 10px;
+      border-bottom: 2px solid var(--sand-light);
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .country-count {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 400;
+      color: var(--text-muted);
+    }
+
+    .location-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 12px rgba(45,90,39,0.08);
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      border: 1.5px solid transparent;
+    }
+    .location-card:active { transform: scale(0.98); }
+    .location-card.verified { border-color: var(--forest-light); }
+    .card-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+    .card-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+    .card-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px; font-weight: 700;
+      color: var(--forest-dark);
+      flex: 1;
+      line-height: 1.3;
+    }
+    .card-dist {
+      font-size: 12px; color: var(--sky);
+      font-weight: 500; white-space: nowrap;
+    }
+    .card-addr { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+    .card-tag {
+      font-size: 11px; padding: 2px 8px;
+      border-radius: 10px;
+      background: var(--sand-pale);
+      color: var(--bark);
+    }
+    .card-tag.verified-tag {
+      background: var(--forest);
+      color: var(--white);
+    }
+    .card-actions { display: flex; gap: 8px; }
+    .card-btn {
+      flex: 1; padding: 8px;
+      border-radius: 8px; border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; text-align: center;
+    }
+    .card-btn-nav { background: var(--forest); color: var(--white); }
+    .card-btn-map { background: var(--sand-pale); color: var(--forest-dark); }
+
+    /* EVENTS TAB */
+    #tab-events { padding: 12px; }
+    .events-header {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; font-weight: 700;
+      color: var(--forest-dark);
+      margin-bottom: 4px;
+    }
+    .events-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+    .event-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 12px rgba(45,90,39,0.08);
+      border-left: 4px solid var(--forest);
+    }
+    .event-date {
+      font-size: 12px; color: var(--sky);
+      font-weight: 500; margin-bottom: 4px;
+    }
+    .event-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px; font-weight: 700;
+      color: var(--forest-dark);
+      margin-bottom: 4px;
+    }
+    .event-loc { font-size: 12px; color: var(--text-muted); }
+    .event-desc { font-size: 13px; color: var(--text); margin-top: 6px; line-height: 1.5; }
+    .no-events {
+      text-align: center; padding: 40px 20px;
+      color: var(--text-muted); font-size: 14px;
+    }
+    .no-events-icon { font-size: 48px; margin-bottom: 12px; }
+
+    /* ADD TAB */
+    #tab-add { padding: 12px; }
+    .add-header {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; font-weight: 700;
+      color: var(--forest-dark);
+      margin-bottom: 4px;
+    }
+    .add-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+
+    .form-section {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 12px rgba(45,90,39,0.08);
+    }
+    .form-section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px; font-weight: 700;
+      color: var(--forest-dark);
+      margin-bottom: 12px;
+    }
+    .form-group { margin-bottom: 12px; }
+    .form-label {
+      display: block;
+      font-size: 13px; font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; padding: 10px 12px;
+      border: 1.5px solid #e0ddd4;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      background: var(--cream);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--forest);
+    }
+    .form-textarea { min-height: 80px; resize: vertical; }
+    .form-checkboxes { display: flex; flex-wrap: wrap; gap: 8px; }
+    .form-checkbox-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--text);
+      cursor: pointer;
+      background: var(--sand-pale);
+      padding: 6px 12px;
+      border-radius: 20px;
+    }
+    .form-submit-btn {
+      width: 100%; padding: 14px;
+      background: var(--forest);
+      color: var(--white);
+      border: none; border-radius: 12px;
+      font-family: 'Playfair Display', serif;
+      font-size: 16px; font-weight: 700;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.2s;
+    }
+    .form-submit-btn:active { background: var(--forest-dark); }
+
+    /* BOTTOM TABS */
+    nav {
+      height: var(--tab-h);
+      background: var(--forest-dark);
+      display: flex;
+      flex-shrink: 0;
+      border-top: 1px solid rgba(200,169,110,0.2);
+    }
+    #global-copyright {
+      position: fixed;
+      bottom: 0; left: 0;
+      width: 100%; height: 27px;
+      line-height: 27px;
+      text-align: center;
+      background: var(--forest-deep, #0f2410);
+      color: var(--sand);
+      font-size: 0.72rem;
+      font-weight: bold;
+      z-index: 1001;
+      font-family: 'DM Sans', sans-serif;
+      letter-spacing: 0.5px;
+    }
+    .nav-tab {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      border: none; background: none;
+      color: rgba(200,169,110,0.5);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px; font-weight: 500;
+      transition: color 0.2s;
+      padding: 6px 0;
+    }
+    .nav-tab.active { color: var(--sand-light); }
+    .nav-tab-icon { font-size: 22px; }
+
+    /* LOADING */
+    #loading-overlay {
+      position: absolute; inset: 0;
+      background: rgba(250,247,240,0.85);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px; z-index: 50;
+      transition: opacity 0.3s;
+    }
+    #loading-overlay.hide { opacity: 0; pointer-events: none; }
+    .loading-text { font-size: 14px; color: var(--forest); font-weight: 500; }
+    .loading-spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--sand-light);
+      border-top-color: var(--forest);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* TOAST */
+    #toast {
+      position: fixed; bottom: calc(var(--tab-h) + 12px); left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--forest-dark);
+      color: var(--sand-light);
+      padding: 10px 20px; border-radius: 20px;
+      font-size: 13px; font-weight: 500;
+      opacity: 0; transition: all 0.3s;
+      z-index: 200; white-space: nowrap;
+      box-shadow: var(--shadow);
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* NAV MODAL */
+    #nav-modal {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;
+      background: rgba(0,0,0,0.5);
+      display: none; align-items: flex-end;
+      -webkit-overflow-scrolling: touch;
+    }
+    #nav-modal.open { display: flex; }
+    .nav-sheet {
+      width: 100%; background: var(--white);
+      border-radius: 20px 20px 0 0;
+      padding: 20px 16px 32px;
+    }
+    .nav-sheet-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px; font-weight: 700;
+      color: var(--forest-dark);
+      margin-bottom: 4px;
+    }
+    .nav-sheet-addr { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+    .nav-option {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px; border-radius: 12px;
+      cursor: pointer; margin-bottom: 8px;
+      border: 1.5px solid #e0ddd4;
+      transition: background 0.2s;
+    }
+    .nav-option:active { background: var(--sand-pale); }
+    .nav-option-icon { font-size: 24px; }
+    .nav-option-name { font-size: 15px; font-weight: 500; color: var(--text); }
+    .nav-cancel {
+      width: 100%; padding: 14px;
+      background: var(--sand-pale);
+      border: none; border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px; font-weight: 500;
+      color: var(--text); cursor: pointer;
+      margin-top: 4px;
+    }
+
+    /* PARTNER TAB */
+    #tab-partner { padding: 12px; }
+    .partner-section { margin-bottom: 24px; }
+    .partner-section-title {
+      font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 500;
+      border-bottom: 1px solid var(--sand-light);
+      padding-bottom: 8px; margin-bottom: 12px;
+    }
+    .partner-card {
+      background: var(--white);
+      border: 1.5px solid var(--forest-pale);
+      border-radius: var(--radius);
+      padding: 14px; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; color: var(--text);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .partner-card:active { background: var(--sand-pale); border-color: var(--forest); }
+    .partner-icon { font-size: 2rem; flex-shrink: 0; }
+    .partner-info { flex: 1; }
+    .partner-info h3 {
+      font-family: "Playfair Display", serif;
+      font-size: 14px; font-weight: 700;
+      color: var(--forest-dark); margin: 0 0 3px;
+    }
+    .partner-info p { font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.4; }
+    .partner-arrow { color: var(--forest); font-size: 1.3rem; flex-shrink: 0; }
+    .partner-header {
+      font-family: "Playfair Display", serif;
+      font-size: 20px; font-weight: 700;
+      color: var(--forest-dark); margin-bottom: 4px;
+    }
+    .partner-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+
+    /* STATS BAR */
+    #stats-bar {
+      background: var(--forest);
+      padding: 6px 16px;
+      display: flex; gap: 16px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .stat-item { font-size: 12px; color: var(--sand-light); }
+    .stat-item strong { color: var(--sand); }
+
+    /* SUCCESS MESSAGE */
+    .success-msg {
+      background: var(--forest);
+      color: var(--white);
+      padding: 14px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-icon">🚐</div>
+  <div class="splash-title">Camper Vadász</div>
+  <div class="splash-sub">Kempingek & lakóautó megállók</div>
+  <div class="splash-loader"></div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-logo">🚐</div>
+  <div class="header-title">Camper Vadász</div>
+  <button class="header-btn" id="locate-btn" title="GPS">📍</button>
+  <button class="header-btn" id="refresh-btn" title="Frissítés">🔄</button>
+  <button class="header-btn" onclick="window.location.href='https://vadasz-apps.web.app'" title="Vadász Apps portál">🏠</button>
+</header>
+
+<!-- FILTER BAR -->
+<div id="filter-bar">
+  <button class="filter-chip active" data-filter="all">Összes</button>
+  <button class="filter-chip" data-filter="electric">⚡ Áram</button>
+  <button class="filter-chip" data-filter="water">💧 Víz</button>
+  <button class="filter-chip" data-filter="shower">🚿 Zuhany</button>
+  <button class="filter-chip" data-filter="dogs">🐕 Kutya OK</button>
+  <button class="filter-chip" data-filter="free">🆓 Ingyenes</button>
+  <button class="filter-chip" data-filter="verified">✅ Megerősített</button>
+</div>
+
+<!-- STATS BAR -->
+<div id="stats-bar">
+  <div class="stat-item">🗺️ <strong id="stat-total">0</strong> helyszín</div>
+  <div class="stat-item">✅ <strong id="stat-verified">0</strong> megerősített</div>
+  <div class="stat-item">🌍 <strong id="stat-countries">0</strong> ország</div>
+</div>
+
+<!-- CONTENT -->
+<div id="content">
+
+  <!-- MAP TAB -->
+  <div class="tab-panel active" id="tab-map">
+    <div id="map"></div>
+    <div id="loading-overlay">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Helyszínek betöltése…</div>
+    </div>
+  </div>
+
+  <!-- LIST TAB -->
+  <div class="tab-panel" id="tab-list">
+    <div id="list-content">
+      <div style="padding:40px 20px;text-align:center;color:var(--text-muted)">
+        <div style="font-size:48px;margin-bottom:12px">🏕️</div>
+        <div>Töltés folyamatban…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVENTS TAB -->
+  <div class="tab-panel" id="tab-events">
+    <div style="padding:12px">
+      <div class="events-header">🎪 Camper Események</div>
+      <div class="events-sub">Találkozók, fesztiválok, találkák</div>
+      <div id="events-list">
+        <div class="no-events">
+          <div class="no-events-icon">📅</div>
+          <div>Jelenleg nincsenek közelgő események.</div>
+          <div style="margin-top:8px;font-size:12px">Küldj be egyet az Add fülön!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD TAB -->
+  <div class="tab-panel" id="tab-add">
+    <div class="add-header">➕ Beküldés</div>
+    <div class="add-sub">Adj hozzá új helyszínt vagy eseményt</div>
+
+    <!-- TYPE SELECTOR -->
+    <div class="form-section">
+      <div class="form-group">
+        <label class="form-label">Mit szeretnél beküldeni?</label>
+        <select class="form-select" id="submit-type">
+          <option value="location">🏕️ Helyszín (kemping / megálló)</option>
+          <option value="event">🎪 Esemény (találkozó / fesztivál)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- LOCATION FORM -->
+    <div id="form-location">
+      <div class="form-section">
+        <div class="form-section-title">📍 Alapadatok</div>
+        <div class="form-group">
+          <label class="form-label">Helyszín neve *</label>
+          <input type="text" class="form-input" id="loc-name" placeholder="pl. Mátra Kemping" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cím / leírás</label>
+          <input type="text" class="form-input" id="loc-address" placeholder="pl. 3232 Mátrafüred, Fő út 12." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Weboldal</label>
+          <input type="url" class="form-input" id="loc-web" placeholder="https://" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefonszám</label>
+          <input type="tel" class="form-input" id="loc-phone" placeholder="+36 ..." />
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">⚙️ Felszereltség</div>
+        <div class="form-group">
+          <div class="form-checkboxes">
+            <label class="form-checkbox-label"><input type="checkbox" id="loc-electric"> ⚡ Áram</label>
+            <label class="form-checkbox-label"><input type="checkbox" id="loc-water"> 💧 Víz</label>
+            <label class="form-checkbox-label"><input type="checkbox" id="loc-shower"> 🚿 Zuhany</label>
+            <label class="form-checkbox-label"><input type="checkbox" id="loc-toilet"> 🚻 WC</label>
+            <label class="form-checkbox-label"><input type="checkbox" id="loc-dogs"> 🐕 Kutya OK</label>
+            <label class="form-checkbox-label"><input type="checkbox" id="loc-free"> 🆓 Ingyenes</label>
+            <label class="form-checkbox-label"><input type="checkbox" id="loc-wifi"> 📶 WiFi</label>
+            <label class="form-checkbox-label"><input type="checkbox" id="loc-dump"> 🗑️ Szürke víz</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">💬 Megjegyzés</div>
+        <div class="form-group">
+          <textarea class="form-textarea" id="loc-note" placeholder="Egyéb hasznos info…"></textarea>
+        </div>
+      </div>
+
+      <button class="form-submit-btn" id="submit-location-btn">📤 Helyszín beküldése</button>
+    </div>
+
+    <!-- EVENT FORM -->
+    <div id="form-event" style="display:none">
+      <div class="form-section">
+        <div class="form-section-title">🎪 Esemény adatai</div>
+        <div class="form-group">
+          <label class="form-label">Esemény neve *</label>
+          <input type="text" class="form-input" id="evt-name" placeholder="pl. Magyar Camper Találkozó" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Helyszín</label>
+          <input type="text" class="form-input" id="evt-location" placeholder="pl. Velencei-tó Kemping" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dátum *</label>
+          <input type="date" class="form-input" id="evt-date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Leírás</label>
+          <textarea class="form-textarea" id="evt-desc" placeholder="Rövid leírás az eseményről…"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Weboldal / Facebook</label>
+          <input type="url" class="form-input" id="evt-web" placeholder="https://" />
+        </div>
+      </div>
+      <button class="form-submit-btn" id="submit-event-btn">📤 Esemény beküldése</button>
+    </div>
+  </div>
+
+</div>
+
+  <!-- PARTNER TAB -->
+  <div class="tab-panel" id="tab-partner">
+    <div style="padding:12px">
+      <div class="partner-header">🌐 Partnerek</div>
+      <div class="partner-sub">Támogatók & Vadász Apps</div>
+
+      <div class="partner-section">
+        <div class="partner-section-title">⭐ TÁMOGATÓK & SZPONZOROK</div>
+        <a class="partner-card" href="mailto:info@camper-vadasz.web.app">
+          <div class="partner-icon">⭐</div>
+          <div class="partner-info">
+            <h3>Légy Te az első szponzor!</h3>
+            <p>Írj emailt nekünk és jelenj meg az appban!</p>
+          </div>
+          <div class="partner-arrow">›</div>
+        </a>
+      </div>
+
+      <div class="partner-section">
+        <div class="partner-section-title">🐾 VADÁSZ ALKALMAZÁSOK</div>
+        <a class="partner-card" href="https://vadasz-apps.web.app" target="_blank">
+          <div class="partner-icon">🛡️</div>
+          <div class="partner-info">
+            <h3>Ismerd meg az összes Vadász appot!</h3>
+            <p>Trafik, Patika, Szivar, Pizza, Whiskey és még több – egy helyen, ingyen!</p>
+          </div>
+          <div class="partner-arrow">›</div>
+        </a>
+        <a class="partner-card" href="https://szivar-vadasz.web.app" target="_blank">
+          <div class="partner-icon">🚬</div>
+          <div class="partner-info"><h3>Szivar Vadász</h3><p>Szivarozók és dohányboltok keresője</p></div>
+          <div class="partner-arrow">›</div>
+        </a>
+        <a class="partner-card" href="https://kave-vadasz.web.app" target="_blank">
+          <div class="partner-icon">☕</div>
+          <div class="partner-info"><h3>Kávé Vadász</h3><p>Specialty coffee kávézók keresője</p></div>
+          <div class="partner-arrow">›</div>
+        </a>
+        <a class="partner-card" href="https://bor-vadasz.web.app" target="_blank">
+          <div class="partner-icon">🍷</div>
+          <div class="partner-info"><h3>Bor Vadász</h3><p>Borászatok és borozók keresője</p></div>
+          <div class="partner-arrow">›</div>
+        </a>
+      </div>
+
+      <div class="partner-section">
+        <div class="partner-section-title">❤️ TÁMOGASD AZ APPOT</div>
+        <a class="partner-card" href="https://ko-fi.com/camper-vadasz" target="_blank">
+          <div class="partner-icon">☕</div>
+          <div class="partner-info">
+            <h3>Vegyél egy kávét a fejlesztőnek!</h3>
+            <p>Az app ingyenes, de a fejlesztés nem az 😄</p>
+          </div>
+          <div class="partner-arrow">›</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+<!-- BOTTOM NAV -->
+<nav>
+  <button class="nav-tab active" data-tab="map">
+    <span class="nav-tab-icon">🗺️</span>
+    <span>Térkép</span>
+  </button>
+  <button class="nav-tab" data-tab="list">
+    <span class="nav-tab-icon">📋</span>
+    <span>Lista</span>
+  </button>
+  <button class="nav-tab" data-tab="events">
+    <span class="nav-tab-icon">🎪</span>
+    <span>Események</span>
+  </button>
+  <button class="nav-tab" data-tab="add">
+    <span class="nav-tab-icon">➕</span>
+    <span>Beküldés</span>
+  </button>
+  <button class="nav-tab" data-tab="partner">
+    <span class="nav-tab-icon">🌐</span>
+    <span>Partnerek</span>
+  </button>
+</nav>
+
+<!-- NAV MODAL -->
+<div id="nav-modal">
+  <div class="nav-sheet">
+    <div class="nav-sheet-title" id="nav-modal-name"></div>
+    <div class="nav-sheet-addr" id="nav-modal-addr"></div>
+    <div class="nav-option" id="nav-apple">
+      <span class="nav-option-icon">🍎</span>
+      <span class="nav-option-name">Apple Maps</span>
+    </div>
+    <div class="nav-option" id="nav-google">
+      <span class="nav-option-icon">🗺️</span>
+      <span class="nav-option-name">Google Maps</span>
+    </div>
+    <div class="nav-option" id="nav-waze">
+      <span class="nav-option-icon">🚗</span>
+      <span class="nav-option-name">Waze</span>
+    </div>
+    <button class="nav-cancel" id="nav-cancel">Mégse</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, addDoc, serverTimestamp, query, orderBy }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDz4UO0251lS7H3KydtAFYTRuJJqr4anL8",
+    authDomain: "camper-vadasz.firebaseapp.com",
+    projectId: "camper-vadasz",
+    storageBucket: "camper-vadasz.firebasestorage.app",
+    messagingSenderId: "936613581604",
+    appId: "1:936613581604:web:bb81d24c85977d6498d9b1",
+    measurementId: "G-8PCBZWS3L1"
+  };
+
+  const fbApp = initializeApp(firebaseConfig);
+  const db = getFirestore(fbApp);
+
+  // ── STATE ──────────────────────────────────────────────
+  let allLocations = [];
+  let filteredLocations = [];
+  let activeFilter = 'all';
+  let userLat = 47.4979;
+  let userLng = 19.0402;
+  let navTarget = null;
+  let map, markersLayer;
+
+  const COUNTRY_NAMES = {
+    HU: '🇭🇺 Magyarország', SK: '🇸🇰 Szlovákia', AT: '🇦🇹 Ausztria',
+    RO: '🇷🇴 Románia', HR: '🇭🇷 Horvátország', SI: '🇸🇮 Szlovénia',
+    UA: '🇺🇦 Ukrajna', RS: '🇷🇸 Szerbia', PL: '🇵🇱 Lengyelország',
+    OTHER: '🌍 Egyéb'
+  };
+
+  // ── LEAFLET ────────────────────────────────────────────
+  const L = window.L;
+
+  function initMap() {
+    map = L.map("map", { zoomControl: false }).setView([47.2, 18.5], 5);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(map);
+    markersLayer = L.layerGroup().addTo(map);
+  }
+
+  function haversine(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function formatDist(km) {
+    if (km < 1) return Math.round(km * 1000) + ' m';
+    return km.toFixed(1) + ' km';
+  }
+
+  function getCountryCode(loc) {
+    if (loc.country) return loc.country.toUpperCase();
+    const lat = loc.lat, lng = loc.lng;
+    if (lat > 45.7 && lat < 48.6 && lng > 16.1 && lng < 22.9) return 'HU';
+    if (lat > 47.7 && lat < 49.6 && lng > 16.8 && lng < 22.6) return 'SK';
+    if (lat > 46.4 && lat < 49.0 && lng > 9.5 && lng < 17.2) return 'AT';
+    if (lat > 43.6 && lat < 48.3 && lng > 20.2 && lng < 29.7) return 'RO';
+    if (lat > 42.4 && lat < 46.6 && lng > 13.5 && lng < 19.5) return 'HR';
+    if (lat > 45.4 && lat < 46.9 && lng > 13.4 && lng < 16.6) return 'SI';
+    if (lat > 44.0 && lat < 52.9 && lng > 22.1 && lng < 40.2) return 'UA';
+    return 'OTHER';
+  }
+
+  function buildTags(loc) {
+    const tags = [];
+    if (loc.verified) tags.push({ label: '✅ Megerősített', cls: 'verified' });
+    if (loc.electric) tags.push({ label: '⚡ Áram', cls: '' });
+    if (loc.water) tags.push({ label: '💧 Víz', cls: '' });
+    if (loc.shower) tags.push({ label: '🚿 Zuhany', cls: '' });
+    if (loc.toilet) tags.push({ label: '🚻 WC', cls: '' });
+    if (loc.dogs) tags.push({ label: '🐕 Kutya OK', cls: '' });
+    if (loc.free) tags.push({ label: '🆓 Ingyenes', cls: '' });
+    if (loc.wifi) tags.push({ label: '📶 WiFi', cls: '' });
+    if (loc.dump) tags.push({ label: '🗑️ Szürke víz', cls: '' });
+    return tags;
+  }
+
+  // ── OVERPASS ───────────────────────────────────────────
+  const OVERPASS_MIRRORS = [
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter',
+    'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
+  ];
+
+  const OVERPASS_QUERY = '[out:json][timeout:25];(node["tourism"="camp_site"](45.5,15.5,49.0,23.0);node["tourism"="caravan_site"](45.5,15.5,49.0,23.0););out 300;';
+
+  function parseOsmElement(el) {
+    const lat = el.lat;
+    const lng = el.lon;
+    if (!lat || !lng) return null;
+    const t = el.tags || {};
+    return {
+      id: 'osm_' + el.id,
+      name: t.name || t['name:hu'] || t['name:de'] || 'Kemping',
+      lat, lng,
+      address: [t['addr:city'], t['addr:street']].filter(Boolean).join(', '),
+      website: t.website || t.url || '',
+      phone: t.phone || t['contact:phone'] || '',
+      electric: t.electric_hookup === 'yes' || t['hookup:electric'] === 'yes',
+      water: t.water_supply === 'yes' || t.drinking_water === 'yes',
+      shower: t.shower === 'yes',
+      toilet: t.toilets === 'yes',
+      dogs: t.dog === 'yes',
+      free: t.fee === 'no',
+      wifi: t.internet_access === 'wlan',
+      dump: t.sanitary_dump_station === 'yes',
+      verified: false,
+      source: 'osm',
+      type: t.tourism || 'camp_site'
+    };
+  }
+
+  async function fetchOverpass() {
+    for (const mirror of OVERPASS_MIRRORS) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 40000);
+      try {
+        const resp = await fetch(mirror, {
+          method: 'POST',
+          body: 'data=' + encodeURIComponent(OVERPASS_QUERY),
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          signal: ctrl.signal
+        });
+        clearTimeout(timer);
+        if (!resp.ok) continue;
+        const data = await resp.json();
+        return data.elements.map(parseOsmElement).filter(Boolean);
+      } catch(e) {
+        clearTimeout(timer);
+        continue;
+      }
+    }
+    return [];
+  }
+
+  // ── FIRESTORE ──────────────────────────────────────────
+  async function fetchFirestore() {
+    try {
+      const snap = await getDocs(collection(db, 'helyszinek'));
+      return snap.docs.map(doc => ({ id: 'fs_' + doc.id, ...doc.data(), source: 'firestore' }));
+    } catch(e) {
+      console.warn('Firestore fetch error:', e);
+      return [];
+    }
+  }
+
+  async function fetchEvents() {
+    try {
+      const snap = await getDocs(query(collection(db, 'esemenyek'), orderBy('date', 'asc')));
+      return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch(e) {
+      console.warn('Events fetch error:', e);
+      return [];
+    }
+  }
+
+  // ── MERGE ──────────────────────────────────────────────
+  function mergeLocations(osm, firestore) {
+    const merged = [...firestore];
+    const fsCoords = firestore.map(f => `${f.lat?.toFixed(3)},${f.lng?.toFixed(3)}`);
+    for (const o of osm) {
+      const key = `${o.lat.toFixed(3)},${o.lng.toFixed(3)}`;
+      if (!fsCoords.includes(key)) merged.push(o);
+    }
+    return merged;
+  }
+
+  // ── FILTER ─────────────────────────────────────────────
+  function applyFilter() {
+    if (activeFilter === 'all') {
+      filteredLocations = [...allLocations];
+    } else {
+      filteredLocations = allLocations.filter(l => l[activeFilter]);
+    }
+    filteredLocations.sort((a,b) => haversine(userLat,userLng,a.lat,a.lng) - haversine(userLat,userLng,b.lat,b.lng));
+    renderMap();
+    renderList();
+    updateStats();
+  }
+
+  // ── MAP RENDER ─────────────────────────────────────────
+  function renderMap() {
+    markersLayer.clearLayers();
+    const zoom = map.getZoom();
+    const locs = zoom < 8 ? filteredLocations.slice(0, 150) : filteredLocations;
+
+    locs.forEach(loc => {
+      const icon = L.divIcon({
+        html: `<div style="
+          width:32px;height:32px;
+          background:${loc.verified ? '#2d5a27' : '#5b8fa8'};
+          border:2.5px solid white;
+          border-radius:50% 50% 50% 0;
+          transform:rotate(-45deg);
+          box-shadow:0 2px 8px rgba(0,0,0,0.3);
+          display:flex;align-items:center;justify-content:center;
+        "><span style="transform:rotate(45deg);font-size:14px">${loc.type === 'caravan_site' ? '🚐' : '⛺'}</span></div>`,
+        className: '',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+      });
+
+      const tags = buildTags(loc);
+      const tagsHtml = tags.slice(0, 4).map(t =>
+        `<span class="popup-tag ${t.cls}">${t.label}</span>`
+      ).join('');
+
+      const marker = L.marker([loc.lat, loc.lng], { icon });
+      marker.bindPopup(`
+        <div class="popup-name">${loc.name}</div>
+        ${loc.address ? `<div class="popup-addr">📍 ${loc.address}</div>` : ''}
+        <div class="popup-tags">${tagsHtml}</div>
+        <button class="popup-nav-btn" onclick="window._openNav('${loc.id}')">🧭 Navigálás</button>
+      `, { maxWidth: 240 });
+      markersLayer.addLayer(marker);
+    });
+  }
+
+  // ── LIST RENDER ────────────────────────────────────────
+  function renderList() {
+    const grouped = {};
+    filteredLocations.forEach(loc => {
+      const cc = getCountryCode(loc);
+      if (!grouped[cc]) grouped[cc] = [];
+      grouped[cc].push(loc);
+    });
+
+    const order = ['HU','SK','AT','RO','HR','SI','UA','RS','PL','OTHER'];
+    let html = '';
+    for (const cc of order) {
+      if (!grouped[cc]?.length) continue;
+      const name = COUNTRY_NAMES[cc] || cc;
+      html += `<div class="country-group">
+        <div class="country-header">${name} <span class="country-count">(${grouped[cc].length})</span></div>`;
+      grouped[cc].forEach(loc => {
+        const dist = haversine(userLat, userLng, loc.lat, loc.lng);
+        const tags = buildTags(loc);
+        const tagsHtml = tags.slice(0, 5).map(t =>
+          `<span class="card-tag ${t.cls === 'verified' ? 'verified-tag' : ''}">${t.label}</span>`
+        ).join('');
+        html += `<div class="location-card ${loc.verified ? 'verified' : ''}" onclick="window._cardClick('${loc.id}')">
+          <div class="card-header">
+            <span class="card-icon">${loc.type === 'caravan_site' ? '🚐' : '⛺'}</span>
+            <span class="card-name">${loc.name}</span>
+            <span class="card-dist">${formatDist(dist)}</span>
+          </div>
+          ${loc.address ? `<div class="card-addr">📍 ${loc.address}</div>` : ''}
+          <div class="card-tags">${tagsHtml}</div>
+          <div class="card-actions">
+            <button class="card-btn card-btn-nav" onclick="event.stopPropagation();window._openNav('${loc.id}')">🧭 Navigálás</button>
+            <button class="card-btn card-btn-map" onclick="event.stopPropagation();window._showOnMap('${loc.id}')">🗺️ Térkép</button>
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    }
+
+    document.getElementById('list-content').innerHTML = html ||
+      '<div style="padding:40px 20px;text-align:center;color:var(--text-muted)"><div style="font-size:48px">🏕️</div><div style="margin-top:12px">Nincs találat ezzel a szűrővel.</div></div>';
+  }
+
+  // ── STATS ──────────────────────────────────────────────
+  function updateStats() {
+    document.getElementById('stat-total').textContent = filteredLocations.length;
+    document.getElementById('stat-verified').textContent = filteredLocations.filter(l => l.verified).length;
+    const countries = new Set(filteredLocations.map(l => getCountryCode(l)));
+    document.getElementById('stat-countries').textContent = countries.size;
+  }
+
+  // ── EVENTS RENDER ──────────────────────────────────────
+  function renderEvents(events) {
+    if (!events.length) return;
+    const now = new Date();
+    const upcoming = events.filter(e => new Date(e.date) >= now);
+    const past = events.filter(e => new Date(e.date) < now);
+
+    let html = '';
+    if (upcoming.length) {
+      html += '<div class="events-header" style="font-size:16px;margin-bottom:12px">📅 Közelgő</div>';
+      upcoming.forEach(e => {
+        const d = new Date(e.date);
+        const ds = d.toLocaleDateString('hu-HU', { year:'numeric', month:'long', day:'numeric' });
+        html += `<div class="event-card">
+          <div class="event-date">${ds}</div>
+          <div class="event-name">${e.name}</div>
+          <div class="event-loc">📍 ${e.location || ''}</div>
+          ${e.description ? `<div class="event-desc">${e.description}</div>` : ''}
+          ${e.website ? `<div style="margin-top:8px"><a href="${e.website}" target="_blank" style="color:var(--forest);font-size:13px">🔗 Részletek</a></div>` : ''}
+        </div>`;
+      });
+    }
+    if (past.length) {
+      html += '<div class="events-header" style="font-size:16px;margin:16px 0 12px;color:var(--text-muted)">⏮️ Elmúlt</div>';
+      past.slice(0, 5).forEach(e => {
+        const d = new Date(e.date);
+        const ds = d.toLocaleDateString('hu-HU', { year:'numeric', month:'long', day:'numeric' });
+        html += `<div class="event-card" style="opacity:0.6">
+          <div class="event-date">${ds}</div>
+          <div class="event-name">${e.name}</div>
+          <div class="event-loc">📍 ${e.location || ''}</div>
+        </div>`;
+      });
+    }
+
+    document.getElementById('events-list').innerHTML = html;
+  }
+
+  // ── NAVIGATION ─────────────────────────────────────────
+  window._openNav = function(id) {
+    const loc = allLocations.find(l => l.id === id);
+    if (!loc) return;
+    navTarget = loc;
+    document.getElementById('nav-modal-name').textContent = loc.name;
+    document.getElementById('nav-modal-addr').textContent = loc.address || '';
+    document.getElementById('nav-modal').classList.add('open');
+  };
+
+  window._cardClick = function(id) {
+    const loc = allLocations.find(l => l.id === id);
+    if (loc) window._showOnMap(id);
+  };
+
+  window._showOnMap = function(id) {
+    const loc = allLocations.find(l => l.id === id);
+    if (!loc) return;
+    switchTab('map');
+    map.setView([loc.lat, loc.lng], 14);
+  };
+
+  function openNavTo(lat, lng, name) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    return { lat, lng, name, isIOS };
+  }
+
+  document.getElementById('nav-apple').onclick = function() {
+    if (!navTarget) return;
+    const { lat, lng, name } = navTarget;
+    closeNavModal();
+    setTimeout(() => { window.location.href = 'maps://maps.apple.com/?daddr=' + lat + ',' + lng + '&q=' + encodeURIComponent(name); }, 100);
+  };
+  document.getElementById('nav-google').onclick = function() {
+    if (!navTarget) return;
+    const { lat, lng } = navTarget;
+    closeNavModal();
+    setTimeout(() => { window.location.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng; }, 100);
+  };
+  document.getElementById('nav-waze').onclick = function() {
+    if (!navTarget) return;
+    const { lat, lng } = navTarget;
+    closeNavModal();
+    setTimeout(() => { window.location.href = 'https://waze.com/ul?ll=' + lat + ',' + lng + '&navigate=yes'; }, 100);
+  };
+  document.getElementById('nav-cancel').onclick = closeNavModal;
+  document.getElementById('nav-modal').onclick = function(e) {
+    if (e.target === this) closeNavModal();
+  };
+  function closeNavModal() {
+    document.getElementById('nav-modal').classList.remove('open');
+    navTarget = null;
+  }
+
+  // ── TABS ───────────────────────────────────────────────
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.querySelector(`.nav-tab[data-tab="${tab}"]`).classList.add('active');
+  }
+
+  document.querySelectorAll('.nav-tab').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  // ── FILTERS ────────────────────────────────────────────
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeFilter = chip.dataset.filter;
+      applyFilter();
+    });
+  });
+
+  // ── GPS ────────────────────────────────────────────────
+  document.getElementById('locate-btn').addEventListener('click', () => {
+    if (!navigator.geolocation) { showToast('GPS nem elérhető'); return; }
+    navigator.geolocation.getCurrentPosition(pos => {
+      userLat = pos.coords.latitude;
+      userLng = pos.coords.longitude;
+      map.setView([userLat, userLng], 11);
+      applyFilter();
+      showToast('📍 Helyzet frissítve!');
+    }, () => showToast('GPS hiba'));
+  });
+
+  // ── REFRESH ────────────────────────────────────────────
+  document.getElementById('refresh-btn').addEventListener('click', () => {
+    document.getElementById('loading-overlay').classList.remove('hide');
+    loadAll();
+  });
+
+  // ── SUBMIT TYPE TOGGLE ─────────────────────────────────
+  document.getElementById('submit-type').addEventListener('change', function() {
+    document.getElementById('form-location').style.display = this.value === 'location' ? '' : 'none';
+    document.getElementById('form-event').style.display = this.value === 'event' ? '' : 'none';
+  });
+
+  // ── SUBMIT LOCATION ────────────────────────────────────
+  document.getElementById('submit-location-btn').addEventListener('click', async () => {
+    const name = document.getElementById('loc-name').value.trim();
+    if (!name) { showToast('⚠️ A helyszín neve kötelező!'); return; }
+    try {
+      await addDoc(collection(db, 'bekuldott_helyszinek'), {
+        name,
+        address: document.getElementById('loc-address').value.trim(),
+        website: document.getElementById('loc-web').value.trim(),
+        phone: document.getElementById('loc-phone').value.trim(),
+        note: document.getElementById('loc-note').value.trim(),
+        electric: document.getElementById('loc-electric').checked,
+        water: document.getElementById('loc-water').checked,
+        shower: document.getElementById('loc-shower').checked,
+        toilet: document.getElementById('loc-toilet').checked,
+        dogs: document.getElementById('loc-dogs').checked,
+        free: document.getElementById('loc-free').checked,
+        wifi: document.getElementById('loc-wifi').checked,
+        dump: document.getElementById('loc-dump').checked,
+        verified: false,
+        approved: false,
+        createdAt: serverTimestamp()
+      });
+      showToast('✅ Köszönjük! Ellenőrzés után megjelenik.');
+      ['loc-name','loc-address','loc-web','loc-phone','loc-note'].forEach(id => document.getElementById(id).value = '');
+      ['loc-electric','loc-water','loc-shower','loc-toilet','loc-dogs','loc-free','loc-wifi','loc-dump'].forEach(id => document.getElementById(id).checked = false);
+    } catch(e) {
+      showToast('❌ Hiba a beküldésnél. Próbáld újra!');
+    }
+  });
+
+  // ── SUBMIT EVENT ───────────────────────────────────────
+  document.getElementById('submit-event-btn').addEventListener('click', async () => {
+    const name = document.getElementById('evt-name').value.trim();
+    const date = document.getElementById('evt-date').value;
+    if (!name || !date) { showToast('⚠️ Név és dátum kötelező!'); return; }
+    try {
+      await addDoc(collection(db, 'bekuldott_esemenyek'), {
+        name,
+        location: document.getElementById('evt-location').value.trim(),
+        date,
+        description: document.getElementById('evt-desc').value.trim(),
+        website: document.getElementById('evt-web').value.trim(),
+        approved: false,
+        createdAt: serverTimestamp()
+      });
+      showToast('✅ Esemény beküldve! Hamarosan megjelenik.');
+      ['evt-name','evt-location','evt-date','evt-desc','evt-web'].forEach(id => document.getElementById(id).value = '');
+    } catch(e) {
+      showToast('❌ Hiba a beküldésnél.');
+    }
+  });
+
+  // ── TOAST ──────────────────────────────────────────────
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // ── MAIN LOAD ──────────────────────────────────────────
+  // ── OSM CACHE (localStorage) ──────────────────────────
+  const OSM_CACHE_KEY = 'camper_osm_v1';
+  const OSM_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 óra
+
+  function getOsmCache() {
+    try {
+      const raw = localStorage.getItem(OSM_CACHE_KEY);
+      if (!raw) return null;
+      const { data, ts } = JSON.parse(raw);
+      if (Date.now() - ts > OSM_CACHE_TTL) { localStorage.removeItem(OSM_CACHE_KEY); return null; }
+      return data;
+    } catch(e) { return null; }
+  }
+
+  function setOsmCache(data) {
+    try { localStorage.setItem(OSM_CACHE_KEY, JSON.stringify({ data, ts: Date.now() })); } catch(e) {}
+  }
+
+  async function loadAll() {
+    // GPS non-blocking
+    try {
+      navigator.geolocation.getCurrentPosition(pos => {
+        userLat = pos.coords.latitude;
+        userLng = pos.coords.longitude;
+      });
+    } catch(e) {}
+
+    // 1. Cache-ből OSM azonnal ha van
+    const cached = getOsmCache();
+    if (cached && cached.length > 0) {
+      allLocations = cached;
+      applyFilter();
+      showToast('⚡ ' + cached.length + ' helyszín (gyorsítótárból)');
+    }
+
+    // 2. Firestore + Events
+    const [fsData, events] = await Promise.all([fetchFirestore(), fetchEvents()]);
+    renderEvents(events);
+
+    // Merge Firestore a cached OSM-mel
+    if (cached && cached.length > 0) {
+      allLocations = mergeLocations(cached, fsData);
+    } else {
+      allLocations = fsData;
+    }
+    applyFilter();
+
+    // Splash eltűnik
+    document.getElementById('loading-overlay').classList.add('hide');
+    setTimeout(() => document.getElementById('splash').classList.add('hide'), 300);
+
+    // 3. OSM frissítés háttérben (csak ha nincs cache vagy lejárt)
+    if (!cached) {
+      fetchOverpass().then(osmData => {
+        if (osmData.length > 0) {
+          setOsmCache(osmData);
+          allLocations = mergeLocations(osmData, fsData);
+          applyFilter();
+          showToast('🗺️ ' + osmData.length + ' OSM helyszín betöltve!');
+        }
+      }).catch(() => {});
+    }
+  }
+
+  // ── INIT ───────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    initMap();
+    loadAll();
+  });
+
+  // Service Worker kikapcsolva fejlesztés idejére
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+  }
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" referrerpolicy="no-referrer-when-downgrade"></script>
+<div id="global-copyright">© 2026 Vadász Apps · Minden jog fenntartva</div>
+</body>
+</html>

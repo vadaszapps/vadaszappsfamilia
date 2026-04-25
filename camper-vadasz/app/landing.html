@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Camper Vadász – Kempingek & lakóautó megállók</title>
+  <meta name="description" content="Találd meg a legjobb kempingeket és lakóautó megállókat Magyarországon és környékén. Ingyenes, GPS-alapú kereső." />
+  <meta name="theme-color" content="#1a3a15" />
+  <meta property="og:title" content="Camper Vadász" />
+  <meta property="og:description" content="Kempingek & lakóautó megállók keresője" />
+  <meta property="og:url" content="https://camper-vadasz.web.app" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --forest:       #2d5a27;
+      --forest-dark:  #1a3a15;
+      --forest-deep:  #0f2410;
+      --forest-light: #4a8a42;
+      --forest-pale:  #d4e8d0;
+      --sand:         #c8a96e;
+      --sand-light:   #e8d5a3;
+      --sand-pale:    #f5edd8;
+      --sky:          #5b8fa8;
+      --sky-light:    #a8cfe0;
+      --cream:        #faf7f0;
+      --bark:         #6b4c2a;
+      --text:         #1e1e1e;
+      --text-muted:   #6b6b5a;
+      --white:        #ffffff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── HERO ─────────────────────────────────────────── */
+    .hero {
+      min-height: 100dvh;
+      background: var(--forest-deep);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 40px 24px 80px;
+    }
+
+    /* Animated forest background */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .tree {
+      position: absolute;
+      bottom: 0;
+      opacity: 0.18;
+    }
+    .tree svg { display: block; }
+
+    /* Stars */
+    .stars {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .star {
+      position: absolute;
+      background: var(--sand-light);
+      border-radius: 50%;
+      animation: twinkle var(--dur, 3s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 0.9; transform: scale(1.4); }
+    }
+
+    /* Moon */
+    .moon {
+      position: absolute;
+      top: 48px; right: 10%;
+      width: 56px; height: 56px;
+      background: var(--sand-light);
+      border-radius: 50%;
+      box-shadow: 0 0 40px rgba(232,213,163,0.3);
+      animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* Campfire */
+    .campfire {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 48px;
+      animation: flicker 1.5s ease-in-out infinite alternate;
+      filter: drop-shadow(0 0 20px rgba(255,160,60,0.6));
+    }
+    @keyframes flicker {
+      0% { transform: translateX(-50%) scale(1) rotate(-1deg); }
+      100% { transform: translateX(-50%) scale(1.08) rotate(1deg); }
+    }
+
+    /* Camper van */
+    .camper-van {
+      font-size: 72px;
+      animation: drive 0.5s ease-in-out infinite alternate;
+      margin-bottom: 24px;
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,0.4));
+    }
+    @keyframes drive {
+      0% { transform: translateY(0) rotate(-0.5deg); }
+      100% { transform: translateY(-4px) rotate(0.5deg); }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      max-width: 600px;
+    }
+
+    .hero-eyebrow {
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--sand);
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(44px, 10vw, 80px);
+      font-weight: 900;
+      color: var(--sand-light);
+      line-height: 1.05;
+      margin-bottom: 20px;
+      text-shadow: 0 4px 32px rgba(0,0,0,0.4);
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--sand);
+    }
+
+    .hero-subtitle {
+      font-size: 18px;
+      color: rgba(232,213,163,0.75);
+      line-height: 1.7;
+      margin-bottom: 40px;
+      font-weight: 300;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--sand);
+      color: var(--forest-deep);
+      text-decoration: none;
+      padding: 18px 36px;
+      border-radius: 60px;
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 32px rgba(200,169,110,0.4);
+    }
+    .hero-cta:hover {
+      background: var(--sand-light);
+      transform: translateY(-3px);
+      box-shadow: 0 16px 48px rgba(200,169,110,0.5);
+    }
+    .hero-cta-arrow {
+      font-size: 20px;
+      transition: transform 0.3s;
+    }
+    .hero-cta:hover .hero-cta-arrow { transform: translateX(4px); }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: rgba(232,213,163,0.4);
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      animation: bounce-down 2s ease-in-out infinite;
+    }
+    @keyframes bounce-down {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* ── FEATURES ──────────────────────────────────────── */
+    .section {
+      padding: 80px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--forest);
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(30px, 6vw, 48px);
+      font-weight: 900;
+      color: var(--forest-dark);
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 17px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 560px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 56px;
+    }
+
+    .feature-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 32px 28px;
+      border: 1.5px solid var(--forest-pale);
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--forest);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 60px rgba(45,90,39,0.12);
+      border-color: var(--forest-light);
+    }
+    .feature-card:hover::before { transform: scaleX(1); }
+
+    .feature-icon {
+      font-size: 40px;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .feature-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--forest-dark);
+      margin-bottom: 10px;
+    }
+    .feature-desc {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* ── AMENITIES ─────────────────────────────────────── */
+    .amenities-section {
+      background: var(--forest-dark);
+      padding: 80px 24px;
+    }
+    .amenities-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .amenities-section .section-label { color: var(--sand); }
+    .amenities-section .section-title { color: var(--sand-light); }
+    .amenities-section .section-sub { color: rgba(232,213,163,0.65); }
+
+    .amenities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      margin-top: 48px;
+    }
+
+    .amenity-chip {
+      background: rgba(200,169,110,0.1);
+      border: 1.5px solid rgba(200,169,110,0.25);
+      border-radius: 16px;
+      padding: 20px 16px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .amenity-chip:hover {
+      background: rgba(200,169,110,0.2);
+      border-color: rgba(200,169,110,0.5);
+      transform: translateY(-3px);
+    }
+    .amenity-icon { font-size: 28px; margin-bottom: 8px; }
+    .amenity-name {
+      font-size: 13px;
+      color: var(--sand-light);
+      font-weight: 500;
+    }
+
+    /* ── HOW IT WORKS ─────────────────────────────────── */
+    .steps-section {
+      background: var(--sand-pale);
+      padding: 80px 24px;
+    }
+    .steps-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0;
+      margin-top: 56px;
+      position: relative;
+    }
+    .steps-grid::before {
+      content: '';
+      position: absolute;
+      top: 32px;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(to right, var(--forest-pale), var(--forest-light), var(--forest-pale));
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .step-num {
+      width: 64px;
+      height: 64px;
+      background: var(--forest);
+      color: var(--sand-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 900;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(45,90,39,0.3);
+    }
+    .step-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--forest-dark);
+      margin-bottom: 8px;
+    }
+    .step-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ── COUNTRIES ─────────────────────────────────────── */
+    .countries-section {
+      padding: 80px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .countries-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 40px;
+    }
+    .country-pill {
+      background: var(--white);
+      border: 1.5px solid var(--forest-pale);
+      border-radius: 40px;
+      padding: 10px 20px;
+      font-size: 15px;
+      color: var(--forest-dark);
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .country-pill:hover {
+      background: var(--forest);
+      color: var(--sand-light);
+      border-color: var(--forest);
+      transform: translateY(-2px);
+    }
+
+    /* ── CTA SECTION ───────────────────────────────────── */
+    .cta-section {
+      background: var(--forest);
+      padding: 100px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '🏕️';
+      position: absolute;
+      font-size: 200px;
+      opacity: 0.05;
+      top: 50%; left: 10%;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+    .cta-section::after {
+      content: '🚐';
+      position: absolute;
+      font-size: 200px;
+      opacity: 0.05;
+      top: 50%; right: 10%;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+    .cta-inner { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
+    .cta-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(32px, 7vw, 56px);
+      font-weight: 900;
+      color: var(--sand-light);
+      margin-bottom: 20px;
+      line-height: 1.1;
+    }
+    .cta-sub {
+      font-size: 17px;
+      color: rgba(232,213,163,0.7);
+      margin-bottom: 40px;
+      line-height: 1.7;
+    }
+    .cta-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .cta-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--sand);
+      color: var(--forest-deep);
+      text-decoration: none;
+      padding: 16px 32px;
+      border-radius: 50px;
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 700;
+      transition: all 0.3s;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .cta-btn-primary:hover {
+      background: var(--sand-light);
+      transform: translateY(-3px);
+    }
+    .cta-btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--sand-light);
+      text-decoration: none;
+      padding: 16px 32px;
+      border-radius: 50px;
+      border: 1.5px solid rgba(232,213,163,0.4);
+      font-size: 16px;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+    .cta-btn-secondary:hover {
+      border-color: var(--sand);
+      color: var(--sand);
+    }
+
+    /* ── FOOTER ────────────────────────────────────────── */
+    footer {
+      background: var(--forest-deep);
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--sand-light);
+      margin-bottom: 12px;
+    }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .footer-links a {
+      color: rgba(200,169,110,0.6);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--sand); }
+    .footer-copy {
+      font-size: 12px;
+      color: rgba(200,169,110,0.3);
+    }
+
+    /* ── SCROLL ANIMATIONS ─────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* ── RESPONSIVE ────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .steps-grid::before { display: none; }
+      .hero-cta { padding: 16px 28px; font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HERO ──────────────────────────────────────────── -->
+<section class="hero">
+
+  <!-- Stars -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Moon -->
+  <div class="moon"></div>
+
+  <!-- Trees -->
+  <div class="hero-bg" id="trees"></div>
+
+  <!-- Campfire -->
+  <div class="campfire">🔥</div>
+
+  <div class="hero-content">
+    <div class="camper-van">🚐</div>
+    <div class="hero-eyebrow">Vadász Apps</div>
+    <h1 class="hero-title">Camper<br><em>Vadász</em></h1>
+    <p class="hero-subtitle">
+      Kempingek és lakóautó megállók keresője<br>
+      Magyarországon és 8 szomszédos országban
+    </p>
+    <a href="index.html" class="hero-cta">
+      Nyílt térkép
+      <span class="hero-cta-arrow">→</span>
+    </a>
+  </div>
+
+  <div class="hero-scroll">
+    <span>↓</span>
+    <span style="font-size:10px">Görgets</span>
+  </div>
+</section>
+
+<!-- ── FEATURES ──────────────────────────────────────── -->
+<section class="section">
+  <div class="reveal">
+    <div class="section-label">Miért Camper Vadász?</div>
+    <h2 class="section-title">Minden, ami kell az<br>út előtt és közben</h2>
+    <p class="section-sub">Nyílt adatokon alapuló, ingyenes kereső – reklám nélkül, mindig naprakész.</p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card reveal reveal-delay-1">
+      <span class="feature-icon">🗺️</span>
+      <div class="feature-title">Interaktív térkép</div>
+      <p class="feature-desc">Leaflet + OpenStreetMap alapú térkép, valós idejű OSM adatokkal. Zoom-ra szűr, nem lassul be.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <span class="feature-icon">📋</span>
+      <div class="feature-title">Lista nézet</div>
+      <p class="feature-desc">Ország szerint csoportosítva, GPS-távolság szerinti sorrendben. Gyorsan megtalálod a legközelebbit.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-3">
+      <span class="feature-icon">🧭</span>
+      <div class="feature-title">Navigáció</div>
+      <p class="feature-desc">Egy koppintással indulhatsz – Apple Maps, Google Maps vagy Waze. Te választod meg, melyiket.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-4">
+      <span class="feature-icon">✅</span>
+      <div class="feature-title">Megerősített helyek</div>
+      <p class="feature-desc">Szerkesztőink által ellenőrzött helyszínek zöld badge-el jelölve – megbízható adatok, nem csak OSM.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <span class="feature-icon">🎪</span>
+      <div class="feature-title">Camper események</div>
+      <p class="feature-desc">Találkozók, fesztiválok, meetupok egy helyen. Beküldéssel bővíthető közösségi naptár.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <span class="feature-icon">📱</span>
+      <div class="feature-title">PWA – Telepíthető</div>
+      <p class="feature-desc">Főképernyőre rakod, és offline is hozzáférsz az utoljára betöltött adatokhoz. Nincs App Store.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── AMENITIES ─────────────────────────────────────── -->
+<section class="amenities-section">
+  <div class="amenities-inner">
+    <div class="reveal">
+      <div class="section-label">Szűrhető felszereltség</div>
+      <h2 class="section-title">Csak azt lásd,<br>ami számodra fontos</h2>
+      <p class="section-sub">Szűrj az igényeid szerint – egyetlen koppintással.</p>
+    </div>
+    <div class="amenities-grid">
+      <div class="amenity-chip reveal reveal-delay-1">
+        <div class="amenity-icon">⚡</div>
+        <div class="amenity-name">Áram</div>
+      </div>
+      <div class="amenity-chip reveal reveal-delay-1">
+        <div class="amenity-icon">💧</div>
+        <div class="amenity-name">Víz</div>
+      </div>
+      <div class="amenity-chip reveal reveal-delay-2">
+        <div class="amenity-icon">🚿</div>
+        <div class="amenity-name">Zuhany</div>
+      </div>
+      <div class="amenity-chip reveal reveal-delay-2">
+        <div class="amenity-icon">🚻</div>
+        <div class="amenity-name">WC</div>
+      </div>
+      <div class="amenity-chip reveal reveal-delay-3">
+        <div class="amenity-icon">🐕</div>
+        <div class="amenity-name">Kutya OK</div>
+      </div>
+      <div class="amenity-chip reveal reveal-delay-3">
+        <div class="amenity-icon">🆓</div>
+        <div class="amenity-name">Ingyenes</div>
+      </div>
+      <div class="amenity-chip reveal reveal-delay-4">
+        <div class="amenity-icon">📶</div>
+        <div class="amenity-name">WiFi</div>
+      </div>
+      <div class="amenity-chip reveal reveal-delay-4">
+        <div class="amenity-icon">🗑️</div>
+        <div class="amenity-name">Szürke víz</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ───────────────────────────────────── -->
+<section class="steps-section">
+  <div class="steps-inner">
+    <div class="reveal" style="text-align:center">
+      <div class="section-label">Hogyan működik?</div>
+      <h2 class="section-title">Három lépés az útra</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step reveal reveal-delay-1">
+        <div class="step-num">1</div>
+        <div class="step-title">Nyisd meg</div>
+        <p class="step-desc">Böngészőben azonnal működik. Telepítsd PWA-ként a főképernyőre a legjobb élményért.</p>
+      </div>
+      <div class="step reveal reveal-delay-2">
+        <div class="step-num">2</div>
+        <div class="step-title">Szűrj & keress</div>
+        <p class="step-desc">GPS alapján mutatja a legközelebbi helyeket. Szűrd szükségleted szerint.</p>
+      </div>
+      <div class="step reveal reveal-delay-3">
+        <div class="step-num">3</div>
+        <div class="step-title">Indulj el</div>
+        <p class="step-desc">Választsd ki a kedvenc navigációs apponkat és indulj egyetlen koppintással.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── COUNTRIES ─────────────────────────────────────── -->
+<section class="countries-section">
+  <div class="reveal">
+    <div class="section-label">Lefedett területek</div>
+    <h2 class="section-title">200 km-es sugarú keresés<br>a határon túlra is</h2>
+    <p class="section-sub">Nem áll meg az ország határán. A szomszédos országokban is megtalálja a legjobb helyeket.</p>
+  </div>
+  <div class="countries-grid">
+    <div class="country-pill reveal reveal-delay-1">🇭🇺 Magyarország</div>
+    <div class="country-pill reveal reveal-delay-1">🇸🇰 Szlovákia</div>
+    <div class="country-pill reveal reveal-delay-2">🇦🇹 Ausztria</div>
+    <div class="country-pill reveal reveal-delay-2">🇷🇴 Románia</div>
+    <div class="country-pill reveal reveal-delay-3">🇭🇷 Horvátország</div>
+    <div class="country-pill reveal reveal-delay-3">🇸🇮 Szlovénia</div>
+    <div class="country-pill reveal reveal-delay-4">🇺🇦 Ukrajna</div>
+    <div class="country-pill reveal reveal-delay-4">🇷🇸 Szerbia</div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────── -->
+<section class="cta-section">
+  <div class="cta-inner reveal">
+    <h2 class="cta-title">Készen állsz az<br>útra indulásra?</h2>
+    <p class="cta-sub">Ingyenes, reklám nélküli, közösség által épített. Nyílt forrású adatokon alapul.</p>
+    <div class="cta-buttons">
+      <a href="index.html" class="cta-btn-primary">🗺️ Megnyitom az appot</a>
+      <a href="https://vadasz-apps.web.app" class="cta-btn-secondary">← Vadász Apps portál</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────── -->
+<footer>
+  <div class="footer-logo">🚐 Camper Vadász</div>
+  <div class="footer-links">
+    <a href="index.html">App megnyitása</a>
+    <a href="admin.html">Admin</a>
+    <a href="https://vadasz-apps.web.app">Vadász Apps</a>
+  </div>
+  <div class="footer-copy">© 2026 Vadász Apps · Minden jog fenntartva</div>
+</footer>
+
+<script>
+  // Stars
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 60; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 1;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      top:${Math.random()*70}%;
+      left:${Math.random()*100}%;
+      --dur:${2 + Math.random()*4}s;
+      --delay:${Math.random()*4}s;
+    `;
+    starsEl.appendChild(s);
+  }
+
+  // Trees
+  const treesEl = document.getElementById('trees');
+  const treeData = [
+    { left: '2%', h: 180, w: 80 },
+    { left: '8%', h: 220, w: 100 },
+    { left: '15%', h: 160, w: 70 },
+    { left: '78%', h: 200, w: 90 },
+    { left: '85%', h: 240, w: 110 },
+    { left: '92%', h: 170, w: 75 },
+  ];
+  treeData.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'tree';
+    div.style.left = t.left;
+    div.innerHTML = `<svg width="${t.w}" height="${t.h}" viewBox="0 0 80 ${t.h}" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="40,10 75,${t.h-30} 5,${t.h-30}" fill="#4a8a42"/>
+      <polygon points="40,40 70,${t.h-10} 10,${t.h-10}" fill="#2d5a27"/>
+      <rect x="34" y="${t.h-30}" width="12" height="30" fill="#6b4c2a"/>
+    </svg>`;
+    treesEl.appendChild(div);
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15 });
+  reveals.forEach(r => observer.observe(r));
+</script>
+
+</body>
+</html>

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Camper Vadász – Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --forest: #2d5a27; --forest-dark: #1a3a15; --forest-light: #4a8a42;
+      --sand: #c8a96e; --sand-light: #e8d5a3; --sand-pale: #f5edd8;
+      --sky: #5b8fa8; --cream: #faf7f0; --bark: #6b4c2a;
+      --text: #1e1e1e; --text-muted: #6b6b5a; --white: #ffffff;
+      --danger: #c0392b; --radius: 12px;
+      --shadow: 0 4px 24px rgba(45,90,39,0.13);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; }
+
+    /* LOGIN */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: var(--forest-dark);
+    }
+    .login-box {
+      background: var(--white); border-radius: 20px; padding: 40px 32px;
+      width: 340px; box-shadow: var(--shadow); text-align: center;
+    }
+    .login-icon { font-size: 48px; margin-bottom: 12px; }
+    .login-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px; font-weight: 700; color: var(--forest-dark);
+      margin-bottom: 6px;
+    }
+    .login-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+    .login-input {
+      width: 100%; padding: 12px; border: 1.5px solid #e0ddd4;
+      border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px;
+      background: var(--cream); margin-bottom: 14px; outline: none;
+    }
+    .login-input:focus { border-color: var(--forest); }
+    .login-btn {
+      width: 100%; padding: 12px; background: var(--forest); color: var(--white);
+      border: none; border-radius: 10px; font-family: 'Playfair Display', serif;
+      font-size: 16px; font-weight: 700; cursor: pointer;
+    }
+    .login-btn:active { background: var(--forest-dark); }
+    .login-error { color: var(--danger); font-size: 13px; margin-top: 10px; }
+
+    /* ADMIN LAYOUT */
+    #admin-screen { display: none; }
+    header {
+      background: var(--forest-dark); padding: 0 24px;
+      height: 58px; display: flex; align-items: center; gap: 12px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header-logo { font-size: 28px; }
+    .header-title {
+      font-family: 'Playfair Display', serif; font-size: 20px;
+      font-weight: 700; color: var(--sand-light); flex: 1;
+    }
+    .header-badge {
+      background: var(--sand); color: var(--forest-dark);
+      font-size: 11px; font-weight: 700; padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    /* TABS */
+    .admin-tabs {
+      background: var(--forest); display: flex; overflow-x: auto;
+      border-bottom: 2px solid rgba(200,169,110,0.3);
+      scrollbar-width: none;
+    }
+    .admin-tabs::-webkit-scrollbar { display: none; }
+    .admin-tab {
+      padding: 12px 20px; white-space: nowrap;
+      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+      color: rgba(200,169,110,0.6); cursor: pointer; border: none;
+      background: none; border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .admin-tab.active { color: var(--sand-light); border-bottom-color: var(--sand); }
+
+    /* STATS */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px; padding: 20px 24px;
+    }
+    .stat-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 16px; text-align: center; box-shadow: var(--shadow);
+    }
+    .stat-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px; font-weight: 900; color: var(--forest);
+    }
+    .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    /* PANEL CONTENT */
+    .panel { display: none; padding: 0 24px 24px; }
+    .panel.active { display: block; }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px; font-weight: 700; color: var(--forest-dark);
+      margin: 20px 0 12px; display: flex; align-items: center; gap: 8px;
+    }
+    .badge {
+      background: var(--sand-pale); color: var(--bark);
+      font-family: 'DM Sans', sans-serif; font-size: 12px;
+      padding: 2px 10px; border-radius: 20px;
+    }
+
+    /* CARDS */
+    .item-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow);
+      border-left: 4px solid transparent;
+    }
+    .item-card.pending { border-left-color: var(--sand); }
+    .item-card.approved { border-left-color: var(--forest); }
+    .item-card-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px; font-weight: 700; color: var(--forest-dark);
+      margin-bottom: 4px;
+    }
+    .item-card-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+    .item-card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+    .item-tag {
+      font-size: 11px; padding: 2px 8px; border-radius: 10px;
+      background: var(--sand-pale); color: var(--bark);
+    }
+    .item-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      padding: 8px 16px; border-radius: 8px; border: none;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn:active { opacity: 0.7; }
+    .btn-approve { background: var(--forest); color: var(--white); }
+    .btn-delete { background: var(--danger); color: var(--white); }
+    .btn-edit { background: var(--sand-pale); color: var(--forest-dark); }
+    .btn-primary { background: var(--forest); color: var(--white); }
+
+    /* FORM IN MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.5);
+      display: none; align-items: center; justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--white); border-radius: 16px;
+      padding: 24px; width: 100%; max-width: 500px;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; font-weight: 700; color: var(--forest-dark);
+      margin-bottom: 16px;
+    }
+    .form-group { margin-bottom: 12px; }
+    .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 5px; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; padding: 10px 12px; border: 1.5px solid #e0ddd4;
+      border-radius: 10px; font-family: 'DM Sans', sans-serif;
+      font-size: 14px; background: var(--cream); outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--forest); }
+    .form-textarea { min-height: 80px; resize: vertical; }
+    .form-checkboxes { display: flex; flex-wrap: wrap; gap: 8px; }
+    .form-checkbox-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; cursor: pointer;
+      background: var(--sand-pale); padding: 6px 12px; border-radius: 20px;
+    }
+    .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .btn-cancel { background: var(--sand-pale); color: var(--text); }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center; padding: 40px 20px;
+      color: var(--text-muted);
+    }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+    /* TOAST */
+    #toast {
+      position: fixed; bottom: 20px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--forest-dark); color: var(--sand-light);
+      padding: 10px 20px; border-radius: 20px;
+      font-size: 13px; font-weight: 500;
+      opacity: 0; transition: all 0.3s; z-index: 300;
+      white-space: nowrap; box-shadow: var(--shadow);
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .loading { padding: 40px; text-align: center; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-icon">🚐</div>
+    <div class="login-title">Camper Vadász</div>
+    <div class="login-sub">Admin felület</div>
+    <input type="password" class="login-input" id="pw-input" placeholder="Jelszó" />
+    <button class="login-btn" id="login-btn">Belépés</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-screen">
+  <header>
+    <div class="header-logo">🚐</div>
+    <div class="header-title">Camper Vadász Admin</div>
+    <div class="header-badge">ADMIN</div>
+  </header>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number" id="stat-approved">–</div>
+      <div class="stat-label">Jóváhagyott helyszín</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="stat-pending">–</div>
+      <div class="stat-label">Függőben lévő</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="stat-events-count">–</div>
+      <div class="stat-label">Aktív esemény</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="stat-evt-pending">–</div>
+      <div class="stat-label">Esemény függőben</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="admin-tabs">
+    <button class="admin-tab active" data-panel="locations">🏕️ Helyszínek</button>
+    <button class="admin-tab" data-panel="pending">📥 Beküldések</button>
+    <button class="admin-tab" data-panel="events">🎪 Események</button>
+    <button class="admin-tab" data-panel="evt-pending">📥 Esemény beküldések</button>
+  </div>
+
+  <!-- APPROVED LOCATIONS PANEL -->
+  <div class="panel active" id="panel-locations">
+    <div class="section-title">
+      ✅ Jóváhagyott helyszínek
+      <button class="btn btn-primary" onclick="openAddModal()" style="margin-left:auto;font-size:12px;padding:6px 14px">+ Új helyszín</button>
+    </div>
+    <div id="locations-list"><div class="loading">Betöltés…</div></div>
+  </div>
+
+  <!-- PENDING LOCATIONS PANEL -->
+  <div class="panel" id="panel-pending">
+    <div class="section-title">📥 Beküldött helyszínek</div>
+    <div id="pending-list"><div class="loading">Betöltés…</div></div>
+  </div>
+
+  <!-- EVENTS PANEL -->
+  <div class="panel" id="panel-events">
+    <div class="section-title">
+      🎪 Aktív események
+      <button class="btn btn-primary" onclick="openAddEventModal()" style="margin-left:auto;font-size:12px;padding:6px 14px">+ Új esemény</button>
+    </div>
+    <div id="events-list"><div class="loading">Betöltés…</div></div>
+  </div>
+
+  <!-- PENDING EVENTS PANEL -->
+  <div class="panel" id="panel-evt-pending">
+    <div class="section-title">📥 Beküldött események</div>
+    <div id="evt-pending-list"><div class="loading">Betöltés…</div></div>
+  </div>
+</div>
+
+<!-- ADD/EDIT LOCATION MODAL -->
+<div class="modal-overlay" id="location-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">Új helyszín</div>
+    <input type="hidden" id="edit-doc-id" />
+    <div class="form-group">
+      <label class="form-label">Helyszín neve *</label>
+      <input type="text" class="form-input" id="m-name" placeholder="pl. Mátra Kemping" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cím</label>
+      <input type="text" class="form-input" id="m-address" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Szélességi fok (lat)</label>
+      <input type="number" step="0.000001" class="form-input" id="m-lat" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Hosszúsági fok (lng)</label>
+      <input type="number" step="0.000001" class="form-input" id="m-lng" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Ország kód (pl. HU, SK, AT)</label>
+      <input type="text" class="form-input" id="m-country" maxlength="2" placeholder="HU" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Weboldal</label>
+      <input type="url" class="form-input" id="m-web" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Telefon</label>
+      <input type="tel" class="form-input" id="m-phone" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Felszereltség</label>
+      <div class="form-checkboxes">
+        <label class="form-checkbox-label"><input type="checkbox" id="m-electric"> ⚡ Áram</label>
+        <label class="form-checkbox-label"><input type="checkbox" id="m-water"> 💧 Víz</label>
+        <label class="form-checkbox-label"><input type="checkbox" id="m-shower"> 🚿 Zuhany</label>
+        <label class="form-checkbox-label"><input type="checkbox" id="m-toilet"> 🚻 WC</label>
+        <label class="form-checkbox-label"><input type="checkbox" id="m-dogs"> 🐕 Kutya OK</label>
+        <label class="form-checkbox-label"><input type="checkbox" id="m-free"> 🆓 Ingyenes</label>
+        <label class="form-checkbox-label"><input type="checkbox" id="m-wifi"> 📶 WiFi</label>
+        <label class="form-checkbox-label"><input type="checkbox" id="m-dump"> 🗑️ Szürke víz</label>
+        <label class="form-checkbox-label"><input type="checkbox" id="m-verified"> ✅ Megerősített</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Megjegyzés</label>
+      <textarea class="form-textarea" id="m-note"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="modal-save-btn">💾 Mentés</button>
+      <button class="btn btn-cancel" onclick="closeLocationModal()">Mégse</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT EVENT MODAL -->
+<div class="modal-overlay" id="event-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="event-modal-title">Új esemény</div>
+    <input type="hidden" id="edit-event-id" />
+    <div class="form-group">
+      <label class="form-label">Esemény neve *</label>
+      <input type="text" class="form-input" id="em-name" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Helyszín</label>
+      <input type="text" class="form-input" id="em-location" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Dátum *</label>
+      <input type="date" class="form-input" id="em-date" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Leírás</label>
+      <textarea class="form-textarea" id="em-desc"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Weboldal</label>
+      <input type="url" class="form-input" id="em-web" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="event-save-btn">💾 Mentés</button>
+      <button class="btn btn-cancel" onclick="closeEventModal()">Mégse</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+  const PROJECT_ID = 'camper-vadasz';
+  const API_KEY = 'AIzaSyDz4UO0251lS7H3KydtAFYTRuJJqr4anL8';
+  const BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+  const ADMIN_PW = 'zola19';
+
+  // ── LOGIN ────────────────────────────────────────────────
+  document.getElementById('login-btn').onclick = function() {
+    if (document.getElementById('pw-input').value === ADMIN_PW) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-screen').style.display = 'block';
+      loadAll();
+    } else {
+      document.getElementById('login-error').textContent = 'Hibás jelszó!';
+    }
+  };
+  document.getElementById('pw-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('login-btn').click();
+  });
+
+  // ── REST API HELPERS ─────────────────────────────────────
+  async function fsGet(path) {
+    const r = await fetch(`${BASE}/${path}?key=${API_KEY}`);
+    return r.json();
+  }
+  async function fsList(collection) {
+    const r = await fetch(`${BASE}/${collection}?key=${API_KEY}&pageSize=200`);
+    return r.json();
+  }
+  async function fsSet(collection, docId, fields) {
+    const body = { fields: toFs(fields) };
+    const method = docId ? 'PATCH' : 'POST';
+    const url = docId
+      ? `${BASE}/${collection}/${docId}?key=${API_KEY}`
+      : `${BASE}/${collection}?key=${API_KEY}`;
+    const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    return r.json();
+  }
+  async function fsDelete(collection, docId) {
+    await fetch(`${BASE}/${collection}/${docId}?key=${API_KEY}`, { method: 'DELETE' });
+  }
+
+  function toFs(obj) {
+    const fields = {};
+    for (const [k, v] of Object.entries(obj)) {
+      if (v === null || v === undefined) continue;
+      if (typeof v === 'boolean') fields[k] = { booleanValue: v };
+      else if (typeof v === 'number') fields[k] = { doubleValue: v };
+      else fields[k] = { stringValue: String(v) };
+    }
+    return fields;
+  }
+
+  function fromFs(doc) {
+    if (!doc.fields) return {};
+    const obj = { _id: doc.name?.split('/').pop() };
+    for (const [k, v] of Object.entries(doc.fields)) {
+      obj[k] = v.stringValue ?? v.booleanValue ?? v.doubleValue ?? v.integerValue ?? '';
+    }
+    return obj;
+  }
+
+  // ── LOAD ALL ────────────────────────────────────────────
+  async function loadAll() {
+    await Promise.all([loadLocations(), loadPending(), loadEvents(), loadEvtPending()]);
+  }
+
+  // ── LOCATIONS ───────────────────────────────────────────
+  let locationsData = [];
+  async function loadLocations() {
+    const data = await fsList('helyszinek');
+    locationsData = (data.documents || []).map(fromFs);
+    document.getElementById('stat-approved').textContent = locationsData.length;
+    renderLocations();
+  }
+
+  function renderLocations() {
+    const el = document.getElementById('locations-list');
+    if (!locationsData.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">🏕️</div><div>Még nincsenek helyszínek.</div></div>';
+      return;
+    }
+    el.innerHTML = locationsData.map(loc => `
+      <div class="item-card approved">
+        <div class="item-card-name">${loc.name || '–'} ${loc.verified === true || loc.verified === 'true' ? '✅' : ''}</div>
+        <div class="item-card-meta">📍 ${loc.address || '–'} | ${loc.country || '–'} | lat: ${loc.lat || '?'}, lng: ${loc.lng || '?'}</div>
+        <div class="item-card-tags">
+          ${loc.electric === true || loc.electric === 'true' ? '<span class="item-tag">⚡ Áram</span>' : ''}
+          ${loc.water === true || loc.water === 'true' ? '<span class="item-tag">💧 Víz</span>' : ''}
+          ${loc.shower === true || loc.shower === 'true' ? '<span class="item-tag">🚿 Zuhany</span>' : ''}
+          ${loc.dogs === true || loc.dogs === 'true' ? '<span class="item-tag">🐕 Kutya OK</span>' : ''}
+          ${loc.free === true || loc.free === 'true' ? '<span class="item-tag">🆓 Ingyenes</span>' : ''}
+          ${loc.wifi === true || loc.wifi === 'true' ? '<span class="item-tag">📶 WiFi</span>' : ''}
+        </div>
+        <div class="item-actions">
+          <button class="btn btn-edit" onclick="editLocation('${loc._id}')">✏️ Szerkesztés</button>
+          <button class="btn btn-delete" onclick="deleteLocation('${loc._id}')">🗑️ Törlés</button>
+        </div>
+      </div>`).join('');
+  }
+
+  window.deleteLocation = async function(id) {
+    if (!confirm('Biztosan törlöd ezt a helyszínt?')) return;
+    await fsDelete('helyszinek', id);
+    showToast('🗑️ Helyszín törölve');
+    loadLocations();
+  };
+
+  window.editLocation = function(id) {
+    const loc = locationsData.find(l => l._id === id);
+    if (!loc) return;
+    document.getElementById('modal-title').textContent = 'Helyszín szerkesztése';
+    document.getElementById('edit-doc-id').value = id;
+    document.getElementById('m-name').value = loc.name || '';
+    document.getElementById('m-address').value = loc.address || '';
+    document.getElementById('m-lat').value = loc.lat || '';
+    document.getElementById('m-lng').value = loc.lng || '';
+    document.getElementById('m-country').value = loc.country || '';
+    document.getElementById('m-web').value = loc.website || '';
+    document.getElementById('m-phone').value = loc.phone || '';
+    document.getElementById('m-note').value = loc.note || '';
+    ['electric','water','shower','toilet','dogs','free','wifi','dump','verified'].forEach(f => {
+      document.getElementById('m-' + f).checked = loc[f] === true || loc[f] === 'true';
+    });
+    document.getElementById('location-modal').classList.add('open');
+  };
+
+  window.openAddModal = function() {
+    document.getElementById('modal-title').textContent = 'Új helyszín';
+    document.getElementById('edit-doc-id').value = '';
+    ['name','address','lat','lng','country','web','phone','note'].forEach(f =>
+      document.getElementById('m-' + f).value = '');
+    ['electric','water','shower','toilet','dogs','free','wifi','dump','verified'].forEach(f =>
+      document.getElementById('m-' + f).checked = false);
+    document.getElementById('location-modal').classList.add('open');
+  };
+
+  window.closeLocationModal = function() {
+    document.getElementById('location-modal').classList.remove('open');
+  };
+
+  document.getElementById('modal-save-btn').onclick = async function() {
+    const name = document.getElementById('m-name').value.trim();
+    if (!name) { showToast('⚠️ Név kötelező!'); return; }
+    const docId = document.getElementById('edit-doc-id').value;
+    const data = {
+      name,
+      address: document.getElementById('m-address').value.trim(),
+      lat: parseFloat(document.getElementById('m-lat').value) || 0,
+      lng: parseFloat(document.getElementById('m-lng').value) || 0,
+      country: document.getElementById('m-country').value.trim().toUpperCase(),
+      website: document.getElementById('m-web').value.trim(),
+      phone: document.getElementById('m-phone').value.trim(),
+      note: document.getElementById('m-note').value.trim(),
+      electric: document.getElementById('m-electric').checked,
+      water: document.getElementById('m-water').checked,
+      shower: document.getElementById('m-shower').checked,
+      toilet: document.getElementById('m-toilet').checked,
+      dogs: document.getElementById('m-dogs').checked,
+      free: document.getElementById('m-free').checked,
+      wifi: document.getElementById('m-wifi').checked,
+      dump: document.getElementById('m-dump').checked,
+      verified: document.getElementById('m-verified').checked,
+      source: 'admin'
+    };
+    await fsSet('helyszinek', docId || null, data);
+    showToast('✅ Helyszín mentve!');
+    closeLocationModal();
+    loadLocations();
+  };
+
+  // ── PENDING LOCATIONS ───────────────────────────────────
+  let pendingData = [];
+  async function loadPending() {
+    const data = await fsList('bekuldott_helyszinek');
+    pendingData = (data.documents || []).map(fromFs).filter(d => !d.approved || d.approved === 'false');
+    document.getElementById('stat-pending').textContent = pendingData.length;
+    renderPending();
+  }
+
+  function renderPending() {
+    const el = document.getElementById('pending-list');
+    if (!pendingData.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">📥</div><div>Nincs függőben lévő beküldés.</div></div>';
+      return;
+    }
+    el.innerHTML = pendingData.map(loc => `
+      <div class="item-card pending">
+        <div class="item-card-name">${loc.name || '–'}</div>
+        <div class="item-card-meta">📍 ${loc.address || '–'}</div>
+        ${loc.note ? `<div style="font-size:13px;color:var(--text-muted);margin-bottom:8px">💬 ${loc.note}</div>` : ''}
+        <div class="item-card-tags">
+          ${loc.electric === true || loc.electric === 'true' ? '<span class="item-tag">⚡ Áram</span>' : ''}
+          ${loc.water === true || loc.water === 'true' ? '<span class="item-tag">💧 Víz</span>' : ''}
+          ${loc.shower === true || loc.shower === 'true' ? '<span class="item-tag">🚿 Zuhany</span>' : ''}
+          ${loc.dogs === true || loc.dogs === 'true' ? '<span class="item-tag">🐕 Kutya OK</span>' : ''}
+          ${loc.free === true || loc.free === 'true' ? '<span class="item-tag">🆓 Ingyenes</span>' : ''}
+        </div>
+        <div class="item-actions">
+          <button class="btn btn-approve" onclick="approvePending('${loc._id}')">✅ Jóváhagyás</button>
+          <button class="btn btn-delete" onclick="deletePending('${loc._id}')">🗑️ Elutasítás</button>
+        </div>
+      </div>`).join('');
+  }
+
+  window.approvePending = async function(id) {
+    const loc = pendingData.find(l => l._id === id);
+    if (!loc) return;
+    const { _id, approved, createdAt, ...rest } = loc;
+    await fsSet('helyszinek', null, { ...rest, approved: true, verified: false, source: 'community' });
+    await fsDelete('bekuldott_helyszinek', id);
+    showToast('✅ Helyszín jóváhagyva és áthelyezve!');
+    loadPending(); loadLocations();
+  };
+
+  window.deletePending = async function(id) {
+    if (!confirm('Elutasítod és törlöd ezt a beküldést?')) return;
+    await fsDelete('bekuldott_helyszinek', id);
+    showToast('🗑️ Beküldés törölve');
+    loadPending();
+  };
+
+  // ── EVENTS ──────────────────────────────────────────────
+  let eventsData = [];
+  async function loadEvents() {
+    const data = await fsList('esemenyek');
+    eventsData = (data.documents || []).map(fromFs);
+    const now = new Date().toISOString().split('T')[0];
+    const active = eventsData.filter(e => e.date >= now);
+    document.getElementById('stat-events-count').textContent = active.length;
+    renderEvents();
+  }
+
+  function renderEvents() {
+    const el = document.getElementById('events-list');
+    if (!eventsData.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">🎪</div><div>Nincsenek események.</div></div>';
+      return;
+    }
+    const now = new Date().toISOString().split('T')[0];
+    const sorted = [...eventsData].sort((a,b) => (a.date||'').localeCompare(b.date||''));
+    const upcoming = sorted.filter(e => e.date >= now);
+    const past = sorted.filter(e => e.date < now);
+
+    let html = '';
+    if (upcoming.length) {
+      html += '<div class="section-title" style="margin-top:8px">📅 Közelgő</div>';
+      html += upcoming.map(e => eventCard(e)).join('');
+    }
+    if (past.length) {
+      html += '<div class="section-title" style="color:var(--text-muted)">⏮️ Elmúlt</div>';
+      html += past.map(e => eventCard(e, true)).join('');
+    }
+    el.innerHTML = html;
+  }
+
+  function eventCard(e, isPast = false) {
+    return `<div class="item-card approved" style="${isPast ? 'opacity:0.6' : ''}">
+      <div class="item-card-name">${e.name || '–'}</div>
+      <div class="item-card-meta">📅 ${e.date || '–'} | 📍 ${e.location || '–'}</div>
+      ${e.description ? `<div style="font-size:13px;color:var(--text-muted);margin-bottom:8px">${e.description}</div>` : ''}
+      <div class="item-actions">
+        <button class="btn btn-edit" onclick="editEvent('${e._id}')">✏️ Szerkesztés</button>
+        <button class="btn btn-delete" onclick="deleteEvent('${e._id}')">🗑️ Törlés</button>
+      </div>
+    </div>`;
+  }
+
+  window.openAddEventModal = function() {
+    document.getElementById('event-modal-title').textContent = 'Új esemény';
+    document.getElementById('edit-event-id').value = '';
+    ['em-name','em-location','em-date','em-desc','em-web'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('event-modal').classList.add('open');
+  };
+
+  window.editEvent = function(id) {
+    const e = eventsData.find(x => x._id === id);
+    if (!e) return;
+    document.getElementById('event-modal-title').textContent = 'Esemény szerkesztése';
+    document.getElementById('edit-event-id').value = id;
+    document.getElementById('em-name').value = e.name || '';
+    document.getElementById('em-location').value = e.location || '';
+    document.getElementById('em-date').value = e.date || '';
+    document.getElementById('em-desc').value = e.description || '';
+    document.getElementById('em-web').value = e.website || '';
+    document.getElementById('event-modal').classList.add('open');
+  };
+
+  window.closeEventModal = function() {
+    document.getElementById('event-modal').classList.remove('open');
+  };
+
+  document.getElementById('event-save-btn').onclick = async function() {
+    const name = document.getElementById('em-name').value.trim();
+    const date = document.getElementById('em-date').value;
+    if (!name || !date) { showToast('⚠️ Név és dátum kötelező!'); return; }
+    const docId = document.getElementById('edit-event-id').value;
+    const data = {
+      name,
+      location: document.getElementById('em-location').value.trim(),
+      date,
+      description: document.getElementById('em-desc').value.trim(),
+      website: document.getElementById('em-web').value.trim(),
+      approved: true
+    };
+    await fsSet('esemenyek', docId || null, data);
+    showToast('✅ Esemény mentve!');
+    closeEventModal();
+    loadEvents();
+  };
+
+  window.deleteEvent = async function(id) {
+    if (!confirm('Biztosan törlöd ezt az eseményt?')) return;
+    await fsDelete('esemenyek', id);
+    showToast('🗑️ Esemény törölve');
+    loadEvents();
+  };
+
+  // ── PENDING EVENTS ──────────────────────────────────────
+  let evtPendingData = [];
+  async function loadEvtPending() {
+    const data = await fsList('bekuldott_esemenyek');
+    evtPendingData = (data.documents || []).map(fromFs).filter(d => !d.approved || d.approved === 'false');
+    document.getElementById('stat-evt-pending').textContent = evtPendingData.length;
+    renderEvtPending();
+  }
+
+  function renderEvtPending() {
+    const el = document.getElementById('evt-pending-list');
+    if (!evtPendingData.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">📥</div><div>Nincs függőben lévő esemény beküldés.</div></div>';
+      return;
+    }
+    el.innerHTML = evtPendingData.map(e => `
+      <div class="item-card pending">
+        <div class="item-card-name">${e.name || '–'}</div>
+        <div class="item-card-meta">📅 ${e.date || '–'} | 📍 ${e.location || '–'}</div>
+        ${e.description ? `<div style="font-size:13px;color:var(--text-muted);margin-bottom:8px">${e.description}</div>` : ''}
+        <div class="item-actions">
+          <button class="btn btn-approve" onclick="approveEvent('${e._id}')">✅ Jóváhagyás</button>
+          <button class="btn btn-delete" onclick="deleteEvtPending('${e._id}')">🗑️ Elutasítás</button>
+        </div>
+      </div>`).join('');
+  }
+
+  window.approveEvent = async function(id) {
+    const e = evtPendingData.find(x => x._id === id);
+    if (!e) return;
+    const { _id, approved: _a, createdAt, ...rest } = e;
+    await fsSet('esemenyek', null, { ...rest, approved: true });
+    await fsDelete('bekuldott_esemenyek', id);
+    showToast('✅ Esemény jóváhagyva!');
+    loadEvtPending(); loadEvents();
+  };
+
+  window.deleteEvtPending = async function(id) {
+    if (!confirm('Elutasítod és törlöd?')) return;
+    await fsDelete('bekuldott_esemenyek', id);
+    showToast('🗑️ Törölve');
+    loadEvtPending();
+  };
+
+  // ── TABS ────────────────────────────────────────────────
+  document.querySelectorAll('.admin-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.panel).classList.add('active');
+    });
+  });
+
+  // ── TOAST ────────────────────────────────────────────────
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+</script>
+
+</body>
+</html>
