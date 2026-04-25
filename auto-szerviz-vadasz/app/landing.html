@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Autószerviz Vadász – Szervizek & Gumiszerelők</title>
+  <meta name="description" content="Találd meg a legközelebbi autószervizeket és gumiszerelőket Magyarországon. Ingyenes, GPS-alapú kereső." />
+  <meta name="theme-color" content="#0d0d0d" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --black:     #0d0d0d;
+      --dark:      #111111;
+      --steel:     #1e1e1e;
+      --steel-mid: #2a2a2a;
+      --orange:    #ff6b00;
+      --orange-dk: #cc5500;
+      --orange-lt: #ff8c33;
+      --amber:     #ffb347;
+      --silver:    #b0b0b0;
+      --silver-lt: #e0e0e0;
+      --white:     #f5f5f5;
+      --text-muted:#666;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--black);
+      color: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ── HERO ─────────────────────────────────────────── */
+    .hero {
+      min-height: 100dvh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px 100px;
+      overflow: hidden;
+    }
+
+    /* Animated grid background */
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,107,0,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,107,0,0.06) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridMove 20s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes gridMove {
+      0% { background-position: 0 0; }
+      100% { background-position: 60px 60px; }
+    }
+
+    /* Orange glow */
+    .hero-glow {
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(255,107,0,0.12) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      animation: pulse 4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 0.6; transform: translate(-50%,-50%) scale(1); }
+      50% { opacity: 1; transform: translate(-50%,-50%) scale(1.1); }
+    }
+
+    /* Floating gears */
+    .gear {
+      position: absolute;
+      font-size: var(--size, 40px);
+      opacity: 0.06;
+      animation: rotate var(--dur, 20s) linear infinite var(--dir, normal);
+      pointer-events: none;
+    }
+    @keyframes rotate { to { transform: rotate(360deg); } }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      max-width: 700px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--orange);
+      font-weight: 500;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,107,0,0.3);
+      padding: 6px 16px;
+      border-radius: 20px;
+      background: rgba(255,107,0,0.06);
+    }
+
+    .hero-icon {
+      font-size: 80px;
+      display: block;
+      margin-bottom: 20px;
+      animation: wrenchBounce 2s ease-in-out infinite;
+      filter: drop-shadow(0 0 30px rgba(255,107,0,0.4));
+    }
+    @keyframes wrenchBounce {
+      0%,100% { transform: rotate(-10deg) translateY(0); }
+      50% { transform: rotate(10deg) translateY(-8px); }
+    }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(52px, 14vw, 110px);
+      line-height: 0.9;
+      letter-spacing: 3px;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+    .hero-title .accent { color: var(--orange); }
+
+    .hero-sub {
+      font-size: clamp(16px, 3vw, 20px);
+      color: var(--silver);
+      line-height: 1.6;
+      margin: 20px auto 40px;
+      max-width: 500px;
+      font-weight: 300;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--orange);
+      color: var(--black);
+      text-decoration: none;
+      padding: 18px 40px;
+      border-radius: 4px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 2px;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 40px rgba(255,107,0,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.5s;
+    }
+    .hero-cta:hover::before { transform: translateX(100%); }
+    .hero-cta:hover {
+      background: var(--orange-lt);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 48px rgba(255,107,0,0.5);
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 32px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column;
+      align-items: center; gap: 8px;
+      color: rgba(255,107,0,0.4);
+      font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+      animation: scrollBounce 2s ease-in-out infinite;
+    }
+    @keyframes scrollBounce {
+      0%,100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* ── STATS BAR ─────────────────────────────────────── */
+    .stats-bar {
+      background: var(--steel);
+      border-top: 1px solid rgba(255,107,0,0.2);
+      border-bottom: 1px solid rgba(255,107,0,0.2);
+      padding: 32px 24px;
+    }
+    .stats-inner {
+      max-width: 900px; margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 32px; text-align: center;
+    }
+    .stat-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 52px; letter-spacing: 2px;
+      color: var(--orange); line-height: 1;
+    }
+    .stat-label {
+      font-size: 12px; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* ── FEATURES ──────────────────────────────────────── */
+    .section {
+      padding: 80px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--orange); font-weight: 500; margin-bottom: 12px;
+    }
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(36px, 7vw, 64px);
+      letter-spacing: 2px; color: var(--white);
+      line-height: 1; margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 16px; color: var(--silver);
+      line-height: 1.7; max-width: 500px;
+      font-weight: 300;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px; margin-top: 56px;
+    }
+
+    .feature-card {
+      background: var(--steel);
+      border: 1px solid var(--steel-mid);
+      border-radius: 4px;
+      padding: 32px 28px;
+      position: relative; overflow: hidden;
+      transition: all 0.25s;
+    }
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--orange);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.3s;
+    }
+    .feature-card:hover {
+      border-color: rgba(255,107,0,0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+    }
+    .feature-card:hover::after { transform: scaleX(1); }
+
+    .feature-icon { font-size: 36px; margin-bottom: 16px; display: block; }
+    .feature-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; letter-spacing: 1px;
+      color: var(--white); margin-bottom: 10px;
+    }
+    .feature-desc { font-size: 14px; color: var(--silver); line-height: 1.65; font-weight: 300; }
+
+    /* ── FILTERS SHOWCASE ─────────────────────────────── */
+    .filters-section {
+      background: var(--steel);
+      border-top: 1px solid var(--steel-mid);
+      border-bottom: 1px solid var(--steel-mid);
+      padding: 80px 24px;
+    }
+    .filters-inner { max-width: 1100px; margin: 0 auto; }
+
+    .filters-grid {
+      display: flex; flex-wrap: wrap; gap: 12px;
+      margin-top: 48px;
+    }
+    .filter-pill {
+      background: var(--steel-mid);
+      border: 1px solid rgba(255,107,0,0.2);
+      border-radius: 4px;
+      padding: 14px 24px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px; letter-spacing: 1px;
+      color: var(--silver-lt);
+      transition: all 0.2s;
+      cursor: default;
+    }
+    .filter-pill:hover {
+      background: var(--orange);
+      color: var(--black);
+      border-color: var(--orange);
+      transform: translateY(-2px);
+    }
+
+    /* ── HOW IT WORKS ─────────────────────────────────── */
+    .steps-section { padding: 80px 24px; }
+    .steps-inner { max-width: 900px; margin: 0 auto; }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2px; margin-top: 56px;
+      background: var(--steel-mid);
+      border: 1px solid var(--steel-mid);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .step {
+      background: var(--steel);
+      padding: 32px 24px;
+      position: relative;
+    }
+    .step-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 64px; letter-spacing: 2px;
+      color: rgba(255,107,0,0.15);
+      line-height: 1; margin-bottom: 12px;
+    }
+    .step-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px; letter-spacing: 1px;
+      color: var(--orange); margin-bottom: 8px;
+    }
+    .step-desc { font-size: 13px; color: var(--silver); line-height: 1.6; font-weight: 300; }
+
+    /* ── CTA ─────────────────────────────────────────── */
+    .cta-section {
+      background: var(--orange);
+      padding: 100px 24px;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: '🔧';
+      position: absolute;
+      font-size: 300px; opacity: 0.08;
+      top: 50%; left: 5%;
+      transform: translateY(-50%) rotate(-20deg);
+      pointer-events: none;
+    }
+    .cta-section::after {
+      content: '🚗';
+      position: absolute;
+      font-size: 300px; opacity: 0.08;
+      top: 50%; right: 5%;
+      transform: translateY(-50%) rotate(10deg);
+      pointer-events: none;
+    }
+    .cta-inner { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
+    .cta-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(40px, 8vw, 72px);
+      letter-spacing: 3px; color: var(--black);
+      line-height: 1; margin-bottom: 20px;
+    }
+    .cta-sub {
+      font-size: 17px; color: rgba(0,0,0,0.65);
+      margin-bottom: 40px; line-height: 1.6; font-weight: 300;
+    }
+    .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .cta-btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--black); color: var(--orange);
+      text-decoration: none; padding: 16px 36px;
+      border-radius: 4px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px; letter-spacing: 2px;
+      transition: all 0.3s;
+    }
+    .cta-btn-primary:hover { background: var(--dark); transform: translateY(-3px); }
+    .cta-btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; color: var(--black);
+      text-decoration: none; padding: 16px 36px;
+      border-radius: 4px; border: 2px solid rgba(0,0,0,0.3);
+      font-size: 15px; font-weight: 500;
+      transition: all 0.3s;
+    }
+    .cta-btn-secondary:hover { border-color: var(--black); }
+
+    /* ── FOOTER ──────────────────────────────────────── */
+    footer {
+      background: var(--black);
+      padding: 40px 24px; text-align: center;
+      border-top: 1px solid var(--steel-mid);
+    }
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 24px; letter-spacing: 3px;
+      color: var(--orange); margin-bottom: 12px;
+    }
+    .footer-links {
+      display: flex; gap: 24px; justify-content: center;
+      flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .footer-links a {
+      color: var(--text-muted); text-decoration: none;
+      font-size: 13px; transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--orange); }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.15); }
+
+    /* ── REVEAL ──────────────────────────────────────── */
+    .reveal {
+      opacity: 0; transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    @media (max-width: 600px) {
+      .steps-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HERO ─────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+
+  <!-- Floating gears -->
+  <div class="gear" style="--size:120px;--dur:30s;--dir:normal;top:10%;left:5%">⚙️</div>
+  <div class="gear" style="--size:80px;--dur:20s;--dir:reverse;top:20%;right:8%">⚙️</div>
+  <div class="gear" style="--size:60px;--dur:15s;--dir:normal;bottom:25%;left:12%">⚙️</div>
+  <div class="gear" style="--size:100px;--dur:25s;--dir:reverse;bottom:15%;right:5%">⚙️</div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">🔧 Vadász Apps</div>
+    <span class="hero-icon">🔧</span>
+    <h1 class="hero-title">
+      AUTÓ<br><span class="accent">SZERVIZ</span><br>VADÁSZ
+    </h1>
+    <p class="hero-sub">
+      Találd meg a legközelebbi autószervizeket és gumiszerelőket –
+      GPS-alapú, ingyenes, mindig kéznél.
+    </p>
+    <a href="index.html" class="hero-cta">
+      🗺️ Megnyitom az appot
+    </a>
+  </div>
+
+  <div class="hero-scroll">
+    <span>↓</span>
+    <span style="font-size:10px">Görgets</span>
+  </div>
+</section>
+
+<!-- ── STATS ─────────────────────────────────────────── -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="reveal">
+      <div class="stat-num">400+</div>
+      <div class="stat-label">Szerviz az adatbázisban</div>
+    </div>
+    <div class="reveal reveal-delay-1">
+      <div class="stat-num">4+</div>
+      <div class="stat-label">Ország lefedve</div>
+    </div>
+    <div class="reveal reveal-delay-2">
+      <div class="stat-num">6</div>
+      <div class="stat-label">Szűrő kategória</div>
+    </div>
+    <div class="reveal reveal-delay-3">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Ingyenes</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FEATURES ──────────────────────────────────────── -->
+<section class="section">
+  <div class="reveal">
+    <div class="section-label">Miért Autószerviz Vadász?</div>
+    <h2 class="section-title">MINDEN AMI KELL<br>ÚTKÖZBEN</h2>
+    <p class="section-sub">Idegenben pukkanás, reggel nem indul az autó – ilyenkor kell egy megbízható kereső.</p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card reveal reveal-delay-1">
+      <span class="feature-icon">🗺️</span>
+      <div class="feature-title">Interaktív térkép</div>
+      <p class="feature-desc">Leaflet alapú térkép, OpenStreetMap adatokkal. Zoom-ra szűr, valós idejű betöltés a háttérben.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <span class="feature-icon">📋</span>
+      <div class="feature-title">Lista nézet</div>
+      <p class="feature-desc">GPS-távolság szerint rendezve, ország csoportosítással. Azonnal látod a legközelebbit.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-3">
+      <span class="feature-icon">📞</span>
+      <div class="feature-title">Közvetlen hívás</div>
+      <p class="feature-desc">Egy koppintással hívhatod a szervizet – nem kell másolgatni a számot.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-4">
+      <span class="feature-icon">🧭</span>
+      <div class="feature-title">Natív navigáció</div>
+      <p class="feature-desc">Apple Maps, Google Maps vagy Waze – te döntöd el melyikkel indulsz el.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <span class="feature-icon">⚡</span>
+      <div class="feature-title">Azonnali betöltés</div>
+      <p class="feature-desc">24 órás cache – második indításkor azonnal megjelennek az adatok, internet nélkül is.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <span class="feature-icon">📱</span>
+      <div class="feature-title">PWA – Telepíthető</div>
+      <p class="feature-desc">Főképernyőre rakod, és natív appként viselkedik. App Store nélkül, ingyen.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── FILTERS ────────────────────────────────────────── -->
+<section class="filters-section">
+  <div class="filters-inner">
+    <div class="reveal">
+      <div class="section-label">Szűrők</div>
+      <h2 class="section-title">CSAK AMI<br>SZÁMODRA KELL</h2>
+      <p class="section-sub">Szűrj az igényeid szerint – egy koppintással megtalálod a megfelelő szervizet.</p>
+    </div>
+    <div class="filters-grid">
+      <div class="filter-pill reveal reveal-delay-1">🛞 Gumiszerelő</div>
+      <div class="filter-pill reveal reveal-delay-1">🚗 Karosszéria</div>
+      <div class="filter-pill reveal reveal-delay-2">⚡ Elektromos autó</div>
+      <div class="filter-pill reveal reveal-delay-2">🕐 24 órás szerviz</div>
+      <div class="filter-pill reveal reveal-delay-3">🛢️ Olajcsere</div>
+      <div class="filter-pill reveal reveal-delay-3">❄️ Klíma szerviz</div>
+      <div class="filter-pill reveal reveal-delay-4">✅ Megerősített helyek</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ───────────────────────────────────── -->
+<section class="steps-section">
+  <div class="steps-inner">
+    <div class="reveal" style="text-align:center;margin-bottom:0">
+      <div class="section-label">Hogyan működik?</div>
+      <h2 class="section-title">HÁROM LÉPÉS</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step reveal reveal-delay-1">
+        <div class="step-num">01</div>
+        <div class="step-title">Nyisd meg</div>
+        <p class="step-desc">Böngészőben azonnal működik. Telepítsd PWA-ként a főképernyőre a legjobb élményért.</p>
+      </div>
+      <div class="step reveal reveal-delay-2">
+        <div class="step-num">02</div>
+        <div class="step-title">Szűrj & keress</div>
+        <p class="step-desc">GPS megmutatja a legközelebbi szervizeket. Szűrj típus szerint – gumi, karosszéria, 24h.</p>
+      </div>
+      <div class="step reveal reveal-delay-3">
+        <div class="step-num">03</div>
+        <div class="step-title">Hívj vagy navigálj</div>
+        <p class="step-desc">Egy koppintással hívd fel vagy indulj el – Apple Maps, Google Maps vagy Waze.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────── -->
+<section class="cta-section">
+  <div class="cta-inner reveal">
+    <h2 class="cta-title">LEÁLLT AZ AUTÓD?</h2>
+    <p class="cta-sub">Ne keresgélj Google-ben – nyisd meg az appot és azonnal látod a legközelebbi szervizeket!</p>
+    <div class="cta-buttons">
+      <a href="index.html" class="cta-btn-primary">🔧 Megnyitom az appot</a>
+      <a href="https://vadasz-apps.web.app" class="cta-btn-secondary">← Vadász Apps portál</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────── -->
+<footer>
+  <div class="footer-logo">🔧 AUTÓSZERVIZ VADÁSZ</div>
+  <div class="footer-links">
+    <a href="index.html">App megnyitása</a>
+    <a href="admin.html">Admin</a>
+    <a href="https://vadasz-apps.web.app">Vadász Apps</a>
+  </div>
+  <div class="footer-copy">© 2026 Vadász Apps · Minden jog fenntartva</div>
+</footer>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  reveals.forEach(r => observer.observe(r));
+</script>
+
+</body>
+</html>
